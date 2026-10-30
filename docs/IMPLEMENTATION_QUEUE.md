@@ -40,7 +40,7 @@ Task contract: `examples/release-approval-verifier-task.json`, implemented by `e
 
 ## F8 artifact digest verification follow-up (2026-10-30)
 
-Task contract: `examples/artifact-digest-task.json`, based on `97d0d1163ccf6505e9065d41dc9b5fee7b575ba7`. Adds `artifact-check PATH --sha256 DIGEST`; streams regular files through a no-follow descriptor, blocks symlinks and detected mid-read mutation, and fails on digest mismatch. The runbook requires keeping the verified artifact immutable through later transfer. Full validation, independent review, and CI for this task are pending. It verifies local bytes only and does not authorize deployment.
+Task contract: `examples/artifact-digest-task.json`, implemented on `3927da1` and symlink-hardened on `ff0b9cd`. Local validation: 71 tests pass, validator/preflight pass, synthetic release check remains BLOCKED (exit 2). Independent code and security reviews PASS for parent-component symlink handling. Three zipapp builds are byte-identical with SHA256 `cbab15f6c626ab460b42c6fc40ee0a4e95b6712762e8c03494051530c06ae844`; doctor and correct-digest artifact-check pass. A stale expected digest correctly failed before rerunning with the current digest. GitHub CI run `41124333344` passed for `ff0b9cd`; the follow-up documentation record is pending its CI run. No artifact transfer or deployment occurred.
 
 ## Retrieval optimization queue (R1–R6)
 
