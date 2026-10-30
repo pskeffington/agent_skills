@@ -43,6 +43,11 @@ class CLITests(unittest.TestCase):
             self.assertEqual(2,bad.returncode)
             unsafe=self.run_cli("search","--repo",str(root/"missing"),"--query","anything")
             self.assertEqual(2,unsafe.returncode)
+            cache=root/"cache"
+            first=self.run_cli("search","--repo",str(root),"--query","release","--cache",str(cache))
+            second=self.run_cli("search","--repo",str(root),"--query","release","--cache",str(cache))
+            self.assertFalse(json.loads(first.stdout)["cache_hit"])
+            self.assertTrue(json.loads(second.stdout)["cache_hit"])
 
     def test_ci_and_security_ingestion_commands(self):
         with tempfile.TemporaryDirectory() as tmp:

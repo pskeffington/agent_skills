@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Offline RAG Evaluation Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "format", "description", "k", "cases"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "format": {"const": 1},
+    "description": {"type": "string", "minLength": 10},
+    "k": {"type": "integer", "minimum": 1, "maximum": 100},
+    "cases": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "query", "relevant"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "query": {"type": "string", "minLength": 1},
+          "relevant": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+          "untrusted_data_case": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

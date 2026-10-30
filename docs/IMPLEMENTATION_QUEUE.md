@@ -35,8 +35,8 @@ F8 is a **release-readiness** target, not permission to deploy. For production r
 | ID | Dependency | Deliverable | Status / evidence |
 | --- | --- | --- | --- |
 | R1 | F4 | Local lexical index with line/hash provenance and stale-hit verification | PASS: RAG tests from remote commits `a80684e`–`3ad179e`; included in 40-test suite |
-| R2 | R1 | Operator CLI search command with JSON, root checks and stable exits | PASS: CLI verifies every path/line/hash before returning hits; no-answer returns empty JSON; invalid limit/root return BLOCKED exit 2; targeted integration test passes |
-| R3 | R2 | Persisted content-addressed index with atomic writes and corruption/symlink rejection | TODO |
-| R4 | R3 | Labeled offline evaluation fixtures for precision/recall/no-answer/injection | TODO |
-| R5 | R2 | Extend validation across schemas, skills, cross-references, release evidence | TODO |
+| R2 | R1 | Operator CLI search command with JSON, root checks and stable exits | PASS: CLI verifies every path/line/hash before returning hits; no-answer returns empty JSON; invalid limit/root return BLOCKED exit 2; cache remains explicit opt-in |
+| R3 | R2 | Persisted content-addressed index with atomic writes and corruption/symlink rejection | PASS: 3 cache tests cover reuse, content SHA invalidation, malformed payload with recomputed checksum, and symlinked directory/entry rejection; atomic replace and fsync; CLI integration confirms opt-in cache reuse |
+| R4 | R3 | Labeled offline evaluation fixtures for precision/recall/no-answer/injection | PASS: 5 labeled cases; `scripts/evaluate_rag.py` reports file-level precision@2 1.0, recall@2 1.0 across answerable queries, and zero no-answer false positives; fixture-only metric scope is explicit |
+| R5 | R2 | Extend validation across schemas, skills, cross-references, release evidence | PASS: validator checks skill registry/metadata presence, role/resource-chain references, schema structure and required/property consistency, and validates all registered examples against their schema; release dossier example remains semantically BLOCKED |
 | R6 | R4/R5 | Reproducible baseline/optimized benchmarks and independent review | TODO; performance claims must use recorded measurements |

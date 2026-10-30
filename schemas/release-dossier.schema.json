@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Evidence Dossier",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "commit",
+    "artifact_sha256",
+    "target_environment",
+    "gates",
+    "independent_review",
+    "security_review",
+    "staging",
+    "approval",
+    "rollback_ref",
+    "check_provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "artifact_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target_environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "G0",
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6"
+      ],
+      "properties": {
+        "G0": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence_ref",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 3
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "G1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence_ref",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 3
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "G2": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence_ref",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 3
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "G3": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence_ref",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 3
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "G4": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence_ref",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 3
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "G5": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence_ref",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 3
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "G6": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence_ref",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 3
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        }
+      }
+    },
+    "independent_review": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "subject_commit",
+        "artifact_sha256",
+        "invocation_id"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 3
+        },
+        "subject_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "invocation_id": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "security_review": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "subject_commit",
+        "artifact_sha256",
+        "invocation_id"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 3
+        },
+        "subject_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "invocation_id": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "staging": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "subject_commit",
+        "artifact_sha256",
+        "invocation_id"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 3
+        },
+        "subject_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "invocation_id": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "approval": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "subject_commit",
+        "artifact_sha256",
+        "invocation_id"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 3
+        },
+        "subject_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "invocation_id": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "rollback_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "check_provenance": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
