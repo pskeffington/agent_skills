@@ -60,7 +60,8 @@ def profile(root: pathlib.Path, repetitions: int = 5):
             samples["strict_warm_cache"].append(metric)
             _, metric = _measure(lambda: rag.search(index, "release readiness task journal lease", limit=8))
             samples["warm_search"].append(metric)
-        if not rag.verify_hit(root, rag.search(cached, "release", limit=1)[0]) if rag.search(cached, "release", limit=1) else False:
+        hits = rag.search(cached, "release", limit=1)
+        if any(not rag.verify_hit(root, hit) for hit in hits):
             raise ValueError("retrieval citation validation failed")
     summary = {}
     for name, series in samples.items():
