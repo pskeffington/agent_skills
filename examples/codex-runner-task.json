@@ -27,7 +27,7 @@
   ],
   "risk": "high",
   "owner_role": "integrator",
-  "status": "review",
+  "status": "blocked",
   "depends_on": [],
   "evidence_refs": [
     "command: python3 -m unittest tests.test_runners_assurance -v (exit 0, 12 tests)",
@@ -35,8 +35,11 @@
     "command: python3 -m unittest discover -s tests -v (exit 0, 79 tests)",
     "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
-    "source: https://developers.openai.com/codex/cli/reference"
+    "source: https://developers.openai.com/codex/cli/reference",
+    "review: independent code review PASS for current tree; detached-descendant regression fail-closes when process-tree stop is unverifiable",
+    "review: security assurance PASS for current tree with external containment prerequisite",
+    "CI: GitHub Actions run 41126463087 success for commit 19cc04cc7d9595cff7c0d90edefc54e5c593a03c"
   ],
-  "blocker": "External process-containment integration evidence and actual Codex runtime validation; security review passed with that limitation documented, while independent code review is pending final current-tree confirmation.",
+  "blocker": "The adapter cannot itself establish or verify the external process containment it requires (container, cgroup, or Windows Job Object). No real Codex invocation was performed; runtime admission remains blocked until an integration supplies verified containment evidence.",
   "approval_ref": null
 }
