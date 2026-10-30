@@ -6,6 +6,7 @@ import binascii
 import json
 import os
 import pathlib
+import re
 import shutil
 import stat
 import subprocess
@@ -19,6 +20,8 @@ APPROVAL_FIELDS = (
 MAX_TRUST_STORE_BYTES = 1_000_000
 MAX_PUBLIC_KEY_BYTES = 16_384
 MAX_SIGNATURE_BYTES = 16_384
+_PUBLIC_KEY_BITS = re.compile(r"Public-Key: \((\d+) bit(?:\s|,|\))")
+_APPROVED_EC_CURVES = {"prime256v1", "secp384r1", "secp521r1"}
 
 
 def canonical_approval_payload(approval: dict[str, Any]) -> bytes:
@@ -127,6 +130,18 @@ def make_openssl_approval_verifier(approvers: dict[str, dict[str, str]], *, open
                     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
                     with os.fdopen(descriptor, "wb") as stream:
                         stream.write(data)
+                key_info = subprocess.run(
+                    [executable, "pkey", "-pubin", "-in", str(public_key_path), "-text", "-noout"],
+                    stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    shell=False, timeout=5, check=False, env={"PATH": str(pathlib.Path(executable).parent), "LC_ALL": "C"},
+                )
+                key_text = key_info.stdout.decode("utf-8", "replace")
+                bits_match = _PUBLIC_KEY_BITS.search(key_text)
+                bits = int(bits_match.group(1)) if bits_match else 0
+                rsa_allowed = "Modulus:" in key_text and bits >= 2048
+                ec_allowed = bits >= 256 and any(f"ASN1 OID: {curve}" in key_text for curve in _APPROVED_EC_CURVES)
+                if key_info.returncode != 0 or not (rsa_allowed or ec_allowed):
+                    return False
                 result = subprocess.run(
                     [executable, "dgst", "-sha256", "-verify", str(public_key_path), "-signature", str(signature_path), str(payload_path)],
                     stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,

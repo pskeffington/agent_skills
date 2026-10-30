@@ -161,6 +161,30 @@ class ReleaseApprovalTests(unittest.TestCase):
         verifier = make_openssl_approval_verifier(self.approvers, openssl="/missing/openssl")
         self.assertIsNone(verifier(self.sign(self.approval()), "a" * 40, "b" * 64))
 
+    def test_key_policy_accepts_p256_and_rejects_ed25519(self):
+        ec_private, ec_public = self.root / "ec-private.pem", self.root / "ec-public.pem"
+        subprocess.run([OPENSSL, "genpkey", "-algorithm", "EC", "-pkeyopt", "ec_paramgen_curve:P-256", "-out", str(ec_private)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run([OPENSSL, "pkey", "-in", str(ec_private), "-pubout", "-out", str(ec_public)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        approval = self.approval()
+        payload_path, signature_path = self.root / "ec-approval.json", self.root / "ec-approval.sig"
+        payload_path.write_bytes(canonical_approval_payload(approval))
+        subprocess.run([OPENSSL, "dgst", "-sha256", "-sign", str(ec_private), "-out", str(signature_path), str(payload_path)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        approval["signature"] = base64.b64encode(signature_path.read_bytes()).decode("ascii")
+        ec_verifier = make_openssl_approval_verifier({"operator-42": {"authority_ref": "change-control:42", "public_key_pem": ec_public.read_text(encoding="ascii")}}, openssl=OPENSSL)
+        self.assertIs(ec_verifier(approval, "a" * 40, "b" * 64), True)
+
+        ed_private, ed_public = self.root / "ed-private.pem", self.root / "ed-public.pem"
+        subprocess.run([OPENSSL, "genpkey", "-algorithm", "ED25519", "-out", str(ed_private)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run([OPENSSL, "pkey", "-in", str(ed_private), "-pubout", "-out", str(ed_public)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        ed_verifier = make_openssl_approval_verifier({"operator-42": {"authority_ref": "change-control:42", "public_key_pem": ed_public.read_text(encoding="ascii")}}, openssl=OPENSSL)
+        self.assertIs(ed_verifier(approval, "a" * 40, "b" * 64), False)
+
+        small_private, small_public = self.root / "small-private.pem", self.root / "small-public.pem"
+        subprocess.run([OPENSSL, "genpkey", "-algorithm", "RSA", "-pkeyopt", "rsa_keygen_bits:1024", "-out", str(small_private)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run([OPENSSL, "pkey", "-in", str(small_private), "-pubout", "-out", str(small_public)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        small_verifier = make_openssl_approval_verifier({"operator-42": {"authority_ref": "change-control:42", "public_key_pem": small_public.read_text(encoding="ascii")}}, openssl=OPENSSL)
+        self.assertIs(small_verifier(approval, "a" * 40, "b" * 64), False)
+
 
 if __name__ == "__main__":
     unittest.main()
