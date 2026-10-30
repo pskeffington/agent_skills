@@ -24,6 +24,7 @@ def parser() -> argparse.ArgumentParser:
     sub=p.add_subparsers(dest="command",required=True)
     sub.add_parser("doctor",help="check runtime and repository capabilities")
     inv=sub.add_parser("inventory",help="list repository files and manifests"); inv.add_argument("--repo",default=".")
+    search=sub.add_parser("search",help="search local repository text with verified source provenance"); search.add_argument("--repo",default="."); search.add_argument("--query",required=True); search.add_argument("--limit",type=int,default=8)
     plan=sub.add_parser("plan",help="validate and plan a JSON array of task contracts"); plan.add_argument("contracts"); plan.add_argument("--state",default=".agent-toolset/events.jsonl")
     run=sub.add_parser("run",help="execute a safe dry run"); run.add_argument("task")
     status=sub.add_parser("status",help="show journal-derived task state"); status.add_argument("--state",default=".agent-toolset/events.jsonl")
@@ -43,6 +44,14 @@ def main(argv: list[str] | None = None) -> int:
             _json({"status":"PASS","python":sys.version.split()[0],"journal":"available","runner":"dry-run","codex_execution":"disabled"}); return 0
         if args.command == "inventory":
             value=inventory(args.repo); _json({"status":"PASS",**value}); return 0
+        if args.command == "search":
+            from .rag import build_index, search as rag_search, verify_hit
+            root=pathlib.Path(args.repo).resolve(strict=True)
+            if not root.is_dir(): raise ValueError("repository root must be a directory")
+            hits=rag_search(build_index(root),args.query,limit=args.limit)
+            verified=[hit for hit in hits if verify_hit(root,hit)]
+            _json({"status":"PASS","root":str(root),"query":args.query,"hits":verified,"unverified_hits":len(hits)-len(verified)})
+            return 0
         if args.command == "run":
             task=load_contract(args.task,"task")
             result=DryRunRunner().prepare(task,{"mode":"dry-run"})

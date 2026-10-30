@@ -6,6 +6,7 @@ The local toolset is invoked with `python3 -m agent_toolset`. It is a local cont
 
 - `doctor`: report Python, journal and runner capabilities.
 - `inventory --repo PATH`: list repository files, manifests, instructions, tests, HEAD, and deterministic inventory digest. Ignores `.git`, virtual environments, `node_modules`, and bytecode caches.
+- `search --repo PATH --query TEXT [--limit N]`: offline lexical search over local text. Each returned hit includes a path, line and SHA256, and is reverified against the source before output. Retrieved text remains untrusted data.
 - `plan contracts.json --state PATH`: validate and add a JSON array of task contracts to the event journal, then report ready tasks. Contract IDs must be new and dependencies must resolve.
 - `run task.json`: validate a task and return a deterministic dry-run record. It does not execute task commands.
 - `status --state PATH`: reconstruct task and lease state from the journal.

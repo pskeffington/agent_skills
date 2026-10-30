@@ -27,6 +27,23 @@ class CLITests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             dossier=pathlib.Path(tmp)/"bad.json"; dossier.write_text("{}")
             release=self.run_cli("release-check",str(dossier)); self.assertEqual(2,release.returncode)
+    def test_rag_search_with_provenance_no_answer_and_invalid_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=pathlib.Path(tmp); (root/"doc.md").write_text("durable release gate evidence\n",encoding="utf-8")
+            hit=self.run_cli("search","--repo",str(root),"--query","release gate")
+            self.assertEqual(0,hit.returncode,hit.stderr)
+            hits=json.loads(hit.stdout)["hits"]
+            self.assertTrue(hits)
+            self.assertIn("sha256",hits[0])
+            self.assertIsInstance(hits[0]["line"],int)
+            empty=self.run_cli("search","--repo",str(root),"--query","zzzzqwertyuiop998877")
+            self.assertEqual(0,empty.returncode)
+            self.assertEqual([],json.loads(empty.stdout)["hits"])
+            bad=self.run_cli("search","--repo",str(root),"--query","anything","--limit","0")
+            self.assertEqual(2,bad.returncode)
+            unsafe=self.run_cli("search","--repo",str(root/"missing"),"--query","anything")
+            self.assertEqual(2,unsafe.returncode)
+
     def test_ci_and_security_ingestion_commands(self):
         with tempfile.TemporaryDirectory() as tmp:
             ci=pathlib.Path(tmp)/"run.json"; commit="a"*40

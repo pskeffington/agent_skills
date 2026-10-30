@@ -29,3 +29,14 @@ Research, design and security investigation may run concurrently after F0. Only 
 
 ### Release acceptance
 F8 is a **release-readiness** target, not permission to deploy. For production require operator-designated environment, immutable artifact digest, passing CI and staging, independent signoff, rollback drill and explicit approval. If any absent, state BLOCKED and preserve the candidate.
+
+## Retrieval optimization queue (R1–R6)
+
+| ID | Dependency | Deliverable | Status / evidence |
+| --- | --- | --- | --- |
+| R1 | F4 | Local lexical index with line/hash provenance and stale-hit verification | PASS: RAG tests from remote commits `a80684e`–`3ad179e`; included in 40-test suite |
+| R2 | R1 | Operator CLI search command with JSON, root checks and stable exits | PASS: CLI verifies every path/line/hash before returning hits; no-answer returns empty JSON; invalid limit/root return BLOCKED exit 2; targeted integration test passes |
+| R3 | R2 | Persisted content-addressed index with atomic writes and corruption/symlink rejection | TODO |
+| R4 | R3 | Labeled offline evaluation fixtures for precision/recall/no-answer/injection | TODO |
+| R5 | R2 | Extend validation across schemas, skills, cross-references, release evidence | TODO |
+| R6 | R4/R5 | Reproducible baseline/optimized benchmarks and independent review | TODO; performance claims must use recorded measurements |

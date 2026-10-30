@@ -14,7 +14,7 @@ Implement local-only, source-grounded retrieval as a *data* channel for Codex ta
 Benchmark build latency, retrieval latency, number of indexed lines, peak memory, hit precision@k on a fixed local fixture, and index invalidation time. Record environment, corpus commit, warm/cold state, and repeated trials. Change ranking or caching only when regression tests retain citation correctness. No manufactured speedup claims.
 
 ## Codex next tasks
-1. R2: integrate retrieval as an opt-in CLI subcommand with JSON schema, stable error exits and root validation.
+1. R2: **PASS** — integrated `agent-toolset search` subcommand with JSON output, stable error exits, root validation and source-hit revalidation.
 2. R3: add persisted content-addressed index with atomic writes and explicit SHA-based invalidation; reject corrupt cache and symlinked cache.
 3. R4: add offline labeled evaluation fixtures (precision@k, recall@k, no-answer behavior, injection cases).
 4. R5: extend validation to schemas/skills, cross-reference checks and release evidence; fail closed on unavailable checks.
