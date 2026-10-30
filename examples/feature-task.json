@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "DEV-001",
+  "repository": "example/project",
+  "base_commit": "0000000000000000000000000000000000000000",
+  "objective": "Add deterministic status parsing without changing external interfaces.",
+  "scope": {
+    "include": [
+      "src/status.py",
+      "tests/test_status.py"
+    ],
+    "exclude": [
+      "production deployment",
+      "authentication changes"
+    ]
+  },
+  "acceptance": [
+    "Parses valid status values and rejects unknown ones",
+    "Existing public API contract remains unchanged",
+    "Unit tests pass with recorded command and commit"
+  ],
+  "risk": "low",
+  "owner_role": "implementer",
+  "status": "queued",
+  "depends_on": [],
+  "evidence_refs": [],
+  "blocker": null,
+  "approval_ref": null
+}

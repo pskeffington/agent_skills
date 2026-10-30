@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "DEV-001",
+  "stage": "verify",
+  "source_commit": "0000000000000000000000000000000000000000",
+  "result": "BLOCKED",
+  "checks": [
+    {
+      "name": "unit tests",
+      "result": "BLOCKED",
+      "provenance": "command: python3 -m unittest; no runtime attached",
+      "details": "Example only; not a real test execution"
+    }
+  ],
+  "artifacts": [],
+  "blocker": "Attach a working environment and run the tests.",
+  "approval_ref": null
+}
