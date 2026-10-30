@@ -66,43 +66,45 @@ class Journal:
         return events
 
     def append(self, task_id: str, event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
-        if not task_id.strip() or not event_type.strip():
-            raise ValueError("task_id and event_type must be non-empty")
+        if not isinstance(task_id, str) or not task_id.strip() or not isinstance(event_type, str) or not event_type.strip():
+            raise ValueError("task_id and event_type must be non-empty strings")
         if not isinstance(payload, dict):
             raise TypeError("payload must be an object")
         with self._lock:
-            events = self.read()
-            previous = events[-1]["hash"] if events else GENESIS
-            event: dict[str, Any] = {
-                "sequence": len(events) + 1,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "task_id": task_id,
-                "event_type": event_type,
-                "payload": payload,
-                "previous_hash": previous,
-            }
-            event["hash"] = _event_hash(event)
-            encoded = _canonical(event) + b"\n"
-            # Single O_APPEND write under an advisory file lock where available.
             fd = os.open(self.path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o600)
             try:
-                # Remove only an incomplete final fragment before adding a new record.
-                raw = os.pread(fd, os.fstat(fd).st_size, 0)
-                if raw and not raw.endswith(b"\n"):
-                    cut = raw.rfind(b"\n") + 1
-                    os.ftruncate(fd, cut)
                 try:
                     import fcntl
                     fcntl.flock(fd, fcntl.LOCK_EX)
                 except ImportError:
+                    # On platforms without flock, only the per-instance thread lock is available.
                     pass
+                # Read the tail only after taking the process-level lock so sequence and
+                # previous_hash are derived from the record immediately preceding this append.
+                size = os.fstat(fd).st_size
+                raw = os.pread(fd, size, 0)
+                if raw and not raw.endswith(b"\n"):
+                    cut = raw.rfind(b"\n") + 1
+                    os.ftruncate(fd, cut)
+                events = self.read()
+                previous = events[-1]["hash"] if events else GENESIS
+                event: dict[str, Any] = {
+                    "sequence": len(events) + 1,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "task_id": task_id,
+                    "event_type": event_type,
+                    "payload": payload,
+                    "previous_hash": previous,
+                }
+                event["hash"] = _event_hash(event)
+                encoded = _canonical(event) + b"\n"
                 written = os.write(fd, encoded)
                 if written != len(encoded):
                     raise OSError("short journal append")
                 os.fsync(fd)
+                return event
             finally:
                 os.close(fd)
-            return event
 
     def checkpoint(self, path: str | pathlib.Path) -> pathlib.Path:
         """Atomically write a snapshot pointer containing journal head and sequence."""

@@ -16,6 +16,7 @@ class AssuranceIngestionTests(unittest.TestCase):
         self.assertEqual("FAIL",classify_github_run({"head_sha":"b"*40,"conclusion":"success","jobs":[]},expected_commit=commit)["status"])
         self.assertEqual("FAIL",classify_github_run({"head_sha":commit,"conclusion":"failure","jobs":[]},expected_commit=commit)["status"])
         self.assertEqual("BLOCKED",classify_github_run({"head_sha":commit,"conclusion":"in_progress","jobs":[]},expected_commit=commit)["status"])
+        self.assertEqual("BLOCKED",classify_github_run({"head_sha":commit,"conclusion":"weird-new-state","jobs":[]},expected_commit=commit)["status"])
         self.assertTrue(classify_github_run({"head_sha":commit,"conclusion":"success","jobs":[]},expected_commit=commit,required_checks={"test"})["issues"])
     def test_security_severity_threshold_and_missing_export(self):
         self.assertEqual("PASS",summarize_findings({"findings":[{"severity":"low"}]})["status"])

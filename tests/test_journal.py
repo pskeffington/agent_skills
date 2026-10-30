@@ -2,6 +2,7 @@ import json
 import pathlib
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -20,6 +21,17 @@ class JournalTests(unittest.TestCase):
             self.assertEqual(a["hash"], b["previous_hash"])
             checkpoint = Journal(path).checkpoint(pathlib.Path(tmp) / "checkpoint.json")
             self.assertEqual(2, json.loads(checkpoint.read_text())["sequence"])
+
+    def test_concurrent_instances_serialize_sequence_and_hash_chain(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=pathlib.Path(tmp)/"events.jsonl"
+            def append(index):
+                return Journal(path).append("F2-concurrency", "EVENT", {"writer":index})
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                list(pool.map(append, range(40)))
+            events=Journal(path).replay()
+            self.assertEqual(list(range(1,41)),[event["sequence"] for event in events])
+            self.assertEqual(40,len({event["hash"] for event in events}))
 
     def test_tamper_and_sequence_corruption_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

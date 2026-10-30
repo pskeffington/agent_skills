@@ -21,3 +21,14 @@ Small jobs may combine analysis and implementation in one session; independent g
 No daemon, scheduler, autonomous repository-wide deployment, privileged agent runtime, third-party dependency installer, or implicit right to access another repository is created by these files. They provide enforceable-by-validation contracts and human-readable operating policy; external execution must be configured separately.
 
 License: see [LICENSE](LICENSE).
+
+## Local agent toolset
+
+A dependency-free Python control plane lives in `agent_toolset/`. It provides contract validation, durable task journaling, scheduling, safe repository inventory and test execution, fail-closed assurance, and a JSON operator CLI. It does not launch agent processes or deploy software. To build a deterministic standalone zipapp locally:
+
+```sh
+python3 scripts/build_zipapp.py /path/to/agent-toolset.pyz
+python3 /path/to/agent-toolset.pyz doctor
+```
+
+See [the operator manual](docs/OPERATOR_MANUAL.md), [release runbook](docs/RELEASE_RUNBOOK.md), and [security boundaries](docs/SECURITY.md). The generated executable is a candidate artifact; it is not automatically published or deployed.

@@ -33,5 +33,7 @@ def classify_github_run(document: dict[str, Any], *, expected_commit: str, requi
         if job_result != "PASS": issues.append(f"job {name} is {job.get('conclusion') or 'incomplete'}")
     missing=(required_checks or set())-seen
     if missing: issues.append("required checks missing: " + ", ".join(sorted(missing)))
-    status="PASS" if not issues and run_status == "PASS" else ("BLOCKED" if run_status == "BLOCKED" and not any("stale" in x for x in issues) else "FAIL")
+    stale=any("stale" in issue for issue in issues)
+    failed=run_status == "FAIL" or any(" is failure" in issue or " is cancelled" in issue or " is timed_out" in issue for issue in issues)
+    status="PASS" if not issues and run_status == "PASS" else ("FAIL" if stale or failed else "BLOCKED")
     return {"status":status,"issues":issues,"head_sha":head,"run_id":document.get("id"),"conclusion":conclusion,"checks":sorted(seen)}

@@ -1,6 +1,7 @@
 import json
 import pathlib
 import subprocess
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -33,6 +34,17 @@ class CLITests(unittest.TestCase):
             self.assertEqual(0,self.run_cli("ci-ingest",str(ci),"--commit",commit,"--required-check","structural").returncode)
             findings=pathlib.Path(tmp)/"findings.json"; findings.write_text(json.dumps({"findings":[{"severity":"critical"}]}))
             self.assertEqual(1,self.run_cli("security-summary",str(findings)).returncode)
+    def test_deterministic_standalone_zipapp(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            first=pathlib.Path(tmp)/"one.pyz"; second=pathlib.Path(tmp)/"two.pyz"
+            build=self.run_cli("doctor")
+            self.assertEqual(0,build.returncode)
+            subprocess.run([sys.executable,str(ROOT/"scripts/build_zipapp.py"),str(first)],check=True,capture_output=True,text=True)
+            subprocess.run([sys.executable,str(ROOT/"scripts/build_zipapp.py"),str(second)],check=True,capture_output=True,text=True)
+            self.assertEqual(hashlib.sha256(first.read_bytes()).hexdigest(),hashlib.sha256(second.read_bytes()).hexdigest())
+            result=subprocess.run([sys.executable,str(first),"doctor"],cwd=tmp,capture_output=True,text=True,env={"PATH":"/usr/bin:/bin","PYTHONDONTWRITEBYTECODE":"1"})
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertEqual("PASS",json.loads(result.stdout)["status"])
     def test_bad_arguments_and_corrupted_journal_block(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=pathlib.Path(tmp)/"events.jsonl"; path.write_text("not-json\n")
