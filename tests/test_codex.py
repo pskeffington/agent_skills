@@ -18,6 +18,7 @@ class CodexTests(unittest.TestCase):
         attestation=lambda ref, invocation: {"evidence_ref":ref,"subject_commit":commit,"artifact_sha256":digest,"invocation_id":invocation}
         return {"commit":commit,"artifact_sha256":digest,"target_environment":"staging",
           "gates":{g:{"status":"PASS","evidence_ref":f"evidence:{g}","reason":"required checks passed"} for g in REQUIRED},
+          "implementation":attestation("implementation:12","implementer-run"),
           "independent_review":attestation("review:12","reviewer-run"),
           "security_review":attestation("security:12","security-run"),
           "staging":attestation("stage:12","stage-run"),
@@ -32,10 +33,17 @@ class CodexTests(unittest.TestCase):
         result=evaluate(packet)
         self.assertFalse(result["release_ready"])
         self.assertIn("staging is for a different commit",result["issues"])
+        self.assertEqual("FAIL",result["status"])
         packet=self.packet(); packet["independent_review"]="review:12"
-        self.assertFalse(evaluate(packet)["release_ready"])
+        result=evaluate(packet)
+        self.assertFalse(result["release_ready"])
+        self.assertEqual("BLOCKED",result["status"])
 
     def test_same_invocation_cannot_review_or_secure_approval(self):
+        packet=self.packet(); packet["independent_review"]["invocation_id"]="implementer-run"
+        self.assertEqual("FAIL",evaluate(packet)["status"])
+        packet=self.packet(); packet["security_review"]["invocation_id"]="implementer-run"
+        self.assertEqual("FAIL",evaluate(packet)["status"])
         packet=self.packet(); packet["approval"]["invocation_id"]="reviewer-run"
         self.assertIn("reviewer must be independent from approver",evaluate(packet)["issues"])
         packet=self.packet(); packet["approval"]["invocation_id"]="security-run"

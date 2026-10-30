@@ -71,7 +71,7 @@ def main(argv: list[str] | None = None) -> int:
             doc=json.loads(pathlib.Path(args.path).read_text(encoding="utf-8")); result=summarize_findings(doc,fail_on=args.fail_on); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
         if args.command == "release-check":
             from .assurance.release import evaluate
-            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8")); result=evaluate(doc); _json(result); return 0 if result["release_ready"] else 2
+            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8")); result=evaluate(doc); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
         if args.command in {"status","replay","export"}:
             journal=Journal(args.state)
             if args.command == "replay":

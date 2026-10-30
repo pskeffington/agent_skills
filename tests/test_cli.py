@@ -27,6 +27,10 @@ class CLITests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             dossier=pathlib.Path(tmp)/"bad.json"; dossier.write_text("{}")
             release=self.run_cli("release-check",str(dossier)); self.assertEqual(2,release.returncode)
+            stale=json.loads((ROOT/"examples/release-dossier.json").read_text())
+            stale["staging"]={"evidence_ref":"stage:stale","subject_commit":"a"*40,"artifact_sha256":"0"*64,"invocation_id":"staging-run"}
+            dossier.write_text(json.dumps(stale))
+            failed=self.run_cli("release-check",str(dossier)); self.assertEqual(1,failed.returncode); self.assertEqual("FAIL",json.loads(failed.stdout)["status"])
     def test_rag_search_with_provenance_no_answer_and_invalid_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=pathlib.Path(tmp); (root/"doc.md").write_text("durable release gate evidence\n",encoding="utf-8")

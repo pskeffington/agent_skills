@@ -22,7 +22,7 @@ def main(argv=None):
     except (ValueError,OSError,TypeError) as exc:
         result={"status":"BLOCKED","release_ready":False,"issues":[str(exc)],"notice":"Read-only evaluation. No deployment performed."}
     print(json.dumps(result,indent=2))
-    return 0 if result["release_ready"] else 2
+    return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
 
 if __name__ == "__main__":
     raise SystemExit(main())

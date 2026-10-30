@@ -9,6 +9,7 @@
     "artifact_sha256",
     "target_environment",
     "gates",
+    "implementation",
     "independent_review",
     "security_review",
     "staging",
@@ -370,6 +371,37 @@
       "type": "array",
       "items": {
         "type": "string"
+      }
+    },
+    "implementation": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "subject_commit",
+        "artifact_sha256",
+        "invocation_id"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 3
+        },
+        "subject_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "invocation_id": {
+          "type": "string",
+          "minLength": 3
+        }
       }
     }
   }

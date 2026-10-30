@@ -18,7 +18,7 @@ Benchmark build latency, retrieval latency, number of indexed lines, peak memory
 2. R3: **PASS** — explicit `--cache DIR` content-addressed index with SHA-based invalidation, atomic writes, digest validation and corrupt/symlinked cache rejection.
 3. R4: **PASS** — five labeled fixtures and `scripts/evaluate_rag.py` report file-level precision@2 1.0, recall@2 1.0 across answerable cases and zero no-answer false positives. This is fixture-only and does not measure general instruction-following safety.
 4. R5: **PASS** — dependency-free validator checks registered schemas/examples, role/skill/resource references, and the synthetic release dossier shape; semantic release gate still blocks the fixture.
-5. R6: benchmark baseline versus optimized implementation; preserve raw measurements and independent review.
+5. R6: **BLOCKED for completion** — raw measurements are recorded in `docs/benchmarks/rag-benchmark-2026-10-30.json`; warm JSON-cache load was slower than rebuilding on this corpus, so no speedup is claimed. Independent review is still required before this retrieval pass can be release-approved.
 
 ## Gate
 Run `python3 -m unittest discover -s tests -v`, `python3 scripts/validate.py` and `python3 -m agent_toolset.rag --repo . --query "release gate"`. Record exact exits. R1 must not be labelled PASS until these commands execute in a checkout and CI confirms the change.
@@ -27,3 +27,8 @@ Run `python3 -m unittest discover -s tests -v`, `python3 scripts/validate.py` an
 ## R4 measured fixture result
 
 Environment: Python 3.15.2 on macOS. Corpus: four short local Markdown files in `tests/fixtures/rag_eval`; five labeled queries in `examples/rag-evaluation.json`; k=2; file-level ranking deduplicates multiple matching lines by path. Command: `python3 scripts/evaluate_rag.py` (exit 0). Result: precision@2 1.0, recall@2 1.0 on four answerable cases, no-answer false positives 0. The hostile passage case confirms it is retrievable with citation as untrusted text; it does not test whether a model follows or ignores the passage. No performance optimization or speedup is claimed.
+
+
+## R6 measured local benchmark
+
+The benchmark harness is `scripts/benchmark_rag.py`. A repeatable clean-checkout measurement and raw sample record are pending after this harness commit. The initial local probe showed warm JSON-cache loading slower than rebuilding, so no speedup is claimed. The cache rereads and hashes sources then parses the persisted JSON index, so this implementation did not improve startup latency or allocation for the measured corpus. The cache remains opt-in for persistence/reuse semantics; a future optimization must preserve source SHA freshness and cache corruption defenses. Independent reviewer evidence is absent, so R6 is not complete.
