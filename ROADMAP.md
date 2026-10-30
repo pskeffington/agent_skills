@@ -4,9 +4,9 @@
 | --- | --- | --- | --- |
 | A0 research | DONE | primary sources, role/skill/runtime distinction | research links and architecture recorded |
 | A1 design | DONE | L0–L5 hierarchy, stage DAG and resource provenance | machine-readable catalogs |
-| A2 skills | IN PROGRESS | portable orchestrator and specialist skills | each has valid SKILL.md |
-| A3 contracts | IN PROGRESS | task, handoff and evidence schemas + examples | stdlib validator and tests pass |
-| A4 automation | PLANNED | CI harness and runtime-specific adapters | permissions, branch protection, no self-approval |
+| A2 skills | AUTHORED; UNVERIFIED | portable orchestrator and specialist skills | each has valid SKILL.md |
+| A3 contracts | AUTHORED; UNVERIFIED | task, handoff and evidence schemas + examples | stdlib validator and tests pass |
+| A4 automation | SCAFFOLDED; CI UNVERIFIED | CI harness and runtime-specific adapters | permissions, branch protection, no self-approval |
 | A5 pilot | PLANNED | run a bounded change in one selected target repo | real traces, evidence, failure recovery |
 | A6 production | BLOCKED | controlled deployment integration | owner approval, threat review, rollback, monitoring |
 
