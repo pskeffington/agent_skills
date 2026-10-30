@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-10-29",
+  "purpose": "Engineering evidence and decisions; claims are paraphrases, not normative quotations",
+  "sources": [
+    {
+      "id": "AS-001",
+      "title": "Agent Skills format specification",
+      "type": "standard",
+      "url": "https://agentskills.io/specification",
+      "finding": "SKILL.md and portable metadata are the minimum skill contract",
+      "engineering_implication": "Validate directory/name/description and references; distinguish strict format from policy",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "OA-002",
+      "title": "OpenAI Build Skills",
+      "type": "platform guidance",
+      "url": "https://learn.chatgpt.com/docs/build-skills",
+      "finding": "Skills should be focused; descriptions control implicit matching",
+      "engineering_implication": "Require trigger and negative-trigger examples; retain optional OpenAI metadata",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "OA-003",
+      "title": "OpenAI Codex customization",
+      "type": "platform guidance",
+      "url": "https://learn.chatgpt.com/docs/customization/overview",
+      "finding": "AGENTS.md and SKILL.md serve distinct roles; Codex finds repo skills in .agents/skills",
+      "engineering_implication": "Use repo policy separately from the skill entrypoint",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "OA-004",
+      "title": "OpenAI Plugins Skills",
+      "type": "platform guidance",
+      "url": "https://developers.openai.com/plugins/concepts/skills",
+      "finding": "MCP tools expose capabilities while skills encode workflows",
+      "engineering_implication": "Do not confuse repository skills with connectors or remote execution",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "VS-005",
+      "title": "VS Code Agent Skills",
+      "type": "client guidance",
+      "url": "https://code.visualstudio.com/docs/agent-customization/agent-skills",
+      "finding": "Clients may discover several skill directories",
+      "engineering_implication": "Use canonical .agents/skills; validate client-specific installation instead of assuming equivalence",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "OA-006",
+      "title": "OpenAI Codex engineering workflows",
+      "type": "engineering example",
+      "url": "https://developers.openai.com/cookbook/examples/codex/iterating-development-workflows-with-codex",
+      "finding": "AGENTS.md can contain durable repository operating instructions",
+      "engineering_implication": "Keep acceptance gates and phased planning versioned",
+      "status": "supporting",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "OA-007",
+      "title": "OpenAI Skills old catalog README",
+      "type": "deprecated source",
+      "url": "https://github.com/openai/skills/blob/main/README.md",
+      "finding": "The old catalog now directs readers to newer plugin guidance",
+      "engineering_implication": "Do not base current installations on obsolete catalog instructions",
+      "status": "legacy",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "OA-008",
+      "title": "OpenAI prompt injection safety",
+      "type": "security guidance",
+      "url": "https://openai.com/safety/prompt-injections/",
+      "finding": "Untrusted content can redirect an agent toward unintended actions",
+      "engineering_implication": "Constrain scopes, obtain confirmation, and avoid broad tool authority",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "OA-009",
+      "title": "OpenAI agent builder safety",
+      "type": "security guidance",
+      "url": "https://developers.openai.com/api/docs/guides/agent-builder-safety",
+      "finding": "Use tool approvals, constrained inputs, and trace evaluations",
+      "engineering_implication": "Add adversarial and side-effect tests before release",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "GH-010",
+      "title": "GitHub secure your organization",
+      "type": "security guidance",
+      "url": "https://docs.github.com/en/code-security/tutorials/secure-your-organization/protect-against-threats",
+      "finding": "Workflows should minimize token permissions and pin external actions",
+      "engineering_implication": "Use read-only permission and no external Actions in bootstrap CI",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "NIST-011",
+      "title": "NIST AI Risk Management Framework",
+      "type": "risk framework",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "finding": "Govern, Map, Measure, Manage give risk-program structure",
+      "engineering_implication": "Map assurance gates to governance, measurement, and risk response",
+      "status": "supporting",
+      "verified_on": "2026-10-29"
+    },
+    {
+      "id": "MCP-012",
+      "title": "MCP Skills Extension specification",
+      "type": "security specification",
+      "url": "https://skills.extensions.modelcontextprotocol.io/specification/stable/skills",
+      "finding": "MCP-served skill text is untrusted and local execution requires approval",
+      "engineering_implication": "Do not assume remotely supplied skills grant execution authority",
+      "status": "primary",
+      "verified_on": "2026-10-29"
+    }
+  ]
+}
