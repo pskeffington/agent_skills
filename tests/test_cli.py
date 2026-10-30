@@ -46,7 +46,7 @@ class CLITests(unittest.TestCase):
             self.assertEqual(canonical_approval_payload(approval),result.stdout.encode())
     def test_artifact_check_pass_fail_and_symlink_blocked(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root=pathlib.Path(tmp); artifact=root/"candidate.pyz"; artifact.write_bytes(b"immutable candidate bytes\n")
+            root=pathlib.Path(tmp).resolve(); artifact=root/"candidate.pyz"; artifact.write_bytes(b"immutable candidate bytes\n")
             digest=hashlib.sha256(artifact.read_bytes()).hexdigest()
             passed=self.run_cli("artifact-check",str(artifact),"--sha256",digest)
             self.assertEqual(0,passed.returncode,passed.stdout)
@@ -56,6 +56,9 @@ class CLITests(unittest.TestCase):
             link=root/"candidate-link.pyz"; link.symlink_to(artifact)
             blocked=self.run_cli("artifact-check",str(link),"--sha256",digest)
             self.assertEqual(2,blocked.returncode)
+            alias=root/"parent-link"; alias.symlink_to(root,target_is_directory=True)
+            parent_blocked=self.run_cli("artifact-check",str(alias/"candidate.pyz"),"--sha256",digest)
+            self.assertEqual(2,parent_blocked.returncode)
     def test_rag_search_with_provenance_no_answer_and_invalid_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=pathlib.Path(tmp); (root/"doc.md").write_text("durable release gate evidence\n",encoding="utf-8")

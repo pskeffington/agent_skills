@@ -19,10 +19,25 @@ def verify_artifact(path: str | pathlib.Path, expected_sha256: str) -> dict[str,
     if not hasattr(os, "O_NOFOLLOW"):
         return {"status": "BLOCKED", "issues": ["safe artifact verification requires O_NOFOLLOW support"]}
     target = pathlib.Path(path).expanduser()
+    if not target.is_absolute():
+        target = pathlib.Path.cwd() / target
+    if ".." in target.parts:
+        return {"status": "BLOCKED", "issues": ["artifact path must not contain parent traversal"]}
+    if not hasattr(os, "O_DIRECTORY") or os.open not in os.supports_dir_fd:
+        return {"status": "BLOCKED", "issues": ["safe artifact verification requires directory-relative open support"]}
+    directory_fd = None
     try:
-        descriptor = os.open(target, os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NONBLOCK", 0))
+        directory_fd = os.open(target.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0))
+        for component in target.parts[1:-1]:
+            next_fd = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0), dir_fd=directory_fd)
+            os.close(directory_fd)
+            directory_fd = next_fd
+        descriptor = os.open(target.name, os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NONBLOCK", 0), dir_fd=directory_fd)
     except OSError as exc:
         return {"status": "BLOCKED", "issues": [f"artifact cannot be opened safely: {exc}"]}
+    finally:
+        if directory_fd is not None:
+            os.close(directory_fd)
     try:
         before = os.fstat(descriptor)
         if not stat.S_ISREG(before.st_mode):
