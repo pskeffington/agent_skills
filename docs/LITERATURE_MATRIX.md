@@ -28,3 +28,7 @@
 ## Maintenance rule
 
 When any primary source materially changes, update the JSON record with verification date, adjust architecture or gates, and add regression tests for the affected assumption. Do not replace a standards claim with an untested vendor inference.
+
+## Feedback and adaptive model research
+
+See [Research Feedback Matrix](RESEARCH_FEEDBACK_MATRIX.md) for ML-013 through ML-024 (12 additional publications), including provenance, neural preference optimization, critique, routing, and agent evaluation. Machine-readable entries are included in `data/literature_matrix.json`.

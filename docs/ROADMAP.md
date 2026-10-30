@@ -19,3 +19,13 @@
 6. Promote with explicit G2–G5 evidence; update status, limitations, provenance, and rollback notes.
 
 Every pass: inspect changes -> implement smallest phase item -> run validation/tests -> record results -> draft PR. If blocked, preserve the blocker and do not advance the gate or weaken checks.
+
+## P6 Research-guided adaptive agent operation (planning only)
+
+1. Define feedback provenance and held-out splits before attempting neural optimization.
+2. Benchmark selected model tiers using deterministic task-family datasets and calibrated judges.
+3. Implement offline skill prompt optimization and critique; preserve baselines and rollback.
+4. Shadow-test routers and feedback loops without external side effects.
+5. Admit canaries only after G2-G5 and objective quality/cost/safety thresholds are met.
+
+Read `docs/FEEDBACK_MODEL_SELECTION.md` and `data/literature_matrix.json` before implementing this phase.
