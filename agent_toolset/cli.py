@@ -11,6 +11,7 @@ from .assurance.security import summarize_findings
 from .contracts import ContractError, load_contract
 from .inventory import inventory
 from .journal import Journal, JournalError
+from .rag import build_index, search as rag_search, verify_hit
 from .runners.dry_run import DryRunRunner
 from .scheduler import ScheduleError, Scheduler
 
@@ -34,11 +35,20 @@ def parser() -> argparse.ArgumentParser:
     sec=sub.add_parser("security-summary",help="summarize a saved security findings export"); sec.add_argument("path"); sec.add_argument("--fail-on",default="high")
     release=sub.add_parser("release-check",help="evaluate a release dossier without deploying"); release.add_argument("evidence")
     export=sub.add_parser("export",help="export journal-derived state as JSON"); export.add_argument("--state",default=".agent-toolset/events.jsonl")
+    rag=sub.add_parser("rag-search",help="search local repository text with verifiable citations"); rag.add_argument("--repo",default="."); rag.add_argument("--query",required=True); rag.add_argument("--limit",type=int,default=8)
     return p
 
 def main(argv: list[str] | None = None) -> int:
     args=parser().parse_args(argv)
     try:
+        if args.command == "rag-search":
+            if not 1 <= args.limit <= 100: raise ValueError("limit must be between 1 and 100")
+            index=build_index(args.repo)
+            hits=rag_search(index,args.query,limit=args.limit)
+            verified=[hit for hit in hits if verify_hit(args.repo,hit)]
+            if len(verified) != len(hits):
+                _json({"status":"BLOCKED","error":"retrieval source changed during verification"}); return 2
+            _json({"status":"PASS","mode":"offline-lexical","indexed_lines":len(index["documents"]),"hits":verified}); return 0
         if args.command == "doctor":
             _json({"status":"PASS","python":sys.version.split()[0],"journal":"available","runner":"dry-run","codex_execution":"disabled"}); return 0
         if args.command == "inventory":
