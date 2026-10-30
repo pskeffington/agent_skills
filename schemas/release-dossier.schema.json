@@ -343,7 +343,9 @@
         "invocation_id",
         "decision",
         "approver_id",
-        "authority_ref"
+        "authority_ref",
+        "signature_algorithm",
+        "signature"
       ],
       "properties": {
         "evidence_ref": {
@@ -372,6 +374,15 @@
         "authority_ref": {
           "type": "string",
           "minLength": 3
+        },
+        "signature_algorithm": {
+          "const": "openssl-dgst-sha256"
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 21848,
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
         }
       }
     },

@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F8-APPROVAL-VERIFY-20261030",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "4a372614d4172752e5314e605d66e8d249e81e3e",
+  "objective": "Implement configured detached signature verification for release approval and bind authorized approver, decision, commit, and artifact to an operator-managed public-key trust store.",
+  "scope": {
+    "include": [
+      "agent_toolset/assurance/approval.py",
+      "agent_toolset/cli.py",
+      "scripts/release_gate.py",
+      "schemas/release-dossier.schema.json",
+      "tests/test_release_approval.py",
+      "tests/test_cli.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/RELEASE_RUNBOOK.md",
+      "docs/RELEASE_GATES.md",
+      "docs/TEST_MATRIX.md",
+      ".agents/skills/release-readiness/SKILL.md"
+    ],
+    "exclude": [
+      "merge to main",
+      "staging or production deployment",
+      "private-key generation or access",
+      "changing trusted approver policy"
+    ]
+  },
+  "acceptance": [
+    "Offline signature verifies with trusted allowlisted public key and is bound to approval payload, candidate commit, artifact digest, invocation, identity, decision, and authority reference",
+    "Unsigned, altered, unauthorized, stale, or unverifiable approvals fail closed",
+    "Trust store rejects symlink, non-regular, oversized, and group/world-writable files",
+    "Operator CLI exposes canonical approval payload generation and release-check trust store option",
+    "Full repository tests and validators pass; candidate zipapp is rebuilt and hashed",
+    "Independent code/security review and GitHub CI validate the exact committed tree"
+  ],
+  "risk": "high",
+  "owner_role": "security-assurance",
+  "status": "running",
+  "depends_on": [
+    "F8"
+  ],
+  "evidence_refs": [
+    "ci:41122857319-success-for-base",
+    "test-run:unittest-69-pass",
+    "validator:exit-0",
+    "preflight:exit-0",
+    "release-example:exit-2-blocked",
+    "release-dossier:exit-2-blocked",
+    "review:pending"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

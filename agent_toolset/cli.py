@@ -33,7 +33,8 @@ def parser() -> argparse.ArgumentParser:
     replay=sub.add_parser("replay",help="verify and display the event journal"); replay.add_argument("--state",default=".agent-toolset/events.jsonl")
     ci=sub.add_parser("ci-ingest",help="classify a saved GitHub Actions run export"); ci.add_argument("path"); ci.add_argument("--commit",required=True); ci.add_argument("--required-check",action="append",default=[])
     sec=sub.add_parser("security-summary",help="summarize a saved security findings export"); sec.add_argument("path"); sec.add_argument("--fail-on",default="high")
-    release=sub.add_parser("release-check",help="evaluate a release dossier without deploying"); release.add_argument("evidence")
+    release=sub.add_parser("release-check",help="evaluate a release dossier without deploying"); release.add_argument("evidence"); release.add_argument("--approval-trust-store",help="operator-managed JSON allowlist of authorized approver public keys")
+    approval=sub.add_parser("approval-payload",help="emit canonical approval bytes for offline detached signing"); approval.add_argument("dossier")
     export=sub.add_parser("export",help="export journal-derived state as JSON"); export.add_argument("--state",default=".agent-toolset/events.jsonl")
     return p
 
@@ -71,7 +72,26 @@ def main(argv: list[str] | None = None) -> int:
             doc=json.loads(pathlib.Path(args.path).read_text(encoding="utf-8")); result=summarize_findings(doc,fail_on=args.fail_on); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
         if args.command == "release-check":
             from .assurance.release import evaluate
-            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8")); result=evaluate(doc); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
+            from .assurance.approval import load_trust_store, make_openssl_approval_verifier
+            def unique_pairs(pairs):
+                result={}
+                for key,value in pairs:
+                    if key in result: raise ValueError(f"duplicate release dossier key: {key}")
+                    result[key]=value
+                return result
+            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8"),object_pairs_hook=unique_pairs)
+            verifier=None
+            if args.approval_trust_store:
+                verifier=make_openssl_approval_verifier(load_trust_store(args.approval_trust_store))
+            result=evaluate(doc,approval_verifier=verifier); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
+        if args.command == "approval-payload":
+            from .assurance.approval import canonical_approval_payload
+            doc=json.loads(pathlib.Path(args.dossier).read_text(encoding="utf-8"))
+            try:
+                payload=canonical_approval_payload(doc.get("approval"))
+            except ValueError as exc:
+                print(json.dumps({"status":"BLOCKED","error":str(exc)}),file=sys.stderr); return 2
+            sys.stdout.buffer.write(payload); return 0
         if args.command in {"status","replay","export"}:
             journal=Journal(args.state)
             if args.command == "replay":

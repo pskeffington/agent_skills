@@ -1,0 +1,166 @@
+import base64
+import json
+import os
+import pathlib
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+from agent_toolset.assurance.approval import (
+    canonical_approval_payload,
+    load_trust_store,
+    make_openssl_approval_verifier,
+)
+from agent_toolset.assurance.release import REQUIRED, evaluate
+
+
+OPENSSL = shutil.which("openssl")
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+
+@unittest.skipUnless(OPENSSL, "OpenSSL is required for detached signature tests")
+class ReleaseApprovalTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.temp.name)
+        self.private = self.root / "approver-private.pem"
+        self.public = self.root / "approver-public.pem"
+        subprocess.run(
+            [OPENSSL, "genpkey", "-algorithm", "RSA", "-pkeyopt", "rsa_keygen_bits:2048", "-out", str(self.private)],
+            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            [OPENSSL, "pkey", "-in", str(self.private), "-pubout", "-out", str(self.public)],
+            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        self.approvers = {"operator-42": {
+            "authority_ref": "change-control:42",
+            "public_key_pem": self.public.read_text(encoding="ascii"),
+        }}
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def approval(self):
+        return {
+            "evidence_ref": "approval:request-42",
+            "subject_commit": "a" * 40,
+            "artifact_sha256": "b" * 64,
+            "invocation_id": "approval-run-42",
+            "decision": "APPROVE",
+            "approver_id": "operator-42",
+            "authority_ref": "change-control:42",
+            "signature_algorithm": "openssl-dgst-sha256",
+        }
+
+    def sign(self, approval):
+        payload_path = self.root / "approval.json"
+        signature_path = self.root / "approval.sig"
+        payload_path.write_bytes(canonical_approval_payload(approval))
+        subprocess.run(
+            [OPENSSL, "dgst", "-sha256", "-sign", str(self.private), "-out", str(signature_path), str(payload_path)],
+            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        approval["signature"] = base64.b64encode(signature_path.read_bytes()).decode("ascii")
+        return approval
+
+    def test_signature_authenticates_identity_commit_and_artifact(self):
+        approval = self.sign(self.approval())
+        verifier = make_openssl_approval_verifier(self.approvers, openssl=OPENSSL)
+        self.assertIs(verifier(approval, "a" * 40, "b" * 64), True)
+        self.assertIs(verifier(approval, "c" * 40, "b" * 64), False)
+        self.assertIs(verifier(approval, "a" * 40, "d" * 64), False)
+        forged = dict(approval, approver_id="operator-99")
+        self.assertIs(verifier(forged, "a" * 40, "b" * 64), False)
+        altered = dict(approval, authority_ref="change-control:other")
+        self.assertIs(verifier(altered, "a" * 40, "b" * 64), False)
+        altered = dict(approval, evidence_ref="approval:substituted")
+        self.assertIs(verifier(altered, "a" * 40, "b" * 64), False)
+
+    def test_signed_approval_allows_ready_classification_only_with_trusted_key(self):
+        commit, artifact = "a" * 40, "b" * 64
+        attestation = lambda ref, run: {
+            "evidence_ref": ref, "subject_commit": commit,
+            "artifact_sha256": artifact, "invocation_id": run,
+        }
+        approval = self.sign({**attestation("approval:request-42", "approver-run"),
+            "decision": "APPROVE", "approver_id": "operator-42",
+            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"})
+        dossier = {
+            "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
+            "implementation": attestation("implementation:42", "implementer-run"),
+            "independent_review": attestation("review:42", "review-run"),
+            "security_review": attestation("security:42", "security-run"),
+            "staging": attestation("staging:42", "staging-run"),
+            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
+        }
+        verifier = make_openssl_approval_verifier(self.approvers, openssl=OPENSSL)
+        self.assertEqual("BLOCKED", evaluate(dossier)["status"])
+        self.assertEqual("PASS", evaluate(dossier, approval_verifier=verifier)["status"])
+        dossier["artifact_sha256"] = "c" * 64
+        self.assertEqual("FAIL", evaluate(dossier, approval_verifier=verifier)["status"])
+
+    def test_release_cli_verifies_trust_store_and_detached_signature(self):
+        commit, artifact = "a" * 40, "b" * 64
+        attestation = lambda ref, run: {
+            "evidence_ref": ref, "subject_commit": commit,
+            "artifact_sha256": artifact, "invocation_id": run,
+        }
+        approval = self.sign({**attestation("approval:request-42", "approver-run"),
+            "decision": "APPROVE", "approver_id": "operator-42",
+            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"})
+        dossier = {
+            "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
+            "implementation": attestation("implementation:42", "implementer-run"),
+            "independent_review": attestation("review:42", "review-run"),
+            "security_review": attestation("security:42", "security-run"),
+            "staging": attestation("staging:42", "staging-run"),
+            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
+        }
+        dossier_path = self.root / "release.json"
+        dossier_path.write_text(json.dumps(dossier), encoding="utf-8")
+        trust_path = self.root / "trust.json"
+        trust_path.write_text(json.dumps({"schema_version": "1.0.0", "approvers": self.approvers}), encoding="utf-8")
+        trust_path.chmod(0o600)
+        env = {"PATH": str(pathlib.Path(OPENSSL).parent) + os.pathsep + "/usr/bin:/bin", "PYTHONDONTWRITEBYTECODE": "1"}
+        result = subprocess.run(
+            [sys.executable, "-m", "agent_toolset", "release-check", str(dossier_path), "--approval-trust-store", str(trust_path)],
+            cwd=ROOT, env=env, capture_output=True, text=True,
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual("PASS", json.loads(result.stdout)["status"])
+
+    def test_trust_store_loading_rejects_writable_and_symlinked_store(self):
+        store = self.root / "trust.json"
+        store.write_text(json.dumps({"schema_version": "1.0.0", "approvers": {
+            "operator-42": {"authority_ref": "change-control:42", "public_key_pem": self.approvers["operator-42"]["public_key_pem"]},
+        }}), encoding="utf-8")
+        store.chmod(0o600)
+        self.assertEqual(self.approvers, load_trust_store(store))
+        store.chmod(0o666)
+        with self.assertRaises(ValueError):
+            load_trust_store(store)
+        alias = self.root / "trust-link.json"
+        alias.symlink_to(store)
+        with self.assertRaises(OSError):
+            load_trust_store(alias)
+
+    def test_trust_store_rejects_duplicate_identity_keys(self):
+        record = json.dumps({"authority_ref": "change-control:42", "public_key_pem": self.approvers["operator-42"]["public_key_pem"]})
+        store = self.root / "duplicate-trust.json"
+        store.write_text('{"schema_version":"1.0.0","approvers":{"operator-42":' + record + ',"operator-42":' + record + '}}', encoding="utf-8")
+        store.chmod(0o600)
+        with self.assertRaisesRegex(ValueError, "duplicate trust store key"):
+            load_trust_store(store)
+
+    def test_unavailable_openssl_is_unknown_not_success(self):
+        verifier = make_openssl_approval_verifier(self.approvers, openssl="/missing/openssl")
+        self.assertIsNone(verifier(self.sign(self.approval()), "a" * 40, "b" * 64))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -27,10 +27,23 @@ class CLITests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             dossier=pathlib.Path(tmp)/"bad.json"; dossier.write_text("{}")
             release=self.run_cli("release-check",str(dossier)); self.assertEqual(2,release.returncode)
+            dossier.write_text('{"approval":null,"approval":null}',encoding="utf-8")
+            duplicate=self.run_cli("release-check",str(dossier)); self.assertEqual(2,duplicate.returncode)
             stale=json.loads((ROOT/"examples/release-dossier.json").read_text())
             stale["staging"]={"evidence_ref":"stage:stale","subject_commit":"a"*40,"artifact_sha256":"0"*64,"invocation_id":"staging-run"}
             dossier.write_text(json.dumps(stale))
             failed=self.run_cli("release-check",str(dossier)); self.assertEqual(1,failed.returncode); self.assertEqual("FAIL",json.loads(failed.stdout)["status"])
+    def test_approval_payload_command_emits_exact_canonical_bytes(self):
+        from agent_toolset.assurance.approval import canonical_approval_payload
+        approval={"evidence_ref":"approval:42","subject_commit":"a"*40,"artifact_sha256":"b"*64,
+          "invocation_id":"approval-run-42","decision":"APPROVE","approver_id":"operator-42",
+          "authority_ref":"change-control:42","signature_algorithm":"openssl-dgst-sha256"}
+        with tempfile.TemporaryDirectory() as tmp:
+            dossier=pathlib.Path(tmp)/"dossier.json"
+            dossier.write_text(json.dumps({"approval":approval}),encoding="utf-8")
+            result=self.run_cli("approval-payload",str(dossier))
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertEqual(canonical_approval_payload(approval),result.stdout.encode())
     def test_rag_search_with_provenance_no_answer_and_invalid_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=pathlib.Path(tmp); (root/"doc.md").write_text("durable release gate evidence\n",encoding="utf-8")
