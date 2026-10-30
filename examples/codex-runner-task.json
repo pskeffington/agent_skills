@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F5-CODEX-CLI",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "55f5f4e4c214a56899fc8fdf0854d8646ab944fb",
+  "objective": "Implement bounded opt-in Codex CLI task execution in a dedicated local Git worktree.",
+  "scope": {
+    "include": [
+      "agent_toolset/runners/codex_cli.py",
+      "tests/test_runners_assurance.py",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "docs/CODEX_IMPLEMENTATION.md"
+    ],
+    "exclude": [
+      "production deployment",
+      "credentials and secret stores",
+      "Git commit and push operations"
+    ]
+  },
+  "acceptance": [
+    "Codex is disabled unless explicitly enabled and available at a supported version",
+    "Execution requires a clean dedicated Git worktree at the task base commit",
+    "Execution is bounded by timeout, prompt size, and captured output limits when externally contained",
+    "Execution uses JSONL, fixed workspace-write sandbox, stdin prompt, and process-group cancellation",
+    "Out-of-scope changes fail closed and default runner tests remain offline",
+    "Full repository acceptance checks pass with the synthetic release gate blocked"
+  ],
+  "risk": "high",
+  "owner_role": "integrator",
+  "status": "review",
+  "depends_on": [],
+  "evidence_refs": [
+    "command: python3 -m unittest tests.test_runners_assurance -v (exit 0, 12 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 79 tests)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "source: https://developers.openai.com/codex/cli/reference"
+  ],
+  "blocker": "External process-containment integration evidence and actual Codex runtime validation; security review passed with that limitation documented, while independent code review is pending final current-tree confirmation.",
+  "approval_ref": null
+}

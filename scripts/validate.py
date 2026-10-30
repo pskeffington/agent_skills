@@ -12,6 +12,7 @@ EXAMPLE_SCHEMAS = {
     "security-hardening-task.json": "task-contract.schema.json",
     "release-approval-verifier-task.json": "task-contract.schema.json",
     "artifact-digest-task.json": "task-contract.schema.json",
+    "codex-runner-task.json": "task-contract.schema.json",
     "feature-handoff.json": "handoff.schema.json",
     "feature-evidence.json": "evidence.schema.json",
     "rag-evaluation.json": "rag-evaluation.schema.json",

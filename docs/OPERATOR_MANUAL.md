@@ -1,6 +1,25 @@
 # Operator manual
 
-The local toolset is invoked with `python3 -m agent_toolset`. It is a local control plane, not a deployed autonomous service. The default runner is side-effect-free; the Codex adapter only probes its version and cannot launch work.
+The local toolset is invoked with `python3 -m agent_toolset`. It is a local control plane, not a deployed autonomous service. The default runner is side-effect-free. The Codex CLI adapter is disabled by default; when explicitly enabled, it can execute one task in a clean linked Git worktree.
+
+### Opt-in Codex runner API
+
+The F5 adapter is currently a Python API, not a CLI `run` backend. A caller must create a separate linked Git worktree at the task contract's exact `base_commit`, set `scope.include`, and then explicitly enable the runner:
+
+```python
+from agent_toolset.runners.codex_cli import CodexCLIAdapter
+
+runner = CodexCLIAdapter(enabled=True, timeout_seconds=300)
+result = runner.execute(task, {
+    "worktree": "/tmp/task-worktree",
+    "dedicated_worktree": True,
+    "external_process_containment": True,
+    "containment_ref": "operator-evidence:container/job-object-id",
+    "run_id": "task-123-worker-1",
+})
+```
+
+The adapter probes the installed CLI version and required `codex exec` flags before execution. It uses a fixed `workspace-write` sandbox, disables user configuration, accepts the prompt on stdin under the execution timeout, caps output, terminates remaining POSIX process-group members, and verifies tracked, untracked and ignored changes against `scope.include` before reporting success. It requires an operator-provided external process-containment attestation because process groups alone cannot contain descendants that detach or create new sessions; this adapter does not create a container/cgroup/Windows Job Object itself. Without that verified external containment and reference, execution is BLOCKED. Supply `run_id` so another thread can call `runner.cancel(run_id)`; cancelled executions report `BLOCKED`. Any worktree that begins dirty or contains ignored files is rejected. A scope violation marks the task `FAIL`; discard that isolated worktree rather than integrating it. Offline tests use a fake CLI; an actual model invocation and platform sandbox enforcement have not been validated. Do not pass secrets in the task contract.
 
 ## Commands
 
