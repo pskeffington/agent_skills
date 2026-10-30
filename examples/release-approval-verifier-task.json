@@ -35,18 +35,18 @@
   ],
   "risk": "high",
   "owner_role": "security-assurance",
-  "status": "running",
+  "status": "done",
   "depends_on": [
     "F8"
   ],
   "evidence_refs": [
-    "ci:41122857319-success-for-base",
-    "test-run:unittest-69-pass",
+    "test-run:unittest-70-pass-at-97d",
     "validator:exit-0",
     "preflight:exit-0",
-    "release-example:exit-2-blocked",
-    "release-dossier:exit-2-blocked",
-    "review:pending"
+    "ci:41123812623-success",
+    "review:code-review-pass-at-97d",
+    "review:security-review-pass-at-97d",
+    "commit:97d0d1163ccf6505e9065d41dc9b5fee7b575ba7"
   ],
   "blocker": null,
   "approval_ref": null

@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F8-ARTIFACT-DIGEST-20261030",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "97d0d1163ccf6505e9065d41dc9b5fee7b575ba7",
+  "objective": "Verify the actual release candidate artifact bytes against the immutable SHA256 bound by the release dossier before transfer or staging.",
+  "scope": {
+    "include": [
+      "agent_toolset/assurance/artifact.py",
+      "agent_toolset/cli.py",
+      "tests/test_cli.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/RELEASE_RUNBOOK.md",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "deploying or transferring artifacts",
+      "merging to main",
+      "secret access"
+    ]
+  },
+  "acceptance": [
+    "Hash regular files incrementally through a no-follow descriptor",
+    "Block symlinks, unsupported platforms, unreadable files, and changes detected during hashing",
+    "PASS only when actual SHA256 matches the expected lowercase digest; mismatches return FAIL",
+    "Document the immutability requirement between verification and later transfer/deployment",
+    "Full repository acceptance and independent review recorded"
+  ],
+  "risk": "medium",
+  "owner_role": "build-integration",
+  "status": "running",
+  "depends_on": [
+    "F8-APPROVAL-VERIFY-20261030"
+  ],
+  "evidence_refs": [
+    "review:pending",
+    "ci:pending"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

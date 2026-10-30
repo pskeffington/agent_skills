@@ -35,6 +35,7 @@ def parser() -> argparse.ArgumentParser:
     sec=sub.add_parser("security-summary",help="summarize a saved security findings export"); sec.add_argument("path"); sec.add_argument("--fail-on",default="high")
     release=sub.add_parser("release-check",help="evaluate a release dossier without deploying"); release.add_argument("evidence"); release.add_argument("--approval-trust-store",help="operator-managed JSON allowlist of authorized approver public keys")
     approval=sub.add_parser("approval-payload",help="emit canonical approval bytes for offline detached signing"); approval.add_argument("dossier")
+    artifact=sub.add_parser("artifact-check",help="verify candidate artifact bytes against a SHA256 digest"); artifact.add_argument("path"); artifact.add_argument("--sha256",required=True)
     export=sub.add_parser("export",help="export journal-derived state as JSON"); export.add_argument("--state",default=".agent-toolset/events.jsonl")
     return p
 
@@ -92,6 +93,9 @@ def main(argv: list[str] | None = None) -> int:
             except ValueError as exc:
                 print(json.dumps({"status":"BLOCKED","error":str(exc)}),file=sys.stderr); return 2
             sys.stdout.buffer.write(payload); return 0
+        if args.command == "artifact-check":
+            from .assurance.artifact import verify_artifact
+            result=verify_artifact(args.path,args.sha256); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
         if args.command in {"status","replay","export"}:
             journal=Journal(args.state)
             if args.command == "replay":

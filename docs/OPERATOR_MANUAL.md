@@ -16,6 +16,7 @@ The local toolset is invoked with `python3 -m agent_toolset`. It is a local cont
 - `replay --state PATH`: verify the event hash chain and print events.
 - `release-check dossier.json [--approval-trust-store PATH]`: evaluate G0-G6 and required review, staging, rollback, provenance, and approval evidence. This is read-only and does not deploy. Without a trusted approval key store, an otherwise complete dossier remains BLOCKED.
 - `approval-payload dossier.json`: emit the canonical approval fields as raw UTF-8 bytes for offline detached signing. It never reads a private key or changes the dossier.
+- `artifact-check PATH --sha256 DIGEST`: stream and verify the actual regular-file bytes against the dossier artifact SHA256; symlinks and mid-read changes are BLOCKED.
 - `export --state PATH`: export the verified journal event stream as JSON.
 
 Exit codes: `0` successful command/PASS, `1` verified FAIL (including stale or contradictory release attestations), `2` BLOCKED or malformed/missing prerequisites. Output is JSON for automation. Journal events are append-only and hash chained; preserve the journal file as evidence. A trailing incomplete record is ignored during replay and truncated before a subsequent append. Journal appends serialize through an advisory file lock before deriving sequence numbers. Keep journal files in a trusted local directory; hash chaining detects edits but is not a digital signature or protection against an attacker who can rewrite the entire journal.
