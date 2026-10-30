@@ -26,6 +26,13 @@ class CLITests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             dossier=pathlib.Path(tmp)/"bad.json"; dossier.write_text("{}")
             release=self.run_cli("release-check",str(dossier)); self.assertEqual(2,release.returncode)
+    def test_ci_and_security_ingestion_commands(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ci=pathlib.Path(tmp)/"run.json"; commit="a"*40
+            ci.write_text(json.dumps({"id":1,"head_sha":commit,"conclusion":"success","jobs":[{"name":"structural","conclusion":"success"}]}))
+            self.assertEqual(0,self.run_cli("ci-ingest",str(ci),"--commit",commit,"--required-check","structural").returncode)
+            findings=pathlib.Path(tmp)/"findings.json"; findings.write_text(json.dumps({"findings":[{"severity":"critical"}]}))
+            self.assertEqual(1,self.run_cli("security-summary",str(findings)).returncode)
     def test_bad_arguments_and_corrupted_journal_block(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=pathlib.Path(tmp)/"events.jsonl"; path.write_text("not-json\n")

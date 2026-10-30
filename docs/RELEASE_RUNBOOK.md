@@ -11,3 +11,7 @@ This repository toolset only prepares and evaluates evidence. It has no deployme
 7. After an authorized deployment, record actual result, monitoring window and rollback decision in the external deployment system and link immutable evidence back to the dossier.
 
 A failed or unavailable gate remains FAIL or BLOCKED. Do not replace real evidence with fixture success. Rollback must identify the prior immutable artifact and exact operator procedure before a release can be considered ready.
+
+## Evidence packet shape
+
+For each gate include a status, reason, and evidence pointer. Review, security, staging, and approval attestations must bind their invocation identity, commit SHA and artifact SHA256. The evaluator rejects stale subject bindings and rejects reviewer/security invocations that match the approver. Use `ci-ingest` only for a saved, authoritative workflow export; its output must match the candidate SHA and required job names. Use `security-summary` on the security scanner's actual export. These local checks validate supplied records and do not authenticate forged files, so preserve originals and verify their provenance in GitHub or the security system.

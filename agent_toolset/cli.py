@@ -6,6 +6,8 @@ import pathlib
 import sys
 from typing import Any
 from .assurance.evidence import assess_evidence
+from .assurance.ci import classify_github_run
+from .assurance.security import summarize_findings
 from .contracts import ContractError, load_contract
 from .inventory import inventory
 from .journal import Journal, JournalError
@@ -28,6 +30,8 @@ def parser() -> argparse.ArgumentParser:
     verify=sub.add_parser("verify",help="validate evidence against a source commit"); verify.add_argument("evidence"); verify.add_argument("--commit",required=True)
     evidence=sub.add_parser("evidence",help="validate and print an evidence contract"); evidence.add_argument("path")
     replay=sub.add_parser("replay",help="verify and display the event journal"); replay.add_argument("--state",default=".agent-toolset/events.jsonl")
+    ci=sub.add_parser("ci-ingest",help="classify a saved GitHub Actions run export"); ci.add_argument("path"); ci.add_argument("--commit",required=True); ci.add_argument("--required-check",action="append",default=[])
+    sec=sub.add_parser("security-summary",help="summarize a saved security findings export"); sec.add_argument("path"); sec.add_argument("--fail-on",default="high")
     release=sub.add_parser("release-check",help="evaluate a release dossier without deploying"); release.add_argument("evidence")
     export=sub.add_parser("export",help="export journal-derived state as JSON"); export.add_argument("--state",default=".agent-toolset/events.jsonl")
     return p
@@ -48,6 +52,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "verify":
             doc=load_contract(args.evidence,"evidence"); result=assess_evidence(doc,subject_commit=args.commit); _json(result)
             return 2 if doc["result"] == "BLOCKED" and result["status"] == "FAIL" else EXIT[result["status"]]
+        if args.command == "ci-ingest":
+            doc=json.loads(pathlib.Path(args.path).read_text(encoding="utf-8")); result=classify_github_run(doc,expected_commit=args.commit,required_checks=set(args.required_check)); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
+        if args.command == "security-summary":
+            doc=json.loads(pathlib.Path(args.path).read_text(encoding="utf-8")); result=summarize_findings(doc,fail_on=args.fail_on); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
         if args.command == "release-check":
             from scripts.release_gate import evaluate
             doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8")); result=evaluate(doc); _json(result); return 0 if result["release_ready"] else 2
