@@ -8,7 +8,7 @@
 | Leases | acquire/release ownership | duplicate writer, expired-but-live lease, cross-worktree collision |
 | Filesystem | confined read inside checkout | ../ traversal, absolute escape, symlink escape |
 | Commands | allowlisted subprocess invocation | shell metacharacters, env leakage, timeout |
-| Codex runner | absent runtime yields BLOCKED | unexpected version, permission refusal, cancellation |
+| Codex runner | fake CLI with supported version/flags completes in a clean linked worktree and only changes declared paths | primary/dirty worktree, wrong base, symlink path, ignored/out-of-scope file, timeout, duplicate run ID, cancellation, detached descendant, missing external-containment evidence; actual model/runtime containment remains BLOCKED until independently verified |
 | Independent review | reviewer evidence for exact SHA | same identity as author, stale SHA, missing CI |
 | Release | complete signed-off staging dossier with a valid detached approver signature against the configured trust store | absent trust store/OpenSSL/signature, unauthorized approver, signature mutation, wrong commit or artifact digest, missing rollback, synthetic fixture |
 | CLI | JSON machine output and stable exit | bad args and corrupted state fail closed |
