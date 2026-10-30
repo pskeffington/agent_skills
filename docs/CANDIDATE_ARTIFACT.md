@@ -2,10 +2,10 @@
 
 This is local build evidence for a reproducible executable candidate. It is not a staging or production release attestation.
 
-- Source commit: `d3afa371af75a98e812e716e6794e7c984b5d2c1`
+- Source commit: `6ec0e4e1a978d7b105e31fe49821d0f914b8043a`
 - Build command: `python3 scripts/build_zipapp.py dist/agent-toolset.pyz`
 - Artifact: `dist/agent-toolset.pyz`
-- SHA256: `516bccd688af46c880bb60c6201fc810b1e47adbf9ab462040f880b431ab918f`
+- SHA256: `6efc812441e63afccb856b60b653425af2c58b4d42441f3f6084c0cca599bf2c`
 - Environment: Python 3.15.2, macOS local workspace
 - Reproducibility: two independently written artifacts had the same SHA256
 - Smoke check: `python3 dist/agent-toolset.pyz doctor` returned exit 0 and `status=PASS`

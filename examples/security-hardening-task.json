@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "task_id": "F3-F6-SECURITY-20261030",
   "repository": "pskeffington/agent_skills",
-  "base_commit": "3de8560005c75d3bdc75b3c3a9bf4f836cadab6f",
+  "base_commit": "6ec0e4e1a978d7b105e31fe49821d0f914b8043a",
   "objective": "Close independent review findings in scheduler, journal, repository retrieval, CI evidence classification, bounded command output, and release approval admission.",
   "scope": {
     "include": [
@@ -39,7 +39,7 @@
   ],
   "risk": "high",
   "owner_role": "build-integration",
-  "status": "queued",
+  "status": "done",
   "depends_on": [
     "F2",
     "F3",
@@ -52,7 +52,10 @@
     "test-run:unittest-61-pass",
     "validator:exit-0",
     "preflight:exit-0",
-    "release-example:exit-2-blocked"
+    "release-example:exit-2-blocked",
+    "review:independent-code-review-follow-up-pass",
+    "review:security-assurance-follow-up-pass",
+    "commit:6ec0e4e1a978d7b105e31fe49821d0f914b8043a"
   ],
   "blocker": null,
   "approval_ref": null
