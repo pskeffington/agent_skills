@@ -29,3 +29,7 @@ Every pass: inspect changes -> implement smallest phase item -> run validation/t
 5. Admit canaries only after G2-G5 and objective quality/cost/safety thresholds are met.
 
 Read `docs/FEEDBACK_MODEL_SELECTION.md` and `data/literature_matrix.json` before implementing this phase.
+
+## P7 — Standalone full skill-library build campaign
+
+Read `docs/SKILL_LIBRARY_PLAN.md` and `data/skill_build_matrix.json`. Construct 24 independent skills in four waves, first establishing evaluation fixtures and offline admission evidence. Keep all source and runtime dependencies within `agent_skills`; no sibling-repo coupling. These are **planned** tasks, not implemented skills. Build the earliest eligible priority and record executed checks and blockers on each pass. G2-G5 remain mandatory.
