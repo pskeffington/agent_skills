@@ -1,0 +1,111 @@
+{
+  "status": "PASS",
+  "scope": "single local checkout; observational measurements only; no speedup claim",
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "source_commit": "3de8560005c75d3bdc75b3c3a9bf4f836cadab6f",
+    "worktree_clean": false,
+    "corpus_fingerprint": "1022f34392b405725f88bfcef9e044edc5f38cabbd8a8162335c96b34ee79ac2",
+    "corpus_root": "/Users/null/GitHub/agent_skills",
+    "repetitions": 5,
+    "cache": "temporary local directory; warm cache includes source fingerprint scan and JSON read"
+  },
+  "corpus": {
+    "indexed_files": 99,
+    "indexed_nonempty_lines": 4081
+  },
+  "cold_build": {
+    "samples": [
+      {
+        "latency_ms": 108.0803,
+        "python_peak_bytes": 3767425
+      },
+      {
+        "latency_ms": 88.7129,
+        "python_peak_bytes": 3700513
+      },
+      {
+        "latency_ms": 85.6358,
+        "python_peak_bytes": 3685793
+      },
+      {
+        "latency_ms": 93.0444,
+        "python_peak_bytes": 3685793
+      },
+      {
+        "latency_ms": 91.1558,
+        "python_peak_bytes": 3685793
+      }
+    ],
+    "median_latency_ms": 91.1558,
+    "median_python_peak_bytes": 3685793
+  },
+  "warm_search": {
+    "query": "release readiness task journal lease",
+    "limit": 8,
+    "samples": [
+      {
+        "latency_ms": 11.2925,
+        "python_peak_bytes": 132900
+      },
+      {
+        "latency_ms": 10.7852,
+        "python_peak_bytes": 111093
+      },
+      {
+        "latency_ms": 10.6436,
+        "python_peak_bytes": 111093
+      },
+      {
+        "latency_ms": 10.8411,
+        "python_peak_bytes": 111093
+      },
+      {
+        "latency_ms": 10.9692,
+        "python_peak_bytes": 111093
+      }
+    ],
+    "median_latency_ms": 10.8411,
+    "median_python_peak_bytes": 111093
+  },
+  "warm_cache_load": {
+    "samples": [
+      {
+        "latency_ms": 211.4961,
+        "python_peak_bytes": 8901812
+      },
+      {
+        "latency_ms": 212.6212,
+        "python_peak_bytes": 8901812
+      },
+      {
+        "latency_ms": 213.9462,
+        "python_peak_bytes": 8901812
+      },
+      {
+        "latency_ms": 212.5847,
+        "python_peak_bytes": 8901812
+      },
+      {
+        "latency_ms": 212.461,
+        "python_peak_bytes": 8901812
+      }
+    ],
+    "median_latency_ms": 212.5847,
+    "median_python_peak_bytes": 8901812
+  },
+  "invalidation": {
+    "sample": {
+      "latency_ms": 2.7598,
+      "python_peak_bytes": 78105
+    },
+    "rebuild_detected": true
+  },
+  "fixture_quality": {
+    "precision_at_k": 1.0,
+    "recall_at_k": 1.0,
+    "no_answer_false_positives": 0,
+    "scope": "fixture-only; file-level metrics over unique paths; no claim of general retrieval quality or instruction-following safety"
+  }
+}

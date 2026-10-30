@@ -340,7 +340,10 @@
         "evidence_ref",
         "subject_commit",
         "artifact_sha256",
-        "invocation_id"
+        "invocation_id",
+        "decision",
+        "approver_id",
+        "authority_ref"
       ],
       "properties": {
         "evidence_ref": {
@@ -356,6 +359,17 @@
           "pattern": "^[0-9a-f]{64}$"
         },
         "invocation_id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "decision": {
+          "const": "APPROVE"
+        },
+        "approver_id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "authority_ref": {
           "type": "string",
           "minLength": 3
         }

@@ -30,6 +30,10 @@ Research, design and security investigation may run concurrently after F0. Only 
 ### Release acceptance
 F8 is a **release-readiness** target, not permission to deploy. For production require operator-designated environment, immutable artifact digest, passing CI and staging, independent signoff, rollback drill and explicit approval. If any absent, state BLOCKED and preserve the candidate.
 
+## Security hardening follow-up (2026-10-30)
+
+Task contract: `examples/security-hardening-task.json`, based on source commit `3de8560005c75d3bdc75b3c3a9bf4f836cadab6f`. This closes review findings across F2/F3/F4/F6/F8. Local evidence at this checkpoint: 61 unit tests PASS; structural validator PASS; Codex preflight PASS; synthetic release dossier BLOCKED with exit 2 as required; observational benchmark `docs/benchmarks/rag-benchmark-security-hardening-2026-10-30.json` recorded (99 files, 4,081 lines; median cold build 91.2 ms, warm search 10.8 ms, warm cache validation/load 212.6 ms; no speedup claim). GitHub Actions run `41121581800` passed for the earlier source commit `3de8560005c75d3bdc75b3c3a9bf4f836cadab6f`; it does not include this working-tree batch. Follow-up independent reviews are pending. The CLI has no configured approval authority verifier, so a complete-looking dossier remains BLOCKED. No staging or production action occurred.
+
 ## Retrieval optimization queue (R1–R6)
 
 | ID | Dependency | Deliverable | Status / evidence |

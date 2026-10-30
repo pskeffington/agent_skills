@@ -10,6 +10,7 @@ The local toolset is invoked with `python3 -m agent_toolset`. It is a local cont
 - `plan contracts.json --state PATH`: validate and add a JSON array of task contracts to the event journal, then report ready tasks. Contract IDs must be new and dependencies must resolve.
 - `run task.json`: validate a task and return a deterministic dry-run record. It does not execute task commands.
 - `status --state PATH`: reconstruct task and lease state from the journal.
+- Cancelling a task with an active lease requires the execution adapter to verify that its worker has stopped; the scheduler does not terminate workers itself.
 - `verify evidence.json --commit SHA`: validate evidence, fail stale source commits and non-PASS checks.
 - `evidence PATH`: parse and print a validated evidence contract.
 - `replay --state PATH`: verify the event hash chain and print events.
@@ -20,7 +21,7 @@ Exit codes: `0` successful command/PASS, `1` verified FAIL (including stale or c
 - `ci-ingest run.json --commit SHA [--required-check NAME]`: classify an exported GitHub Actions workflow run for the exact commit. This is offline ingestion; it does not fetch GitHub. Missing, incomplete or stale runs do not pass.
 - `security-summary findings.json [--fail-on high]`: summarize an exported `{ "findings": [...] }` document. Missing or malformed exports are BLOCKED; findings at or above the configured threshold fail.
 
-Release dossier format: each `G0`–`G6` gate is `{ "status": "PASS", "evidence_ref": "...", "reason": "..." }`. `implementation`, `independent_review`, `security_review`, `staging`, and `approval` are objects that each include `evidence_ref`, `subject_commit`, `artifact_sha256`, and `invocation_id`. Each subject must match the dossier commit and artifact digest. Reviewer and security invocations must differ from the implementer and the approver. Also provide `target_environment`, `rollback_ref`, and nonempty `check_provenance`. This validates linkage and presence; it cannot cryptographically authenticate an external reference. Operators must verify referenced evidence in its authoritative system.
+Release dossier format: each `G0`–`G6` gate is `{ "status": "PASS", "evidence_ref": "...", "reason": "..." }`. `implementation`, `independent_review`, `security_review`, `staging`, and `approval` are objects that each include `evidence_ref`, `subject_commit`, `artifact_sha256`, and `invocation_id`. Approval additionally requires `decision: "APPROVE"`, `approver_id`, and `authority_ref`. Each subject must match the dossier commit and artifact digest. Reviewer and security invocations must differ from the implementer and the approver. Also provide `target_environment`, `rollback_ref`, and nonempty `check_provenance`. The evaluator cannot authenticate external references by itself and returns BLOCKED without an explicitly configured approval verifier. A verifier must validate the approval against the authoritative system and bind it to the dossier commit and artifact digest.
 
 ## Build a standalone artifact
 

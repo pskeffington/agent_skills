@@ -14,7 +14,7 @@ ATTESTATIONS = ("implementation", "independent_review", "security_review", "stag
 def _pointer(value):
     return isinstance(value, str) and len(value.strip()) >= 3
 
-def evaluate(doc):
+def evaluate(doc, approval_verifier=None):
     if not isinstance(doc, dict):
         return {"release_ready":False,"status":"BLOCKED","issues":["dossier must be an object"],"notice":"Read-only evaluation. No deployment performed."}
     issues=[]
@@ -60,6 +60,31 @@ def evaluate(doc):
         issues.append("security reviewer must be independent from implementer")
         contradictions=True
     if isinstance(approval,dict):
+        if approval.get("decision") != "APPROVE":
+            issues.append("approval decision must explicitly be APPROVE")
+            contradictions = contradictions or approval.get("decision") in ("REJECT", "DENY")
+        if not _pointer(approval.get("approver_id")):
+            issues.append("approval approver identity missing")
+        if not _pointer(approval.get("authority_ref")):
+            issues.append("approval authority reference missing")
+        if approval_verifier is None:
+            issues.append("approval authenticity verifier unavailable")
+        else:
+            try:
+                verified = approval_verifier(approval, commit, digest)
+            except Exception as exc:
+                verified = None
+                issues.append("approval verifier error: " + type(exc).__name__)
+            if verified is True:
+                pass
+            elif verified is False:
+                issues.append("approval authenticity verification failed")
+                contradictions = True
+            elif verified is None:
+                issues.append("approval authenticity verification unavailable")
+            else:
+                issues.append("approval verifier returned invalid result")
+                contradictions = True
         for name,attestation in (("implementer",implementation),("reviewer",review),("security reviewer",security)):
             if isinstance(attestation,dict) and attestation.get("invocation_id") == approval.get("invocation_id"):
                 issues.append(f"{name} must be independent from approver")

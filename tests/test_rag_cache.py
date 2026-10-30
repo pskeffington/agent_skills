@@ -5,6 +5,7 @@ import sys
 import stat
 import tempfile
 import unittest
+from pathlib import Path
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from agent_toolset.rag import load_or_build_cache, search
@@ -47,5 +48,45 @@ class RagCacheTests(unittest.TestCase):
             _,fingerprint,_=load_or_build_cache(repo,cache)
             target=cache/f"index-{fingerprint}.json"; target.unlink(); target.symlink_to(pathlib.Path(other)/"outside.json")
             with self.assertRaises(ValueError): load_or_build_cache(repo,cache)
+
+    def test_symlinked_cache_parent_inside_repository_rejected(self):
+        with tempfile.TemporaryDirectory() as temp, tempfile.TemporaryDirectory() as other:
+            base=pathlib.Path(temp); repo=base/"repo"; repo.mkdir()
+            (repo/"doc.md").write_text("cache parent probe\n",encoding="utf-8")
+            outside=pathlib.Path(other)
+            (repo/"cache-link").symlink_to(outside,target_is_directory=True)
+            with self.assertRaises(ValueError):
+                load_or_build_cache(repo,repo/"cache-link"/"nested")
+            self.assertEqual([],list(outside.iterdir()))
+
+    def test_cache_parent_swap_cannot_redirect_entry_write(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base=pathlib.Path(temp); repo=base/"repo"; cache=base/"cache"
+            repo.mkdir(); cache.mkdir()
+            (repo/"doc.md").write_text("cache race content\n",encoding="utf-8")
+            # Cache opens are anchored to the directory descriptor. Replacing its
+            # pathname afterward must not redirect the atomic write elsewhere.
+            import agent_toolset.rag as rag
+            from unittest.mock import patch
+            real_open=rag._ORIGINAL_OS_OPEN
+            swapped=False
+            moved=base/"moved-cache"
+            redirected=base/"redirected-cache"
+            redirected.mkdir()
+
+            def swap_after_directory_open(path, flags, *args, **kwargs):
+                nonlocal swapped
+                fd=real_open(path,flags,*args,**kwargs)
+                if path==cache.name and kwargs.get("dir_fd") is not None and not swapped:
+                    cache.rename(moved)
+                    cache.symlink_to(redirected,target_is_directory=True)
+                    swapped=True
+                return fd
+
+            with patch.object(rag,"_ORIGINAL_OS_OPEN",side_effect=swap_after_directory_open):
+                _,fingerprint,_=load_or_build_cache(repo,cache)
+            self.assertTrue(swapped)
+            self.assertTrue((moved/f"index-{fingerprint}.json").exists())
+            self.assertEqual([],list(redirected.iterdir()))
 
 if __name__=="__main__": unittest.main()

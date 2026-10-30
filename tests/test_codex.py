@@ -22,11 +22,21 @@ class CodexTests(unittest.TestCase):
           "independent_review":attestation("review:12","reviewer-run"),
           "security_review":attestation("security:12","security-run"),
           "staging":attestation("stage:12","stage-run"),
-          "approval":attestation("approval:12","approver-run"),
+          "approval":{**attestation("approval:12","approver-run"),"decision":"APPROVE","approver_id":"operator-42","authority_ref":"change-control:42"},
           "rollback_ref":"runbook:12","check_provenance":["ci:123"]}
 
     def test_structured_exact_subject_dossier_classifies_ready_only(self):
-        self.assertTrue(evaluate(self.packet())["release_ready"])
+        self.assertFalse(evaluate(self.packet())["release_ready"])
+        self.assertIn("approval authenticity verifier unavailable",evaluate(self.packet())["issues"])
+        verifier=lambda approval, commit, digest: approval["decision"] == "APPROVE" and approval["subject_commit"] == commit and approval["artifact_sha256"] == digest
+        self.assertTrue(evaluate(self.packet(),approval_verifier=verifier)["release_ready"])
+
+    def test_approval_requires_explicit_decision_and_verification(self):
+        packet=self.packet(); packet["approval"]["decision"]="REJECT"
+        self.assertEqual("FAIL",evaluate(packet,approval_verifier=lambda *_: True)["status"])
+        packet=self.packet()
+        self.assertEqual("FAIL",evaluate(packet,approval_verifier=lambda *_: False)["status"])
+        self.assertEqual("BLOCKED",evaluate(packet,approval_verifier=lambda *_: None)["status"])
 
     def test_stale_or_unstructured_attestation_blocked(self):
         packet=self.packet(); packet["staging"]["subject_commit"]="c"*40
