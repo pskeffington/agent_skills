@@ -7,12 +7,12 @@ class RagTests(unittest.TestCase):
     def test_ranking_and_provenance(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            (root / "one.md").write_text("alpha beta alpha\\nother\\n", encoding="utf-8")
-            (root / "two.md").write_text("alpha only\\n", encoding="utf-8")
+            (root / "one.md").write_text("alpha beta alpha\nother\n", encoding="utf-8")
+            (root / "two.md").write_text("alpha only\n", encoding="utf-8")
             hits = search(build_index(root), "alpha beta")
             self.assertEqual(hits[0]["path"], "one.md")
             self.assertTrue(verify_hit(root, hits[0]))
-            (root / "one.md").write_text("tampered\\n", encoding="utf-8")
+            (root / "one.md").write_text("tampered\n", encoding="utf-8")
             self.assertFalse(verify_hit(root, hits[0]))
 
     def test_symlink_escape_and_ignored_directories(self):
