@@ -1,0 +1,16 @@
+# Engineering toolset acceptance test matrix
+
+| Area | Positive case | Negative / adversarial case |
+| --- | --- | --- |
+| Contracts | valid minimal task and handoff | malformed JSON, extra fields, unknown role, null risk |
+| DAG | independent parallel tasks | cycle, missing parent, blocked ancestor |
+| Storage | replay valid journal | truncation, tamper, duplicate seq, interrupted append |
+| Leases | acquire/release ownership | duplicate writer, expired-but-live lease, cross-worktree collision |
+| Filesystem | confined read inside checkout | ../ traversal, absolute escape, symlink escape |
+| Commands | allowlisted subprocess invocation | shell metacharacters, env leakage, timeout |
+| Codex runner | absent runtime yields BLOCKED | unexpected version, permission refusal, cancellation |
+| Independent review | reviewer evidence for exact SHA | same identity as author, stale SHA, missing CI |
+| Release | complete signed-off staging dossier | missing approval, missing rollback, synthetic fixture, digest mismatch |
+| CLI | JSON machine output and stable exit | bad args and corrupted state fail closed |
+
+Record test name, exact command, exit code and host environment. Mark unrun test BLOCKED, not PASS.
