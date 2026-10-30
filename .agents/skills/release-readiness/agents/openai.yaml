@@ -1,0 +1,3 @@
+interface:
+  display_name: "Release Readiness"
+  short_description: "Evaluate release candidate gates, evidence validity, artifacts, rollback and explicit owner app"

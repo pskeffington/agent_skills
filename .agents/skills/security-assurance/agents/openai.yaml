@@ -1,0 +1,3 @@
+interface:
+  display_name: "Security Assurance"
+  short_description: "Perform security, supply-chain, permission-boundary and threat review of software changes."

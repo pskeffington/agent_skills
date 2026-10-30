@@ -1,0 +1,3 @@
+interface:
+  display_name: "Independent Code Review"
+  short_description: "Perform independent correctness, maintainability and regression review before release admission"

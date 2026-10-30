@@ -1,0 +1,3 @@
+interface:
+  display_name: "Engineering Planning"
+  short_description: "Break repository engineering requests into small scoped tasks, acceptance criteria, risk assess"
