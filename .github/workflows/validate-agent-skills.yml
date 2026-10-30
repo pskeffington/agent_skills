@@ -1,0 +1,20 @@
+name: Validate agent skills
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  structural:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout (pinned GitHub-hosted action)
+        uses: actions/checkout@v4
+      - name: Check contracts and role catalog
+        run: python3 scripts/validate.py
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Read-only preflight
+        run: python3 scripts/codex_preflight.py --repo .
