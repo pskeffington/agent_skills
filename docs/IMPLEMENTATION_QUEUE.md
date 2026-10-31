@@ -94,3 +94,7 @@ Task contract: `examples/rag-cache-validator-optimization-task.json`, based on `
 ## F8 candidate artifact refresh after RAG search optimization (2026-10-30)
 
 Rebuilt after source commit `a3feb6d882d8bc7a51891fef57b547000d44eddc`. Three independent builds matched SHA256 `de2d44b2417ba60cdf840ac31f531306a18ed079705f0fe520cfa7ee49eb1758`. `doctor`, matching digest, stale digest rejection, matching synthetic-dossier BLOCKED result, and standalone RAG cache miss/hit with verified citations all passed. GitHub Actions run `41155700805` succeeded for the source commit. Artifact is local in ignored `dist/`; no staging or deployment occurred.
+
+## F8 candidate artifact refresh after RAG cache validator optimization (2026-10-30)
+
+Rebuilt from source commit `9d3d48774760655da30c02c73ad624a8228745f4`. Three independent zipapp builds matched SHA256 `d3eabeceafd7104155f49b55f7009fad2763f19ddf2f0db2812bf6886f28d3da` (37,138 bytes). Artifact `doctor` and matching digest verification PASS. CI run `41156229024` was in progress at record time. Release staging evidence remains absent; no staging or deployment occurred.
