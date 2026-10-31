@@ -12,5 +12,6 @@
 | Independent review | reviewer evidence for exact SHA | same identity as author, stale SHA, missing CI |
 | Release | complete signed-off staging dossier with a valid detached approver signature against the configured trust store | absent trust store/OpenSSL/signature, unauthorized approver, signature mutation, wrong commit or artifact digest, dossier bytes mismatching supplied release artifact, symlinked artifact, missing rollback, synthetic fixture |
 | CLI | JSON machine output and stable exit | bad args and corrupted state fail closed |
+| RAG citation provenance | batch verification matches per-hit validity and reads each distinct source once | stale text/hash, bool line number, traversal path, symlink swap, unreadable source |
 
 Record test name, exact command, exit code and host environment. Mark unrun test BLOCKED, not PASS.

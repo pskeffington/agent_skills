@@ -74,6 +74,34 @@ class RagTests(unittest.TestCase):
             (root / "one.md").write_text("tampered\n", encoding="utf-8")
             self.assertFalse(verify_hit(root, hits[0]))
 
+    def test_batch_verification_reads_each_source_once(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            (root/"many.md").write_text("alpha\nalpha beta\nbeta alpha\n",encoding="utf-8")
+            (root/"other.md").write_text("alpha gamma\n",encoding="utf-8")
+            hits=search(build_index(root),"alpha",limit=4)
+            calls=[]
+            read=rag._read_confined_file
+            def counted(base,path,**kwargs):
+                calls.append(path)
+                return read(base,path,**kwargs)
+            with patch.object(rag,"_read_confined_file",side_effect=counted):
+                batch=rag.verify_hits(root,hits)
+            self.assertEqual([verify_hit(root,hit) for hit in hits],batch)
+            self.assertEqual(len(set(hit["path"] for hit in hits)),len(calls))
+            self.assertEqual(len(calls),len(set(calls)))
+            expected=[verify_hit(root,hit) for hit in hits]
+            benchmark=rag.verify_hits(root,hits)
+            self.assertEqual(expected,benchmark)
+
+    def test_batch_verification_rejects_invalid_and_stale_hits(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); (root/"doc.md").write_text("alpha beta\n",encoding="utf-8")
+            hit=search(build_index(root),"alpha")[0]
+            bad_line={**hit,"line":True}
+            bad_text={**hit,"text":"forged"}
+            self.assertEqual([True,False,False,False],rag.verify_hits(root,[hit,bad_line,bad_text,{"path":"../escape"}]))
+
     def test_symlink_escape_and_ignored_directories(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

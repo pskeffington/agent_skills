@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "inventory":
             value=inventory(args.repo); _json({"status":"PASS",**value}); return 0
         if args.command == "search":
-            from .rag import build_index, load_or_build_cache, search as rag_search, verify_hit
+            from .rag import build_index, load_or_build_cache, search as rag_search, verify_hits
             root=pathlib.Path(args.repo).resolve(strict=True)
             if not root.is_dir(): raise ValueError("repository root must be a directory")
             if args.cache:
@@ -62,7 +62,8 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 index=build_index(root); fingerprint=None; cache_hit=False
             hits=rag_search(index,args.query,limit=args.limit)
-            verified=[hit for hit in hits if verify_hit(root,hit)]
+            hit_validity=verify_hits(root,hits)
+            verified=[hit for hit,valid in zip(hits,hit_validity) if valid]
             _json({"status":"PASS","root":str(root),"query":args.query,"hits":verified,"unverified_hits":len(hits)-len(verified),"cache_fingerprint":fingerprint,"cache_hit":cache_hit})
             return 0
         if args.command == "run":

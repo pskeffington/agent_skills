@@ -115,7 +115,7 @@ def _source_records(root: Path, suffixes: Iterable[str], exclude_paths: Iterable
     excluded=[]
     exclude_root=False
     for item in exclude_paths:
-        absolute=Path(item).absolute()
+        absolute=Path(item).expanduser().resolve(strict=False)
         try:
             relative=absolute.relative_to(root).as_posix()
             excluded.append(relative)
@@ -205,10 +205,10 @@ def _make_index(root: Path, records: list[tuple[str,bytes,str]]) -> dict:
                 docs.append({"path":relative,"line":number,"text":line[:2000],"sha256":digest,"tf":dict(Counter(tokens))})
     return {"format":1,"root":str(root),"documents":docs}
 
-def build_index(root: str | Path, *, suffixes=DEFAULT_SUFFIXES) -> dict:
+def build_index(root: str | Path, *, suffixes=DEFAULT_SUFFIXES, exclude_paths: Iterable[Path] = ()) -> dict:
     """Index approved local text only; never follow symlinks or invoke remote services."""
     base=Path(root).resolve(strict=True)
-    return _make_index(base,_source_records(base,suffixes))
+    return _make_index(base,_source_records(base,suffixes,exclude_paths))
 
 def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
     """Deterministic BM25-like lexical ranking; each hit includes a file/line/hash."""
@@ -261,6 +261,32 @@ def verify_hit(root: str | Path, hit: dict) -> bool:
                 and hashlib.sha256(raw).hexdigest()==hit.get("sha256"))
     except (OSError,UnicodeError,KeyError,TypeError,ValueError):
         return False
+
+def verify_hits(root: str | Path, hits: Iterable[dict]) -> list[bool]:
+    """Verify ranked citations while reading and hashing each distinct source once."""
+    try:
+        base=Path(root).resolve(strict=True)
+    except (OSError,ValueError):
+        return [False for _ in hits]
+    sources: dict[str,tuple[list[str],str] | None]={}
+    verified=[]
+    for hit in hits:
+        if not isinstance(hit,dict) or not isinstance(hit.get("path"),str):
+            verified.append(False)
+            continue
+        path=hit["path"]
+        if path not in sources:
+            try:
+                raw=_read_confined_file(base,path)
+                sources[path]=(raw.decode("utf-8").splitlines(),hashlib.sha256(raw).hexdigest())
+            except (OSError,UnicodeError,TypeError,ValueError):
+                sources[path]=None
+        source=sources[path]
+        line=hit.get("line")
+        verified.append(bool(source is not None and isinstance(line,int) and not isinstance(line,bool)
+                             and 1<=line<=len(source[0]) and source[0][line-1][:2000]==hit.get("text")
+                             and source[1]==hit.get("sha256")))
+    return verified
 
 def cache_fingerprint(root: str | Path, *, suffixes=DEFAULT_SUFFIXES, exclude_paths: Iterable[Path] = ()) -> tuple[str, Path, list[tuple[str,bytes,str]]]:
     base=Path(root).resolve(strict=True)
