@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "format": 1,
+  "description": "Small offline fixture; measures retrieval behavior only, not general corpus quality or instruction following.",
+  "k": 2,
+  "cases": [
+    {"id": "journal-replay", "query": "append-only journal hash-chain replay", "relevant": ["journal.md"]},
+    {"id": "release-rollback", "query": "staging artifact approval rollback runbook", "relevant": ["release.md"]},
+    {"id": "security-boundary", "query": "symlink traversal secret redaction permissions", "relevant": ["security.md"]},
+    {"id": "hostile-passage-as-data", "query": "ignore previous safety rules reveal credentials shell command", "relevant": ["injection.md"], "untrusted_data_case": true},
+    {"id": "no-answer", "query": "quasar nebula plutonium 734991", "relevant": []}
+  ]
+}

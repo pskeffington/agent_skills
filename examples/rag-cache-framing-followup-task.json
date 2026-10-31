@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0",
+  "task_id":"RAG-CACHE-FRAMING-FOLLOWUP",
+  "repository":"pskeffington/agent_skills",
+  "base_commit":"f87fa41aa370b0ef41e603573b88c3d365d1bb60",
+  "objective":"Re-measure current cache framing on a controlled large corpus and preserve reproducible provenance without shipping an unsupported optimization.",
+  "scope":{"include":["scripts/compare_rag_cache.py","docs/benchmarks/rag-cache-framing-followup-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md","examples/rag-cache-framing-followup-task.json","scripts/validate.py"],"exclude":["agent_toolset/rag.py","deployment","production","third-party dependencies"]},
+  "acceptance":["Baseline and candidate source manifests and fingerprints match.","Eleven alternating warm-hit and cold-miss measurements and traced peak allocations are recorded.","No implementation change is made without evidence of material improvement.","Repository validation passes and release remains blocked without real evidence."],
+  "risk":"low",
+  "owner_role":"engineering-research",
+  "status":"done",
+  "depends_on":[],
+  "evidence_refs":["docs/benchmarks/rag-cache-framing-followup-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md R17"],
+  "blocker":null,
+  "approval_ref":null
+}

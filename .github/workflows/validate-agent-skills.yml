@@ -1,0 +1,29 @@
+name: Validate agent skills
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  structural:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch this repository without third-party Actions
+        shell: bash
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          FETCH_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "$REPO_URL"
+          git fetch --depth 1 origin "$FETCH_REF"
+          git checkout --detach FETCH_HEAD
+      - name: Check contracts and role catalog
+        run: python3 scripts/validate.py
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Read-only preflight
+        run: python3 scripts/codex_preflight.py --repo .

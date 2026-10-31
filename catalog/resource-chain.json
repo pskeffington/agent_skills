@@ -1,0 +1,182 @@
+{
+  "version": "1.0.0",
+  "external_resources": [
+    "user-request",
+    "human-release-approval"
+  ],
+  "resources": [
+    "user-request",
+    "intake-brief",
+    "repo-inventory",
+    "task-contract",
+    "design-record",
+    "change-set",
+    "build-evidence",
+    "test-evidence",
+    "security-evidence",
+    "review-evidence",
+    "documentation-evidence",
+    "release-decision",
+    "human-release-approval"
+  ],
+  "stages": [
+    {
+      "id": "intake",
+      "role": "orchestrator",
+      "depends_on": [],
+      "consumes": [
+        "user-request"
+      ],
+      "produces": [
+        "intake-brief"
+      ],
+      "gate": "Scope and repository recorded; no inferred authorization"
+    },
+    {
+      "id": "discover",
+      "role": "researcher",
+      "depends_on": [
+        "intake"
+      ],
+      "consumes": [
+        "intake-brief"
+      ],
+      "produces": [
+        "repo-inventory"
+      ],
+      "gate": "Baseline commit, file map, constraints and tool availability evidenced"
+    },
+    {
+      "id": "plan",
+      "role": "planner",
+      "depends_on": [
+        "discover"
+      ],
+      "consumes": [
+        "repo-inventory"
+      ],
+      "produces": [
+        "task-contract"
+      ],
+      "gate": "Acceptance criteria, dependencies, change boundaries and risk assigned"
+    },
+    {
+      "id": "design",
+      "role": "architect",
+      "depends_on": [
+        "plan"
+      ],
+      "consumes": [
+        "task-contract"
+      ],
+      "produces": [
+        "design-record"
+      ],
+      "gate": "Interfaces, tradeoffs and fallback defined; high-risk design reviewed"
+    },
+    {
+      "id": "implement",
+      "role": "implementer",
+      "depends_on": [
+        "design"
+      ],
+      "consumes": [
+        "design-record"
+      ],
+      "produces": [
+        "change-set"
+      ],
+      "gate": "Only allowed files changed; no unapproved network dependency"
+    },
+    {
+      "id": "integrate",
+      "role": "integrator",
+      "depends_on": [
+        "implement"
+      ],
+      "consumes": [
+        "change-set"
+      ],
+      "produces": [
+        "build-evidence"
+      ],
+      "gate": "Build and contract compatibility checked; failures recorded"
+    },
+    {
+      "id": "verify",
+      "role": "verifier",
+      "depends_on": [
+        "integrate"
+      ],
+      "consumes": [
+        "build-evidence"
+      ],
+      "produces": [
+        "test-evidence"
+      ],
+      "gate": "Repeatable tests or explicit blocked evidence"
+    },
+    {
+      "id": "security",
+      "role": "security-reviewer",
+      "depends_on": [
+        "integrate"
+      ],
+      "consumes": [
+        "build-evidence"
+      ],
+      "produces": [
+        "security-evidence"
+      ],
+      "gate": "No unresolved critical/high severity risk"
+    },
+    {
+      "id": "review",
+      "role": "code-reviewer",
+      "depends_on": [
+        "integrate"
+      ],
+      "consumes": [
+        "change-set"
+      ],
+      "produces": [
+        "review-evidence"
+      ],
+      "gate": "Independent review and no unresolved blocking findings"
+    },
+    {
+      "id": "document",
+      "role": "documenter",
+      "depends_on": [
+        "integrate"
+      ],
+      "consumes": [
+        "change-set"
+      ],
+      "produces": [
+        "documentation-evidence"
+      ],
+      "gate": "README, API and operator impact accounted for"
+    },
+    {
+      "id": "release",
+      "role": "release-controller",
+      "depends_on": [
+        "verify",
+        "security",
+        "review",
+        "document"
+      ],
+      "consumes": [
+        "test-evidence",
+        "security-evidence",
+        "review-evidence",
+        "documentation-evidence"
+      ],
+      "produces": [
+        "release-decision"
+      ],
+      "gate": "All required PASS, immutable artifact identity, owner approval before any production change"
+    }
+  ]
+}

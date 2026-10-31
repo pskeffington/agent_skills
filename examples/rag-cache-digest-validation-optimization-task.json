@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-CACHE-DIGEST-OPTIMIZATION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "bf8f52f32742b797d12945bde3d1945bfa76111f",
+  "objective": "Avoid repeated validation of identical per-file SHA-256 values in cached line records without weakening malformed-cache rejection.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "tests/test_rag_cache.py",
+      "scripts/compare_rag_cache.py",
+      "docs/benchmarks/rag-cache-digest-validation-optimization-2026-10-30.json",
+      "docs/reviews/rag-cache-digest-validation-optimization-review-2026-10-30.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/rag-cache-digest-validation-optimization-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "deployment",
+      "production environment",
+      "retrieval ranking changes",
+      "third-party dependencies"
+    ]
+  },
+  "acceptance": [
+    "Every distinct cached file digest is still validated as exactly 64 lowercase hexadecimal characters",
+    "Malformed cache rejection and stale-source invalidation regressions continue to pass",
+    "Paired benchmark proves baseline/candidate source manifests match and records raw timing provenance",
+    "Full repository checks pass and release remains fail-closed"
+  ],
+  "risk": "low",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": ["RAG-SOURCE-SCAN-OPTIMIZATION"],
+  "evidence_refs": [
+    "baseline: bf8f52f32742b797d12945bde3d1945bfa76111f",
+    "profile: repeated per-line digest validation accounted for 373,750 Python character checks on the measured corpus",
+    "benchmark: docs/benchmarks/rag-cache-digest-validation-optimization-2026-10-30.json; eleven uninstrumented paired repetitions; equal 117-file source manifests; median 36.966 ms baseline / 27.1414 ms candidate",
+    "command: python3 -m unittest tests.test_rag_cache -v (exit 0, 8 tests)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 83 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "review: docs/reviews/rag-cache-digest-validation-optimization-review-2026-10-30.md (PASS; updated benchmark method independently confirmed; no correctness/security findings; CI pending for benchmark update)"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

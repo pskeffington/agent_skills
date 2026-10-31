@@ -1,0 +1,252 @@
+{
+  "scope": "Rejected prototype comparison: transient token-length sidecar versus committed baseline; exact search results required; local untraced timings only; no cross-machine claim",
+  "baseline_revision": "HEAD",
+  "baseline_source_sha256": "748d70c2febfcee2caab1812b9609ace0e6bd332d81b1d10535c828f10b3f71f",
+  "candidate_source_sha256": "232bd487db6ef582133ff98485db8cff1949352347ea0d2778d49697c8f8ddb9",
+  "corpus_root": "/private/tmp/rag-scale-r17",
+  "corpus_fingerprint": "e59e23cf38397c1d03f7db6868b4f30fddfe0e8d4793ca7b3ca2527fdce500e9",
+  "source_files": 500,
+  "indexed_lines": 20000,
+  "limit": 8,
+  "queries": [
+    {
+      "query": "function_1",
+      "exact_results_equal": true,
+      "baseline": {
+        "samples_ms": [
+          2.9477,
+          2.8998,
+          2.9701,
+          2.9668,
+          2.895,
+          2.9417,
+          2.9764,
+          2.9067,
+          3.0175,
+          2.8956,
+          3.0147,
+          2.9918,
+          2.935,
+          2.9123,
+          3.0028,
+          3.0176,
+          3.0107,
+          3.011,
+          2.927,
+          3.0161,
+          2.9544
+        ],
+        "median_latency_ms": 2.9668
+      },
+      "candidate": {
+        "samples_ms": [
+          2.6394,
+          2.6318,
+          2.6222,
+          2.5463,
+          2.6433,
+          2.6105,
+          2.5948,
+          2.6356,
+          2.577,
+          2.6344,
+          2.6725,
+          2.5732,
+          2.6368,
+          2.6398,
+          2.6275,
+          2.5671,
+          2.6454,
+          2.5364,
+          2.6154,
+          2.6386,
+          2.633
+        ],
+        "median_latency_ms": 2.6318
+      }
+    },
+    {
+      "query": "value function",
+      "exact_results_equal": true,
+      "baseline": {
+        "samples_ms": [
+          20.0716,
+          17.3213,
+          17.1546,
+          17.1848,
+          19.9475,
+          21.3145,
+          17.2073,
+          17.2507,
+          17.2643,
+          20.6927,
+          17.2785,
+          17.1877,
+          17.2184,
+          17.0645,
+          19.8382,
+          19.5388,
+          17.0964,
+          18.042,
+          22.0485,
+          20.9633,
+          17.3422
+        ],
+        "median_latency_ms": 17.3213
+      },
+      "candidate": {
+        "samples_ms": [
+          17.0694,
+          20.9077,
+          20.3038,
+          16.9375,
+          16.9617,
+          17.145,
+          17.0242,
+          19.4134,
+          19.0402,
+          16.9648,
+          16.9847,
+          20.1627,
+          19.7241,
+          17.4797,
+          17.0307,
+          17.0677,
+          16.9869,
+          19.1285,
+          17.4913,
+          17.3027,
+          17.0214
+        ],
+        "median_latency_ms": 17.145
+      }
+    },
+    {
+      "query": "no_such_term",
+      "exact_results_equal": true,
+      "baseline": {
+        "samples_ms": [
+          2.8135,
+          2.8211,
+          2.7913,
+          2.8282,
+          2.8405,
+          2.8349,
+          2.7972,
+          2.7991,
+          2.7993,
+          2.8367,
+          2.8179,
+          2.7868,
+          2.798,
+          2.8117,
+          2.8106,
+          2.8113,
+          2.7948,
+          2.8073,
+          2.8235,
+          2.8272,
+          2.8329
+        ],
+        "median_latency_ms": 2.8117
+      },
+      "candidate": {
+        "samples_ms": [
+          2.4388,
+          2.4061,
+          2.4237,
+          2.4117,
+          2.374,
+          2.4458,
+          2.4033,
+          2.4099,
+          2.3913,
+          2.4194,
+          2.3991,
+          2.4376,
+          2.3947,
+          2.4045,
+          2.4124,
+          2.412,
+          2.3948,
+          2.4025,
+          2.3789,
+          2.4173,
+          2.4122
+        ],
+        "median_latency_ms": 2.4099
+      }
+    },
+    {
+      "query": "function_39 value",
+      "exact_results_equal": true,
+      "baseline": {
+        "samples_ms": [
+          17.8042,
+          17.7583,
+          20.1052,
+          17.7736,
+          17.677,
+          17.6524,
+          20.3951,
+          20.174,
+          17.7913,
+          17.6683,
+          20.9433,
+          20.4721,
+          17.749,
+          17.6013,
+          17.5365,
+          21.3389,
+          17.7349,
+          17.7929,
+          17.7115,
+          17.7867,
+          20.3227
+        ],
+        "median_latency_ms": 17.7867
+      },
+      "candidate": {
+        "samples_ms": [
+          20.0038,
+          17.5668,
+          17.4855,
+          21.2677,
+          20.3572,
+          17.428,
+          17.4784,
+          17.4505,
+          21.2699,
+          17.4542,
+          17.4719,
+          17.4641,
+          17.5287,
+          20.0916,
+          19.6188,
+          17.4265,
+          17.5613,
+          20.469,
+          20.0427,
+          17.9228,
+          17.3765
+        ],
+        "median_latency_ms": 17.5613
+      }
+    }
+  ],
+  "repetitions": 21,
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "source_commit": "09a3c69",
+    "corpus_generator": "scripts/create_rag_benchmark_corpus.py",
+    "corpus_parameters": {
+      "files": 500,
+      "lines_per_file": 40
+    }
+  },
+  "prototype_decision": {
+    "retained": false,
+    "reason": "Common-term query gains were about 1%; maintaining identity/mutation guards requires sidecar state and memory retention. Modest gains do not justify added runtime state. The no-answer and function_1 gains are useful evidence for a future indexed candidate-selection design."
+  }
+}

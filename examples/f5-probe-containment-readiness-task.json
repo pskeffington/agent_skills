@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F5-PROBE-FAIL-CLOSED",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "a77ec03f16fc82a6b0f4fe7744574976222f7fe9",
+  "objective": "Make the Codex runner capability probe report containment readiness accurately and avoid spawning the CLI when a required verifier is absent.",
+  "scope": {
+    "include": [
+      "agent_toolset/runners/codex_cli.py",
+      "tests/test_runners_assurance.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/TEST_MATRIX.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "scripts/validate.py",
+      "examples/f5-probe-containment-readiness-task.json",
+      "docs/reviews/f5-probe-containment-readiness-review-2026-10-30.md"
+    ],
+    "exclude": [
+      "production deployment",
+      "secrets and credential stores"
+    ]
+  },
+  "acceptance": [
+    "Missing containment verifier makes the probe BLOCKED before version/help subprocess calls.",
+    "A configured verifier is reported as configured but actual containment remains UNVERIFIED until a task-bound attestation is validated.",
+    "Runner execution and cancellation behavior remains covered by the focused tests.",
+    "Independent security review and all repository acceptance checks are recorded."
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "tests/test_runners_assurance.py",
+    "docs/reviews/f5-probe-containment-readiness-review-2026-10-30.md"
+  ],
+  "blocker": "Actual OS-level process containment and platform verifier integration remain unavailable; F5 runtime admission remains BLOCKED.",
+  "approval_ref": null
+}

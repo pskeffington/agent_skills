@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "scope": "Paired local warm-cache latency comparison; timings are uninstrumented; peak allocation is sampled separately with tracemalloc; no cross-machine claim. This report and its review were added after measurement and will appear in future corpus scans.",
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "baseline_commit": "bf8f52f32742b797d12945bde3d1945bfa76111f",
+    "baseline_source_sha256": "5eeed324efe81051462515fc3abad70c837179da15698ee544089bb262b9efba",
+    "candidate_source_sha256": "e1c01c224f845fd8018e7bb19a7d39a74b8fc099c32532e18d2028ad4920137f",
+    "corpus_root": "/Users/null/GitHub/agent_skills",
+    "corpus_fingerprint": "762f51490fe33f4dbfe3c24e91fddd7e5ca63443270e2db515f8d58fea2ffe9d",
+    "source_files": 117,
+    "source_manifest_equal": true,
+    "repetitions": 11,
+    "command": "python3 scripts/compare_rag_cache.py --baseline bf8f52f32742b797d12945bde3d1945bfa76111f --repetitions 11"
+  },
+  "results": {
+    "baseline_warm_cache_load": {
+      "samples_ms": [
+        38.0376,
+        38.2559,
+        37.3153,
+        36.8081,
+        36.7079,
+        36.751,
+        36.8303,
+        36.966,
+        36.878,
+        37.1985,
+        37.5175
+      ],
+      "median_latency_ms": 36.966,
+      "traced_python_peak_bytes": 13023662
+    },
+    "candidate_warm_cache_load": {
+      "samples_ms": [
+        26.9531,
+        27.2369,
+        27.2205,
+        27.0907,
+        27.1212,
+        27.2668,
+        27.1414,
+        27.1332,
+        27.097,
+        27.1565,
+        27.2106
+      ],
+      "median_latency_ms": 27.1414,
+      "traced_python_peak_bytes": 13023667
+    },
+    "median_latency_change_percent": -26.58,
+    "traced_peak_memory_change_bytes": 5
+  },
+  "interpretation": "Checking each distinct SHA-256 string once reduced uninstrumented paired median warm-cache validation latency by 26.58% on this local corpus. Peak traced Python allocation differed by 5 bytes. Source manifests matched. This is local observational evidence only."
+}

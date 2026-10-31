@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-SEARCH-CANDIDATE-OPTIMIZATION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "d851d408e5437a176ca1d1969ad31fd84ded4249",
+  "objective": "Reduce lexical retrieval query work by scoring only documents that match at least one query term while preserving exact ranking output.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "tests/test_rag.py",
+      "scripts/compare_rag_search.py",
+      "docs/benchmarks/rag-search-candidate-optimization-2026-10-30.json",
+      "docs/reviews/rag-search-candidate-optimization-review-2026-10-30.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/rag-search-candidate-optimization-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "deployment",
+      "production environment",
+      "ranking formula changes",
+      "third-party dependencies"
+    ]
+  },
+  "acceptance": [
+    "Candidate search results exactly equal baseline paths, lines, scores, and ordering for paired benchmark queries",
+    "Regression tests for ranking, provenance, empty input, and limits pass",
+    "Alternating uninstrumented benchmark records source and corpus provenance",
+    "Full repository validation passes and release gates remain fail-closed"
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": ["RAG-CACHE-DIGEST-OPTIMIZATION"],
+  "evidence_refs": [
+    "baseline: d851d408e5437a176ca1d1969ad31fd84ded4249",
+    "profile: cProfile current 5,750-line repository corpus; search spent 8 ms, with 29,400 dictionary gets across document-frequency and scoring passes",
+    "benchmark: docs/benchmarks/rag-search-candidate-optimization-2026-10-30.json; 21 alternating uninstrumented samples per query; exact output equality across 6,017 indexed lines",
+    "command: python3 -m unittest tests.test_rag tests.test_rag_cache -v (exit 0, 14 tests)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 83 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "review: docs/reviews/rag-search-candidate-optimization-review-2026-10-30.md (PASS after summation-order and zero-frequency corrections; hash-seed sweep 0..100)",
+    "CI: GitHub Actions run 41155700805 succeeded for commit a3feb6d882d8bc7a51891fef57b547000d44eddc"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

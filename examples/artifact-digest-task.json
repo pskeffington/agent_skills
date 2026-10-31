@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F8-ARTIFACT-DIGEST-20261030",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "97d0d1163ccf6505e9065d41dc9b5fee7b575ba7",
+  "objective": "Verify the actual release candidate artifact bytes against the immutable SHA256 bound by the release dossier before transfer or staging.",
+  "scope": {
+    "include": [
+      "agent_toolset/assurance/artifact.py",
+      "agent_toolset/cli.py",
+      "tests/test_cli.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/RELEASE_RUNBOOK.md",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "deploying or transferring artifacts",
+      "merging to main",
+      "secret access"
+    ]
+  },
+  "acceptance": [
+    "Hash regular files incrementally through a no-follow descriptor",
+    "Block symlinks, unsupported platforms, unreadable files, and changes detected during hashing",
+    "PASS only when actual SHA256 matches the expected lowercase digest; mismatches return FAIL",
+    "Document the immutability requirement between verification and later transfer/deployment",
+    "Full repository acceptance and independent review recorded"
+  ],
+  "risk": "medium",
+  "owner_role": "build-integration",
+  "status": "done",
+  "depends_on": [
+    "F8-APPROVAL-VERIFY-20261030"
+  ],
+  "evidence_refs": [
+    "test-run:unittest-71-pass-at-ff0",
+    "validator:exit-0",
+    "preflight:exit-0",
+    "release-example:exit-2-blocked",
+    "artifact-check:stale-expected-digest-fail-then-corrected-pass",
+    "artifact-check:cbab15f6c626ab460b42c6fc40ee0a4e95b6712762e8c03494051530c06ae844-pass",
+    "zipapp:3-reproducible-builds",
+    "review:independent-code-review-pass",
+    "review:security-assurance-pass",
+    "commit:ff0b9cd766b5451929a9bdb56cd4ca8651533618",
+    "ci:41124333344-success"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

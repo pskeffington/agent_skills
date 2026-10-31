@@ -1,0 +1,95 @@
+{
+  "scope": "paired local warm-cache validation comparison on deterministic synthetic corpus; observational; no cross-machine claim",
+  "baseline_revision": "9d3d48774760655da30c02c73ad624a8228745f4",
+  "baseline_source_sha256": "830ecaae68021bdffd0ef15a3751098e6159d17b840dacf239a9562371e3f575",
+  "candidate_source_sha256": "8dca3ddf7acc38a13cdbd9e74bb611d55ed31ae49677395608b5f79fc81dfc34",
+  "corpus": {
+    "root": "/private/tmp/rag-scale-corpus-r12",
+    "generator": "500 Python files across 25 directories; 40 deterministic function lines per file (20,000 indexed lines)",
+    "fingerprint": "baa23774bc669ea0b922eba6e48d8464e104cb8b83109a6619aa996659b626e6",
+    "source_files": 500,
+    "source_manifest_equal": true
+  },
+  "repetitions": 11,
+  "results": {
+    "baseline": {
+      "samples_ms": [
+        62.6048,
+        62.7533,
+        62.1482,
+        62.5335,
+        63.0726,
+        62.5441,
+        63.1687,
+        62.7754,
+        62.3045,
+        63.0303,
+        63.6042
+      ],
+      "median_latency_ms": 62.7533,
+      "traced_python_peak_bytes": 22577431
+    },
+    "candidate": {
+      "samples_ms": [
+        44.8751,
+        45.101,
+        45.3259,
+        45.3479,
+        44.4813,
+        45.3897,
+        45.5843,
+        46.676,
+        47.5675,
+        45.67,
+        46.2787
+      ],
+      "median_latency_ms": 45.3897,
+      "traced_python_peak_bytes": 22591399
+    }
+  },
+  "median_latency_change_percent": -27.67,
+  "interpretation": "Binary cache-entry framing hashes the exact serialized index payload and avoids parsing then re-serializing a large envelope for checksum validation. On the deterministic 20,000-line corpus, median warm-cache load fell 27.67%; peak traced allocation increased by 13,968 bytes. Cache freshness still hashes every source file, structural index validation still runs, and the cache remains local observational evidence only.",
+  "repository_smoke_comparison": {
+    "root": "/Users/null/GitHub/agent_skills",
+    "corpus_fingerprint": "9f77d3a771caeeaaf57743993ea140fd6960b50b97bce40e5b17185ba19fbdc8",
+    "source_files": 127,
+    "source_manifest_equal": true,
+    "repetitions": 11,
+    "baseline": {
+      "samples_ms": [
+        30.2975,
+        29.7957,
+        30.4683,
+        28.776,
+        29.2174,
+        28.3665,
+        29.1766,
+        28.4568,
+        28.576,
+        28.2791,
+        28.8062
+      ],
+      "median_latency_ms": 28.8062,
+      "traced_python_peak_bytes": 14558234
+    },
+    "candidate": {
+      "samples_ms": [
+        20.56,
+        20.1749,
+        21.5053,
+        20.1621,
+        19.953,
+        19.6005,
+        19.9275,
+        19.8939,
+        20.2341,
+        19.9052,
+        19.8964
+      ],
+      "median_latency_ms": 19.953,
+      "traced_python_peak_bytes": 11018573
+    },
+    "median_latency_change_percent": -30.73,
+    "interpretation": "The current repository corpus also showed a lower warm-cache median and lower traced peak allocation. Local, observational only."
+  }
+}

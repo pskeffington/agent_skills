@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RELEASE-DOSSIER-SIGNATURE-BINDING",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "d27ab2906c4b71d4c58204ffeefbdf1802706971",
+  "objective": "Bind detached release approval to the complete dossier contents, including gate dispositions, target environment, rollback reference and provenance, so dossier mutation invalidates approval.",
+  "scope": {
+    "include": [
+      "agent_toolset/assurance/approval.py",
+      "agent_toolset/assurance/release.py",
+      "agent_toolset/cli.py",
+      "schemas/release-dossier.schema.json",
+      "tests/test_release_approval.py",
+      "tests/test_cli.py",
+      "docs/RELEASE_GATES.md",
+      "docs/RELEASE_RUNBOOK.md",
+      "docs/SECURITY.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/release-dossier-binding-task.json",
+      "scripts/validate.py",
+      "tests/test_codex.py"
+    ],
+    "exclude": [
+      "deployment execution",
+      "production publication",
+      "trust-store administration",
+      "external credentials"
+    ]
+  },
+  "acceptance": [
+    "Approval signing bytes include a SHA-256 binding over canonical dossier content with only the detached signature and its own binding field excluded",
+    "Evaluator recomputes the binding and rejects changed gate evidence, target, rollback and provenance",
+    "Approval-payload CLI calculates signing bytes from the dossier and rejects duplicate JSON keys",
+    "Release schema and operator instructions document the new signed binding",
+    "Full repository acceptance passes; synthetic release remains BLOCKED"
+  ],
+  "risk": "high",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [
+    "F8 release artifact binding"
+  ],
+  "evidence_refs": [
+    "finding: approval signature currently covers approver, authority, invocation, decision, commit and artifact but not release gates, target environment, rollback reference, or check provenance; evaluator reads these mutable dossier fields independently",
+    "independent security review: PASS; docs/reviews/release-dossier-signature-binding-review-2026-10-30.md",
+    "command: python3 -m unittest tests.test_release_approval tests.test_codex tests.test_cli -q (exit 0, 23 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 -m unittest discover -s tests -q (exit 0, 88 tests)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0; worktree dirty during candidate check)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "CI: GitHub Actions structural check run 41157145868 succeeded for implementation commit a7d5bb9214130532001f04106f0b31879f753673",
+    "candidate artifact: three reproducible zipapp builds SHA256 1becc8dc4e660bf43ffd1288ff8dc963edc0ccbd841d6ae4938ae6621cbc8e91; doctor/matching digest PASS; stale digest FAIL exit 1"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

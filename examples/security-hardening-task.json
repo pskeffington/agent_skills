@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F3-F6-SECURITY-20261030",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "3de8560005c75d3bdc75b3c3a9bf4f836cadab6f",
+  "objective": "Close independent review findings in scheduler, journal, repository retrieval, CI evidence classification, bounded command output, and release approval admission.",
+  "scope": {
+    "include": [
+      "agent_toolset/journal.py",
+      "agent_toolset/scheduler.py",
+      "agent_toolset/rag.py",
+      "agent_toolset/assurance/ci.py",
+      "agent_toolset/assurance/release.py",
+      "agent_toolset/test_executor.py",
+      "schemas/release-dossier.schema.json",
+      "tests/test_scheduler.py",
+      "tests/test_rag.py",
+      "tests/test_rag_cache.py",
+      "tests/test_assurance_ingestion.py",
+      "tests/test_toolbox.py",
+      "tests/test_codex.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/RELEASE_RUNBOOK.md"
+    ],
+    "exclude": [
+      "merge to main",
+      "staging or production deployment",
+      "credential or secret access"
+    ]
+  },
+  "acceptance": [
+    "Cross-process journal transactions serialize scheduler state changes",
+    "Overlapping writer scopes cannot be leased concurrently; expired leases require verified worker inactivity",
+    "RAG source and cache access reject symlink races and exclude common secret paths",
+    "CI PASS requires nonempty complete jobs plus configured required checks",
+    "Test output is bounded while captured and timed-out POSIX process groups are killed",
+    "Release admission requires explicit approval fields and a configured verifier; absent verifier is BLOCKED",
+    "Full repository acceptance checks and independent follow-up review recorded"
+  ],
+  "risk": "high",
+  "owner_role": "build-integration",
+  "status": "done",
+  "depends_on": [
+    "F2",
+    "F3",
+    "F4",
+    "F6",
+    "F8"
+  ],
+  "evidence_refs": [
+    "git:3de8560005c75d3bdc75b3c3a9bf4f836cadab6f",
+    "validator:exit-0",
+    "preflight:exit-0",
+    "release-example:exit-2-blocked",
+    "review:independent-code-review-follow-up-pass",
+    "review:security-assurance-follow-up-pass",
+    "commit:6ec0e4e1a978d7b105e31fe49821d0f914b8043a",
+    "test-run:unittest-62-pass"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

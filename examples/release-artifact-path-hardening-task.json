@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RELEASE-ARTIFACT-PATH-HARDEN",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "f2af742ed69bb92cba67dbd2ba3ff741c7f2a127",
+  "objective": "Ensure malformed artifact path inputs return a fail-closed BLOCKED result through direct verification and release evaluation APIs.",
+  "scope": {
+    "include": [
+      "agent_toolset/assurance/artifact.py",
+      "tests/test_codex.py",
+      "docs/TEST_MATRIX.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "scripts/validate.py",
+      "examples/release-artifact-path-hardening-task.json",
+      "docs/reviews/release-artifact-path-hardening-review-2026-10-30.md"
+    ],
+    "exclude": [
+      "production deployment",
+      "secrets and credential stores"
+    ]
+  },
+  "acceptance": [
+    "Invalid types and embedded-NUL artifact paths return BLOCKED without uncaught exceptions.",
+    "Valid artifact digest verification and existing symlink/traversal protections remain intact.",
+    "Release evaluation converts invalid artifact paths into BLOCKED artifact integrity evidence.",
+    "Independent security review and all repository acceptance checks are recorded."
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "tests/test_codex.py",
+    "docs/reviews/release-artifact-path-hardening-review-2026-10-30.md"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

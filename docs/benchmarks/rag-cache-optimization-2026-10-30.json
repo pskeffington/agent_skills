@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "scope": "Paired local warm-cache validation comparison; observational; no cross-machine claim.",
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "baseline_commit": "7aa3b3b5b843e6ede3405279500f47f6958719e4",
+    "baseline_source_sha256": "0d83a385afb9d00ed039052eb851034b0e81a64851b966c1dcd83fd389819a2f",
+    "candidate_source_sha256": "c4c201d34541f96bd708f9c85a866cbb3cfd3e29788ae10f1289832b1a57ff29",
+    "corpus_root": "/Users/null/GitHub/agent_skills",
+    "corpus_fingerprint": "8ba72fe9534951dfca9a2797fc8850e565fa49073c5e2eccf8c2ff847af73be1",
+    "indexed_files": 109,
+    "repetitions": 7,
+    "command": "python3 scripts/compare_rag_cache.py --baseline 7aa3b3b5b843e6ede3405279500f47f6958719e4 --repetitions 7"
+  },
+  "results": {
+    "baseline_warm_cache_load": {
+      "samples_ms": [
+        266.5409,
+        268.6799,
+        270.437,
+        267.5965,
+        268.0288,
+        273.3752,
+        271.4317
+      ],
+      "median_latency_ms": 268.6799,
+      "median_python_peak_bytes": 12185429
+    },
+    "candidate_warm_cache_load": {
+      "samples_ms": [
+        230.403,
+        315.5529,
+        236.4983,
+        237.2945,
+        235.5789,
+        236.8436,
+        233.9716
+      ],
+      "median_latency_ms": 236.4983,
+      "median_python_peak_bytes": 12185434
+    },
+    "median_latency_change_percent": -11.98,
+    "median_peak_memory_change_bytes": 5
+  },
+  "interpretation": "Candidate median warm-cache validation was 11.98% lower on this paired local run; peak traced Python memory was effectively unchanged. This does not establish cross-machine improvement, and cache hits still hash source files and parse/validate the persisted index."
+}

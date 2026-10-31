@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-CACHE-VALIDATOR-OPTIMIZATION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "81aaf5daca24402703761f670973f52b3c50002f",
+  "objective": "Reduce repeated validated cache-index schema overhead while retaining fail-closed checks for malformed cached data.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "tests/test_rag_cache.py",
+      "scripts/compare_rag_cache.py",
+      "docs/benchmarks/rag-cache-validator-optimization-2026-10-30.json",
+      "docs/reviews/rag-cache-validator-optimization-review-2026-10-30.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/rag-cache-validator-optimization-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "cache freshness semantics",
+      "retrieval ranking changes",
+      "third-party dependencies",
+      "deployment"
+    ]
+  },
+  "acceptance": [
+    "Malformed paths, hashes, document structures, token counts, symlinks and stale sources remain rejected or invalidated",
+    "Paired benchmark compares exact path/SHA-256 manifests with uninstrumented latency and separate memory sampling",
+    "Full repository checks pass and synthetic release remains BLOCKED"
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "review",
+  "depends_on": [
+    "RAG-CACHE-DIGEST-OPTIMIZATION"
+  ],
+  "evidence_refs": [
+    "baseline: 81aaf5daca24402703761f670973f52b3c50002f",
+    "profile: cProfile warm cache validation spent 32 ms in full structural validation; path validation repeated on 6,262 line records",
+    "benchmark: docs/benchmarks/rag-cache-validator-optimization-2026-10-30.json; 21 alternating uninstrumented repetitions; equal 123-file source manifests; median 31.6549 ms baseline / 28.4187 ms candidate (10.22% lower); traced peak differs by 805 bytes",
+    "candidate source SHA256: see benchmark report",
+    "command: python3 -m unittest tests.test_rag_cache -v (exit 0, 9 tests)",
+    "limitation: warm cache remains slower than cold index build on this small corpus",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 86 tests)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "independent review: PASS; docs/reviews/rag-cache-validator-optimization-review-2026-10-30.md",
+    "limitation: warm cache remains slower than cold index build on this small corpus"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}
