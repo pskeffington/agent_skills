@@ -9,7 +9,7 @@ This is local build evidence for a reproducible executable candidate. It is not 
 - `doctor`: PASS; Codex execution is disabled by default
 - Matching artifact digest check: PASS; stale digest rejection not repeated during this refresh
 - Synthetic release dossier: not rerun during this refresh; prior matching-digest candidate remained BLOCKED for absent release evidence
-- CI: GitHub Actions run `41156229024` was in progress when recorded
+- CI: GitHub Actions run `41156229024` succeeded for the source commit
 - No staging, deployment, or production action was performed.
 
 The artifact is kept in ignored `dist/` output and is not committed. The zipapp includes only `agent_toolset` Python sources and uses the standard library; release signature verification additionally requires system OpenSSL. Codex execution remains disabled by default and blocked without externally verified process containment. Rebuild after any change to `agent_toolset/` and record the new source commit and digest before using it as a candidate.
