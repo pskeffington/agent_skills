@@ -26,13 +26,20 @@ class CLITests(unittest.TestCase):
         ev=self.run_cli("verify","examples/feature-evidence.json","--commit","0"*40); self.assertEqual(2,ev.returncode)
         with tempfile.TemporaryDirectory() as tmp:
             dossier=pathlib.Path(tmp)/"bad.json"; dossier.write_text("{}")
-            release=self.run_cli("release-check",str(dossier)); self.assertEqual(2,release.returncode)
+            artifact=(pathlib.Path(tmp)/"candidate.pyz").resolve(); artifact.write_bytes(b"candidate")
+            release=self.run_cli("release-check",str(dossier),"--artifact",str(artifact)); self.assertEqual(2,release.returncode)
+            dossier.write_text("null",encoding="utf-8")
+            non_object=self.run_cli("release-check",str(dossier),"--artifact",str(artifact))
+            self.assertEqual(2,non_object.returncode,non_object.stdout)
+            self.assertEqual("BLOCKED",json.loads(non_object.stdout)["status"])
+            dossier.write_text("{}",encoding="utf-8")
             dossier.write_text('{"approval":null,"approval":null}',encoding="utf-8")
-            duplicate=self.run_cli("release-check",str(dossier)); self.assertEqual(2,duplicate.returncode)
+            duplicate=self.run_cli("release-check",str(dossier),"--artifact",str(artifact)); self.assertEqual(2,duplicate.returncode)
             stale=json.loads((ROOT/"examples/release-dossier.json").read_text())
             stale["staging"]={"evidence_ref":"stage:stale","subject_commit":"a"*40,"artifact_sha256":"0"*64,"invocation_id":"staging-run"}
             dossier.write_text(json.dumps(stale))
-            failed=self.run_cli("release-check",str(dossier)); self.assertEqual(1,failed.returncode); self.assertEqual("FAIL",json.loads(failed.stdout)["status"])
+            failed=self.run_cli("release-check",str(dossier),"--artifact",str(artifact)); self.assertEqual(1,failed.returncode); self.assertEqual("FAIL",json.loads(failed.stdout)["status"])
+            self.assertEqual("FAIL",json.loads(failed.stdout)["artifact_integrity"]["status"])
     def test_approval_payload_command_emits_exact_canonical_bytes(self):
         from agent_toolset.assurance.approval import canonical_approval_payload
         approval={"evidence_ref":"approval:42","subject_commit":"a"*40,"artifact_sha256":"b"*64,
@@ -59,6 +66,23 @@ class CLITests(unittest.TestCase):
             alias=root/"parent-link"; alias.symlink_to(root,target_is_directory=True)
             parent_blocked=self.run_cli("artifact-check",str(alias/"candidate.pyz"),"--sha256",digest)
             self.assertEqual(2,parent_blocked.returncode)
+
+    def test_release_check_binds_dossier_digest_to_artifact_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=pathlib.Path(tmp).resolve(); artifact=root/"candidate.pyz"; artifact.write_bytes(b"signed candidate bytes")
+            digest=hashlib.sha256(artifact.read_bytes()).hexdigest()
+            dossier=root/"release.json"; dossier.write_text(json.dumps({"commit":"a"*40,"artifact_sha256":digest}),encoding="utf-8")
+            matched=self.run_cli("release-check",str(dossier),"--artifact",str(artifact))
+            self.assertEqual(2,matched.returncode,matched.stdout)
+            self.assertEqual("PASS",json.loads(matched.stdout)["artifact_integrity"]["status"])
+            dossier.write_text(json.dumps({"commit":"a"*40,"artifact_sha256":"0"*64}),encoding="utf-8")
+            mismatch=self.run_cli("release-check",str(dossier),"--artifact",str(artifact))
+            self.assertEqual(1,mismatch.returncode,mismatch.stdout)
+            self.assertEqual("FAIL",json.loads(mismatch.stdout)["artifact_integrity"]["status"])
+            alias=root/"artifact-alias.pyz"; alias.symlink_to(artifact)
+            blocked=self.run_cli("release-check",str(dossier),"--artifact",str(alias))
+            self.assertEqual(2,blocked.returncode,blocked.stdout)
+            self.assertEqual("BLOCKED",json.loads(blocked.stdout)["artifact_integrity"]["status"])
     def test_rag_search_with_provenance_no_answer_and_invalid_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=pathlib.Path(tmp); (root/"doc.md").write_text("durable release gate evidence\n",encoding="utf-8")

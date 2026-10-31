@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import json
 import os
 import pathlib
@@ -80,7 +81,10 @@ class ReleaseApprovalTests(unittest.TestCase):
         self.assertIs(verifier(altered, "a" * 40, "b" * 64), False)
 
     def test_signed_approval_allows_ready_classification_only_with_trusted_key(self):
-        commit, artifact = "a" * 40, "b" * 64
+        commit = "a" * 40
+        artifact_path = (self.root / "signed-candidate.pyz").resolve()
+        artifact_path.write_bytes(b"release-approved artifact bytes")
+        artifact = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
         attestation = lambda ref, run: {
             "evidence_ref": ref, "subject_commit": commit,
             "artifact_sha256": artifact, "invocation_id": run,
@@ -99,12 +103,15 @@ class ReleaseApprovalTests(unittest.TestCase):
         }
         verifier = make_openssl_approval_verifier(self.approvers, openssl=OPENSSL)
         self.assertEqual("BLOCKED", evaluate(dossier)["status"])
-        self.assertEqual("PASS", evaluate(dossier, approval_verifier=verifier)["status"])
+        self.assertEqual("PASS", evaluate(dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
         dossier["artifact_sha256"] = "c" * 64
-        self.assertEqual("FAIL", evaluate(dossier, approval_verifier=verifier)["status"])
+        self.assertEqual("FAIL", evaluate(dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
 
     def test_release_cli_verifies_trust_store_and_detached_signature(self):
-        commit, artifact = "a" * 40, "b" * 64
+        commit = "a" * 40
+        artifact_path = (self.root / "candidate.pyz").resolve()
+        artifact_path.write_bytes(b"exact candidate artifact bytes")
+        artifact = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
         attestation = lambda ref, run: {
             "evidence_ref": ref, "subject_commit": commit,
             "artifact_sha256": artifact, "invocation_id": run,
@@ -128,11 +135,23 @@ class ReleaseApprovalTests(unittest.TestCase):
         trust_path.chmod(0o600)
         env = {"PATH": str(pathlib.Path(OPENSSL).parent) + os.pathsep + "/usr/bin:/bin", "PYTHONDONTWRITEBYTECODE": "1"}
         result = subprocess.run(
-            [sys.executable, "-m", "agent_toolset", "release-check", str(dossier_path), "--approval-trust-store", str(trust_path)],
+            [sys.executable, "-m", "agent_toolset", "release-check", str(dossier_path), "--artifact", str(artifact_path), "--approval-trust-store", str(trust_path)],
             cwd=ROOT, env=env, capture_output=True, text=True,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual("PASS", json.loads(result.stdout)["status"])
+        compatibility = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "release_gate.py"), "--evidence", str(dossier_path), "--approval-trust-store", str(trust_path)],
+            cwd=ROOT, env=env, capture_output=True, text=True,
+        )
+        self.assertEqual(2, compatibility.returncode, compatibility.stdout)
+        self.assertEqual("BLOCKED", json.loads(compatibility.stdout)["status"])
+        compatibility = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "release_gate.py"), "--evidence", str(dossier_path), "--artifact", str(artifact_path), "--approval-trust-store", str(trust_path)],
+            cwd=ROOT, env=env, capture_output=True, text=True,
+        )
+        self.assertEqual(0, compatibility.returncode, compatibility.stdout + compatibility.stderr)
+        self.assertEqual("PASS", json.loads(compatibility.stdout)["status"])
 
     def test_trust_store_loading_rejects_writable_and_symlinked_store(self):
         store = self.root / "trust.json"

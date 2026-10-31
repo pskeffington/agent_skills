@@ -33,9 +33,9 @@ The adapter probes the installed CLI version and required `codex exec` flags bef
 - `verify evidence.json --commit SHA`: validate evidence, fail stale source commits and non-PASS checks.
 - `evidence PATH`: parse and print a validated evidence contract.
 - `replay --state PATH`: verify the event hash chain and print events.
-- `release-check dossier.json [--approval-trust-store PATH]`: evaluate G0-G6 and required review, staging, rollback, provenance, and approval evidence. This is read-only and does not deploy. Without a trusted approval key store, an otherwise complete dossier remains BLOCKED.
+- `release-check dossier.json --artifact PATH [--approval-trust-store PATH]`: hash the supplied regular-file artifact against the dossier digest and evaluate G0-G6 plus review, staging, rollback, provenance, and approval evidence in one read-only command. A mismatched digest is FAIL; an unsafe or unavailable artifact is BLOCKED. It does not deploy. Without a trusted approval key store, an otherwise complete dossier remains BLOCKED.
 - `approval-payload dossier.json`: emit the canonical approval fields as raw UTF-8 bytes for offline detached signing. It never reads a private key or changes the dossier.
-- `artifact-check PATH --sha256 DIGEST`: stream and verify the actual regular-file bytes against the dossier artifact SHA256; symlinks and mid-read changes are BLOCKED.
+- `artifact-check PATH --sha256 DIGEST`: stream and verify regular-file bytes against an expected SHA256; symlinks and mid-read changes are BLOCKED.
 - `export --state PATH`: export the verified journal event stream as JSON.
 
 Exit codes: `0` successful command/PASS, `1` verified FAIL (including stale or contradictory release attestations), `2` BLOCKED or malformed/missing prerequisites. Output is JSON for automation. Journal events are append-only and hash chained; preserve the journal file as evidence. A trailing incomplete record is ignored during replay and truncated before a subsequent append. Journal appends serialize through an advisory file lock before deriving sequence numbers. Keep journal files in a trusted local directory; hash chaining detects edits but is not a digital signature or protection against an attacker who can rewrite the entire journal.

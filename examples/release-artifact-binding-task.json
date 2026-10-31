@@ -45,13 +45,13 @@
   "evidence_refs": [
     "base: 7aa3b3b5b843e6ede3405279500f47f6958719e4",
     "command: python3 -m unittest tests.test_cli tests.test_release_approval tests.test_codex -v (exit 0, 23 tests)",
-    "command: python3 -m unittest discover -s tests -v (exit 0, 80 tests)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 83 tests)",
     "command: python3 scripts/validate.py (exit 0)",
     "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
     "review: independent code review PASS on current tree",
     "review: security assurance PASS; deployment must use the same immutable bytes checked"
   ],
-  "blocker": "Rebuild and verify the standalone candidate artifact from the implementation commit; staging and release authorization remain outside this task.",
+  "blocker": "Rebuild and verify the standalone candidate artifact from the final implementation commit; staging and release authorization remain outside this task.",
   "approval_ref": null
 }

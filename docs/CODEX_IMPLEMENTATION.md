@@ -38,7 +38,7 @@ python3 scripts/codex_preflight.py --repo /path/to/target
 To evaluate a real evidence packet with no network or deployment side effects:
 
 ```sh
-python3 scripts/release_gate.py --evidence /path/to/release-evidence.json
+python3 scripts/release_gate.py --evidence /path/to/release-evidence.json --artifact /path/to/candidate.pyz
 ```
 
 ## Suggested handoff prompt

@@ -1,4 +1,5 @@
 import pathlib
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -13,8 +14,8 @@ class CodexTests(unittest.TestCase):
         self.assertFalse(result["release_ready"])
         self.assertIn("G6 is not PASS",result["issues"])
 
-    def packet(self):
-        commit="a"*40; digest="b"*64
+    def packet(self,digest="b"*64):
+        commit="a"*40
         attestation=lambda ref, invocation: {"evidence_ref":ref,"subject_commit":commit,"artifact_sha256":digest,"invocation_id":invocation}
         return {"commit":commit,"artifact_sha256":digest,"target_environment":"staging",
           "gates":{g:{"status":"PASS","evidence_ref":f"evidence:{g}","reason":"required checks passed"} for g in REQUIRED},
@@ -27,9 +28,13 @@ class CodexTests(unittest.TestCase):
 
     def test_structured_exact_subject_dossier_classifies_ready_only(self):
         self.assertFalse(evaluate(self.packet())["release_ready"])
-        self.assertIn("approval authenticity verifier unavailable",evaluate(self.packet())["issues"])
+        self.assertIn("candidate artifact path is required",evaluate(self.packet())["issues"])
         verifier=lambda approval, commit, digest: approval["decision"] == "APPROVE" and approval["subject_commit"] == commit and approval["artifact_sha256"] == digest
-        self.assertTrue(evaluate(self.packet(),approval_verifier=verifier)["release_ready"])
+        with tempfile.TemporaryDirectory() as tmp:
+            artifact=(pathlib.Path(tmp)/"candidate.pyz").resolve(); artifact.write_bytes(b"candidate")
+            digest=hashlib.sha256(artifact.read_bytes()).hexdigest()
+            result=evaluate(self.packet(digest),approval_verifier=verifier,artifact_path=artifact)
+            self.assertTrue(result["release_ready"],result)
 
     def test_approval_requires_explicit_decision_and_verification(self):
         packet=self.packet(); packet["approval"]["decision"]="REJECT"

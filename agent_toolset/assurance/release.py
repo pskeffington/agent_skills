@@ -5,6 +5,7 @@ import json
 import pathlib
 import re
 import sys
+from .artifact import verify_artifact
 
 REQUIRED = ("G0", "G1", "G2", "G3", "G4", "G5", "G6")
 SHA = re.compile(r"^[0-9a-f]{40}$")
@@ -14,7 +15,7 @@ ATTESTATIONS = ("implementation", "independent_review", "security_review", "stag
 def _pointer(value):
     return isinstance(value, str) and len(value.strip()) >= 3
 
-def evaluate(doc, approval_verifier=None):
+def _evaluate_dossier(doc, approval_verifier=None):
     if not isinstance(doc, dict):
         return {"release_ready":False,"status":"BLOCKED","issues":["dossier must be an object"],"notice":"Read-only evaluation. No deployment performed."}
     issues=[]
@@ -97,6 +98,27 @@ def evaluate(doc, approval_verifier=None):
     release_ready=not issues
     status="PASS" if release_ready else ("FAIL" if contradictions else "BLOCKED")
     return {"release_ready":release_ready,"status":status,"issues":issues,"notice":"Read-only evaluation. No deployment performed."}
+
+def evaluate(doc, approval_verifier=None, *, artifact_path=None):
+    """Return release readiness only after verifying the candidate artifact bytes."""
+    result=_evaluate_dossier(doc,approval_verifier=approval_verifier)
+    if not artifact_path:
+        result["release_ready"]=False
+        result["status"]="FAIL" if result["status"]=="FAIL" else "BLOCKED"
+        result["issues"].append("candidate artifact path is required")
+        result["artifact_integrity"]={"status":"BLOCKED","issues":["candidate artifact path is required"]}
+        return result
+    expected_digest=doc.get("artifact_sha256") if isinstance(doc,dict) else None
+    integrity=verify_artifact(artifact_path,expected_digest)
+    result["artifact_integrity"]={key:value for key,value in integrity.items() if key != "notice"}
+    if integrity["status"] != "PASS":
+        result["release_ready"]=False
+        result["issues"].append("candidate artifact integrity verification " + integrity["status"].lower())
+        if integrity["status"] == "FAIL":
+            result["status"]="FAIL"
+        elif result["status"] != "FAIL":
+            result["status"]="BLOCKED"
+    return result
 
 def example():
     return {"commit":"0"*40,"artifact_sha256":"0"*64,"target_environment":"example",
