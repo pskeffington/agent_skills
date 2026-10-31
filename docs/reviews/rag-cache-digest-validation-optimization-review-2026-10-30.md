@@ -10,6 +10,6 @@
 
 The independent reviewer confirmed every distinct digest still must be exactly 64 lowercase hexadecimal characters. Repeated malformed values fail closed even when the outer cache checksum is recomputed. No correctness or security findings were reported.
 
-Recorded seven-run benchmark: 151.7227 ms baseline and 138.264 ms candidate median warm-cache validation (8.87% lower), with peak traced Python memory up by 29 bytes. The independent reviewer repeated three samples and measured 154.44 ms / 139.52 ms medians, with matching source manifests. These are local observations, not cross-machine guarantees.
+The benchmark now measures latency without `tracemalloc`, then samples peak allocation separately. The 11-run report records 36.966 ms baseline and 27.1414 ms candidate median warm-cache validation (26.58% lower), with peak traced Python memory up by 5 bytes. The independent reviewer ran 11 alternating baseline/candidate pairs and measured 39.66 ms / 29.89 ms medians with matching manifests. These are local observations, not cross-machine guarantees.
 
-The parent run passed 83 repository tests, `scripts/validate.py`, Codex preflight and `git diff --check`; the synthetic release gate remained BLOCKED (exit 2). No CI result exists yet for this candidate commit. This review does not approve release or deployment.
+The parent run passed 83 repository tests, `scripts/validate.py`, Codex preflight and `git diff --check`; the synthetic release gate remained BLOCKED (exit 2). CI for the candidate implementation commit ran before the benchmark-method-only update; CI for this updated benchmark commit is pending. This review does not approve release or deployment.

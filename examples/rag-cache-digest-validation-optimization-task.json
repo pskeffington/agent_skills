@@ -35,14 +35,14 @@
   "evidence_refs": [
     "baseline: bf8f52f32742b797d12945bde3d1945bfa76111f",
     "profile: repeated per-line digest validation accounted for 373,750 Python character checks on the measured corpus",
-    "benchmark: docs/benchmarks/rag-cache-digest-validation-optimization-2026-10-30.json; seven paired repetitions; equal 115-file source manifests; median 151.7227 ms baseline / 138.264 ms candidate",
+    "benchmark: docs/benchmarks/rag-cache-digest-validation-optimization-2026-10-30.json; eleven uninstrumented paired repetitions; equal 117-file source manifests; median 36.966 ms baseline / 27.1414 ms candidate",
     "command: python3 -m unittest tests.test_rag_cache -v (exit 0, 8 tests)",
     "command: python3 -m unittest discover -s tests -v (exit 0, 83 tests)",
     "command: python3 scripts/validate.py (exit 0)",
     "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
     "command: git diff --check (exit 0)",
-    "review: docs/reviews/rag-cache-digest-validation-optimization-review-2026-10-30.md (PASS; no correctness/security findings; no CI claim)"
+    "review: docs/reviews/rag-cache-digest-validation-optimization-review-2026-10-30.md (PASS; updated benchmark method independently confirmed; no correctness/security findings; CI pending for benchmark update)"
   ],
   "blocker": null,
   "approval_ref": null

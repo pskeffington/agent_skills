@@ -30,18 +30,20 @@ def _module(name: str, source: pathlib.Path):
 def _measure(module, root: pathlib.Path, cache: pathlib.Path, repetitions: int) -> dict:
     module.load_or_build_cache(root, cache)
     samples = []
-    peaks = []
     for _ in range(repetitions):
-        tracemalloc.start()
         started = time.perf_counter_ns()
         module.load_or_build_cache(root, cache)
         samples.append((time.perf_counter_ns() - started) / 1_000_000)
-        peaks.append(tracemalloc.get_traced_memory()[1])
-        tracemalloc.stop()
+    # Measure allocation separately so tracemalloc overhead does not distort
+    # latency comparisons, especially for allocation-heavy JSON validation.
+    tracemalloc.start()
+    module.load_or_build_cache(root, cache)
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
     return {
         "samples_ms": [round(sample, 4) for sample in samples],
         "median_latency_ms": round(statistics.median(samples), 4),
-        "median_python_peak_bytes": int(statistics.median(peaks)),
+        "traced_python_peak_bytes": peak,
     }
 
 
