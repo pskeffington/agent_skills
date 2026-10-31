@@ -14,4 +14,4 @@ The parent run passed all 81 repository tests, `scripts/validate.py`, and Codex 
 
 The recorded seven-run comparison measured 268.6799 ms baseline and 236.4983 ms candidate median warm-cache validation (11.98% lower); peak Python allocation differed by 5 bytes. An independent alternating eight-sample comparison measured 264.67 ms baseline and 227.63 ms candidate medians, reducing the likelihood that run order explains the improvement. These are local observations, not cross-machine guarantees. Re-running after the benchmark report is added changes the indexed corpus fingerprint because the report itself is eligible for indexing; each paired run still compares both versions on the same corpus.
 
-No CI run exists for the uncommitted candidate. This review does not approve release or deployment.
+GitHub Actions run `41154241751` succeeded for commit `0ed7ab18cd76c04a6ce9623acf34b7cdd692cf58`. This review does not approve release or deployment.

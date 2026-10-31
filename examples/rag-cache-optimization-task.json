@@ -40,7 +40,8 @@
     "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
     "command: git diff --check (exit 0)",
-    "review: docs/reviews/rag-cache-optimization-review-2026-10-30.md (PASS; no correctness/security findings; no CI claim)"
+    "review: docs/reviews/rag-cache-optimization-review-2026-10-30.md (PASS; no correctness/security findings)",
+    "CI: GitHub Actions run 41154241751 succeeded for commit 0ed7ab18cd76c04a6ce9623acf34b7cdd692cf58"
   ],
   "blocker": null,
   "approval_ref": null
