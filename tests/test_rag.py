@@ -74,6 +74,14 @@ class RagTests(unittest.TestCase):
             (root / "one.md").write_text("tampered\n", encoding="utf-8")
             self.assertFalse(verify_hit(root, hits[0]))
 
+    def test_top_k_preserves_stable_order_for_equal_sort_keys(self):
+        documents=[{"path":"same.md","line":1,"text":f"entry {i}","sha256":"a"*64,"tf":{"shared":1}}
+                   for i in range(30)]
+        index={"format":1,"root":"/repo","documents":documents}
+        expected=legacy_search(index,"shared",limit=8)
+        self.assertEqual(expected,search(index,"shared",limit=8))
+        self.assertEqual([f"entry {i}" for i in range(8)],[hit["text"] for hit in search(index,"shared",limit=8)])
+
     def test_batch_verification_reads_each_source_once(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)

@@ -18,6 +18,7 @@ EXAMPLE_SCHEMAS = {
     "release-artifact-path-hardening-task.json": "task-contract.schema.json",
     "rag-cache-framing-followup-task.json": "task-contract.schema.json",
     "rag-search-length-cache-investigation-task.json": "task-contract.schema.json",
+    "rag-search-streaming-topk-task.json": "task-contract.schema.json",
     "release-artifact-binding-task.json": "task-contract.schema.json",
     "release-dossier-binding-task.json": "task-contract.schema.json",
     "release-dossier-schema-version-task.json": "task-contract.schema.json",

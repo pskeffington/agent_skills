@@ -1,6 +1,7 @@
 """Offline, repo-confined lexical retrieval with source provenance."""
 from __future__ import annotations
 import hashlib
+import heapq
 import json
 import math
 import os
@@ -237,15 +238,15 @@ def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
         if matches:
             candidates.append((document,length,matches))
     avg=sum(lengths)/len(docs)
-    results=[]
-    for d,length,matches in candidates:
-        score=0.0
-        for term,frequency in matches:
-            idf=math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5))
-            score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
-        if score:
-            results.append({"path":d["path"],"line":d["line"],"sha256":d["sha256"],"text":d["text"],"score":round(score,8)})
-    return sorted(results,key=lambda hit:(-hit["score"],hit["path"],hit["line"]))[:limit]
+    def scored_hits():
+        for document,length,matches in candidates:
+            score=0.0
+            for term,frequency in matches:
+                idf=math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5))
+                score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
+            if score:
+                yield {"path":document["path"],"line":document["line"],"sha256":document["sha256"],"text":document["text"],"score":round(score,8)}
+    return heapq.nsmallest(limit,scored_hits(),key=lambda hit:(-hit["score"],hit["path"],hit["line"]))
 
 def verify_hit(root: str | Path, hit: dict) -> bool:
     """Reject stale citations or changed files before using them as evidence."""
