@@ -10,6 +10,7 @@ SKILLS = ROOT / ".agents" / "skills"
 EXAMPLE_SCHEMAS = {
     "feature-task.json": "task-contract.schema.json",
     "candidate-artifact-release-evaluation-task.json": "task-contract.schema.json",
+    "release-provenance-artifact-refresh-task.json": "task-contract.schema.json",
     "a4-ci-runtime-readiness-task.json": "task-contract.schema.json",
     "security-hardening-task.json": "task-contract.schema.json",
     "release-approval-verifier-task.json": "task-contract.schema.json",

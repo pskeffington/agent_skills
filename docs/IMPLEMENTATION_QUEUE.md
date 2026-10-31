@@ -26,6 +26,10 @@ Independent review of HEAD `12f98fd3f12a829ca19bfdca4d3d2281bad2cd21` found that
 
 Task: `examples/release-check-provenance-task.json`. Release dossier schema advances to `3.0.0`: each check record now requires an argv array, result, candidate commit, artifact digest, evidence reference, invocation ID, and output SHA-256. The evaluator rejects malformed records, non-PASS results, and records for another commit or artifact. Approval binding continues to cover the full dossier, including provenance. These fields validate record shape and subject consistency; evidence authenticity still requires verification in its source system. Focused release/approval tests pass 17/17, full suite 104/104, validator and preflight pass, and synthetic release remains BLOCKED (exit 2). Independent review PASS: `docs/reviews/release-check-provenance-review-2026-10-31.md`. No release gate was promoted.
 
+## F8 candidate artifact refresh after dossier provenance v3 (2026-10-31)
+
+Task: `examples/release-provenance-artifact-refresh-task.json`, built from source commit `33039d975675172693f164e5a25927ac17350dc5`. Three independent builds matched at SHA-256 `72acf0d8384f59245a1c3bc85388edb3d6a1aa39d125ae759105ce966b6c3775` (38,979 bytes). Source and zipapp doctor, exact digest verification, and search passed; search results were byte-for-byte equivalent as JSON objects with eight verified citations. Source and zipapp release evaluation matched: artifact integrity PASS, overall BLOCKED with exit 2 and 14 missing requirements. No deployment occurred.
+
 ## Task handoff discipline
 For each row, create task ID `F<n>-<workstream>`, scope include/exclude files, baseline SHA, owner, fixture, tested acceptance, exact exit code, blocked reason and reviewer. Commit each phase separately.
 

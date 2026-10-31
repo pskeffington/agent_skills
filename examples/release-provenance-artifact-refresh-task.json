@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F8-REBUILD-ARTIFACT-AFTER-PROVENANCE-V3",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "33039d975675172693f164e5a25927ac17350dc5",
+  "objective": "Rebuild the deterministic candidate zipapp after the release dossier v3 evaluator change and bind its new digest to a synthetic, fail-closed release evaluation.",
+  "scope": {
+    "include": [
+      "examples/candidate-artifact-release-dossier.json",
+      "examples/candidate-artifact-release-evaluation-evidence.json",
+      "examples/release-provenance-artifact-refresh-task.json",
+      "docs/CANDIDATE_ARTIFACT.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "staging or production deployment",
+      "changing blocked gate dispositions to PASS",
+      "secrets, trust stores, or approval signing"
+    ]
+  },
+  "acceptance": [
+    "Three independent builds from source commit 33039d975675172693f164e5a25927ac17350dc5 are byte-identical.",
+    "The candidate dossier binds the rebuilt artifact SHA-256 and source commit.",
+    "Source and standalone zipapp return identical eight-hit verified RAG results.",
+    "Source and standalone release evaluators agree: artifact integrity PASS, overall BLOCKED, exit 2.",
+    "No staging or deployment occurs."
+  ],
+  "risk": "low",
+  "owner_role": "release-readiness",
+  "status": "done",
+  "depends_on": [
+    "F8-STRUCTURED-CHECK-PROVENANCE"
+  ],
+  "evidence_refs": [
+    "artifact SHA256: 72acf0d8384f59245a1c3bc85388edb3d6a1aa39d125ae759105ce966b6c3775; three builds matched; 38,979 bytes",
+    "source and zipapp doctor and artifact-check PASS",
+    "source and zipapp search exact equality; 8 hits; unverified_hits=0",
+    "source and zipapp release evaluation equal; artifact integrity PASS; readiness BLOCKED; exit 2"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}
