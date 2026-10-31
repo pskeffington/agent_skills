@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F8-ARTIFACT-BINDING",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "7aa3b3b5b843e6ede3405279500f47f6958719e4",
+  "objective": "Bind release dossier evaluation to a safe digest verification of the exact artifact path in one CLI invocation.",
+  "scope": {
+    "include": [
+      "agent_toolset/cli.py",
+      "tests/test_cli.py",
+      "tests/test_release_approval.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/RELEASE_RUNBOOK.md",
+      "docs/CANDIDATE_ARTIFACT.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "schemas/task-contract.schema.json",
+      "scripts/validate.py",
+      "examples/release-artifact-binding-task.json",
+      "agent_toolset/assurance/release.py",
+      "scripts/release_gate.py",
+      "tests/test_codex.py",
+      "docs/CODEX_IMPLEMENTATION.md",
+      "CODEX_KICKOFF.md"
+    ],
+    "exclude": [
+      "deployment",
+      "production environment",
+      "credentials and trust stores"
+    ]
+  },
+  "acceptance": [
+    "release-check requires an artifact path and hashes it against dossier artifact_sha256",
+    "Artifact mismatch returns FAIL and unsafe or unreadable artifacts return BLOCKED",
+    "Matching artifact bytes do not bypass any existing release dossier gate",
+    "CLI and signed approval integration tests cover digest match, mismatch, and symlink rejection",
+    "Operator and release runbooks document the atomic read-only verification command",
+    "Full local acceptance suite passes and synthetic release example remains BLOCKED",
+    "Public release evaluator cannot return PASS without artifact_path",
+    "Compatibility script release_gate.py cannot return PASS without --artifact"
+  ],
+  "risk": "high",
+  "owner_role": "integrator",
+  "status": "review",
+  "depends_on": [],
+  "evidence_refs": [
+    "base: 7aa3b3b5b843e6ede3405279500f47f6958719e4",
+    "command: python3 -m unittest tests.test_cli tests.test_release_approval tests.test_codex -v (exit 0, 23 tests)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 80 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "review: independent code review PASS on current tree",
+    "review: security assurance PASS; deployment must use the same immutable bytes checked"
+  ],
+  "blocker": "Rebuild and verify the standalone candidate artifact from the implementation commit; staging and release authorization remain outside this task.",
+  "approval_ref": null
+}

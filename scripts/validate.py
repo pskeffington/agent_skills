@@ -13,6 +13,8 @@ EXAMPLE_SCHEMAS = {
     "release-approval-verifier-task.json": "task-contract.schema.json",
     "artifact-digest-task.json": "task-contract.schema.json",
     "codex-runner-task.json": "task-contract.schema.json",
+    "release-artifact-binding-task.json": "task-contract.schema.json",
+    "rag-cache-optimization-task.json": "task-contract.schema.json",
     "feature-handoff.json": "handoff.schema.json",
     "feature-evidence.json": "evidence.schema.json",
     "rag-evaluation.json": "rag-evaluation.schema.json",

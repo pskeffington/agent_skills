@@ -238,7 +238,14 @@ def _valid_cached_index(index: object, expected_root: Path) -> bool:
         if not isinstance(document,dict) or set(document)!={"path","line","text","sha256","tf"}:
             return False
         path=document["path"]
-        if not isinstance(path,str) or Path(path).is_absolute() or ".." in Path(path).parts or "\\" in path:
+        if not isinstance(path,str):
+            return False
+        # Cache paths are POSIX repository-relative names. Avoid constructing a
+        # pathlib object for every indexed line: large indexes repeat each path
+        # many times and validation is on every cache hit.
+        try:
+            _safe_relative_parts(path)
+        except ValueError:
             return False
         if not isinstance(document["line"],int) or isinstance(document["line"],bool) or document["line"]<1:
             return False
@@ -248,8 +255,11 @@ def _valid_cached_index(index: object, expected_root: Path) -> bool:
         if not isinstance(digest,str) or len(digest)!=64 or any(char not in "0123456789abcdef" for char in digest):
             return False
         tf=document["tf"]
-        if not isinstance(tf,dict) or not tf or any(not isinstance(term,str) or not isinstance(count,int) or isinstance(count,bool) or count<1 for term,count in tf.items()):
+        if not isinstance(tf,dict) or not tf:
             return False
+        for term,count in tf.items():
+            if not isinstance(term,str) or not isinstance(count,int) or isinstance(count,bool) or count<1:
+                return False
     return True
 
 def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEFAULT_SUFFIXES) -> tuple[dict,str,bool]:

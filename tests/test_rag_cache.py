@@ -39,6 +39,15 @@ class RagCacheTests(unittest.TestCase):
             target.write_text(json.dumps(envelope),encoding="utf-8")
             with self.assertRaises(ValueError): load_or_build_cache(repo,cache)
 
+    def test_cached_index_rejects_noncanonical_or_escaping_paths(self):
+        from agent_toolset.rag import _valid_cached_index
+        base=Path("/repo")
+        valid_doc={"path":"docs/guide.md","line":1,"text":"safe","sha256":"a"*64,"tf":{"safe":1}}
+        for invalid_path in ("", "/etc/passwd", "../outside", "docs//guide.md", "docs\\guide.md"):
+            with self.subTest(path=invalid_path):
+                document={**valid_doc,"path":invalid_path}
+                self.assertFalse(_valid_cached_index({"format":1,"root":str(base),"documents":[document]},base))
+
     def test_symlinked_cache_directory_and_entry_rejected(self):
         with tempfile.TemporaryDirectory() as temp, tempfile.TemporaryDirectory() as other:
             base=pathlib.Path(temp); repo=base/"repo"; repo.mkdir(); (repo/"doc.md").write_text("link test\\n")

@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-CACHE-OPTIMIZATION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "7aa3b3b5b843e6ede3405279500f47f6958719e4",
+  "objective": "Reduce validated warm RAG cache load overhead without weakening cache corruption or source freshness checks.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "tests/test_rag_cache.py",
+      "scripts/compare_rag_cache.py",
+      "docs/benchmarks/rag-cache-optimization-2026-10-30.json",
+      "docs/reviews/rag-cache-optimization-review-2026-10-30.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/rag-cache-optimization-task.json"
+    ],
+    "exclude": [
+      "deployment",
+      "production environment",
+      "retrieval ranking changes",
+      "third-party dependencies"
+    ]
+  },
+  "acceptance": [
+    "Warm-cache load preserves stale-source invalidation and malformed-cache rejection tests",
+    "The benchmark report records comparable baseline and optimized measurements with environment and corpus provenance",
+    "Optimization claims are limited to measured outcomes on the stated local corpus",
+    "Full required repository validation passes and release gate remains fail-closed"
+  ],
+  "risk": "low",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "baseline: docs/benchmarks/rag-benchmark-2026-10-30.json",
+    "profile: cProfile warm cache load on current worktree; validator 86 ms, source fingerprint 79 ms",
+    "command: python3 scripts/compare_rag_cache.py --baseline 7aa3b3b5b843e6ede3405279500f47f6958719e4 --repetitions 7 (exit 0; median 268.6799 ms baseline, 236.4983 ms candidate)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 81 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "review: docs/reviews/rag-cache-optimization-review-2026-10-30.md (PASS; no correctness/security findings; no CI claim)"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}
