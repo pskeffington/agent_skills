@@ -222,12 +222,12 @@ def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
     if not docs:
         return []
     df={term:0 for term in q}
-    lengths=[]
     candidates=[]
+    total_length=0
     for document in docs:
         frequencies=document["tf"]
         length=sum(frequencies.values())
-        lengths.append(length)
+        total_length+=length
         matches=[]
         for term in q:
             if term in frequencies:
@@ -236,8 +236,8 @@ def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
                 if frequency:
                     matches.append((term,frequency))
         if matches:
-            candidates.append((document,length,matches))
-    avg=sum(lengths)/len(docs)
+            candidates.append((document,length,tuple(matches)))
+    avg=total_length/len(docs)
     idf={term:math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5)) for term in q}
     def scored_hits():
         for document,length,matches in candidates:

@@ -20,6 +20,7 @@ EXAMPLE_SCHEMAS = {
     "rag-search-length-cache-investigation-task.json": "task-contract.schema.json",
     "rag-search-streaming-topk-task.json": "task-contract.schema.json",
     "rag-search-idf-precompute-task.json": "task-contract.schema.json",
+    "rag-search-candidate-memory-task.json": "task-contract.schema.json",
     "release-artifact-binding-task.json": "task-contract.schema.json",
     "release-dossier-binding-task.json": "task-contract.schema.json",
     "release-dossier-schema-version-task.json": "task-contract.schema.json",
