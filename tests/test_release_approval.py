@@ -109,6 +109,28 @@ class ReleaseApprovalTests(unittest.TestCase):
         verifier = make_openssl_approval_verifier(self.approvers, openssl=OPENSSL)
         self.assertEqual("BLOCKED", evaluate(dossier)["status"])
         self.assertEqual("PASS", evaluate(dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        not_applicable = copy.deepcopy(dossier)
+        not_applicable["gates"]["G5"] = {
+            "status": "NOT_APPLICABLE",
+            "evidence_ref": "decision:g5-na-42",
+            "reason": "this candidate has no G5-specific change",
+        }
+        na_approval = dict(not_applicable["approval"])
+        na_approval.pop("signature", None)
+        na_approval["invocation_id"] = "approver-na-run"
+        not_applicable["approval"] = na_approval
+        na_approval["dossier_sha256"] = dossier_binding_sha256(not_applicable)
+        not_applicable["approval"] = self.sign(na_approval)
+        self.assertEqual("PASS", evaluate(not_applicable, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        incomplete_na = copy.deepcopy(not_applicable)
+        incomplete_na["gates"]["G5"]["reason"] = ""
+        incomplete_approval = dict(incomplete_na["approval"])
+        incomplete_approval.pop("signature", None)
+        incomplete_approval["invocation_id"] = "approver-na-incomplete-run"
+        incomplete_na["approval"] = incomplete_approval
+        incomplete_approval["dossier_sha256"] = dossier_binding_sha256(incomplete_na)
+        incomplete_na["approval"] = self.sign(incomplete_approval)
+        self.assertEqual("BLOCKED", evaluate(incomplete_na, approval_verifier=verifier, artifact_path=artifact_path)["status"])
         altered_dossier = copy.deepcopy(dossier)
         altered_dossier["target_environment"] = "production"
         self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])

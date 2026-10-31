@@ -13,7 +13,7 @@ class CodexTests(unittest.TestCase):
     def test_default_dossier_fails_closed(self):
         result=evaluate(example())
         self.assertFalse(result["release_ready"])
-        self.assertIn("G6 is not PASS",result["issues"])
+        self.assertIn("G6 is not PASS or approved NOT_APPLICABLE",result["issues"])
 
     def packet(self,digest="b"*64):
         commit="a"*40
@@ -50,6 +50,14 @@ class CodexTests(unittest.TestCase):
             result=evaluate(packet,approval_verifier=verifier,artifact_path=artifact)
             self.assertEqual("BLOCKED",result["status"])
             self.assertEqual(["unsupported release dossier schema version (expected 2.0.0)"],result["issues"])
+
+    def test_malformed_unhashable_gate_status_fails_closed(self):
+        packet=self.packet()
+        packet["gates"]["G2"]["status"]=[]
+        packet["approval"]["dossier_sha256"]=dossier_binding_sha256(packet)
+        result=evaluate(packet)
+        self.assertEqual("BLOCKED",result["status"])
+        self.assertIn("G2 is not PASS or approved NOT_APPLICABLE",result["issues"])
 
     def test_approval_requires_explicit_decision_and_verification(self):
         packet=self.packet(); packet["approval"]["decision"]="REJECT"

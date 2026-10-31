@@ -36,8 +36,8 @@ def _evaluate_dossier(doc, approval_verifier=None):
             record=gates.get(gate)
             if not isinstance(record,dict):
                 issues.append(gate + " evidence missing")
-            elif record.get("status") != "PASS":
-                issues.append(gate + " is not PASS")
+            elif record.get("status") not in ("PASS", "NOT_APPLICABLE"):
+                issues.append(gate + " is not PASS or approved NOT_APPLICABLE")
                 contradictions = contradictions or record.get("status") == "FAIL"
             if isinstance(record,dict) and (not _pointer(record.get("evidence_ref")) or not _pointer(record.get("reason"))):
                 issues.append(gate + " evidence pointer or reason missing")
