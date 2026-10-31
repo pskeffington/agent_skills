@@ -170,6 +170,10 @@ Rebuilt from source `9a42f18486b1fbbf4d9fcadc69ee04037b0bdbd6`. Three builds mat
 
 Task contract: `examples/rag-search-idf-precompute-task.json`, based on `08e68efe6caac0b36631320281f2f0934858cfe1`. The BM25 IDF expression is now computed once per query term after document frequencies are known, then reused without changing the score expression or term accumulation order. Paired 31-run benchmarks confirm exact ordered results. On 20,000 lines, common multi-term queries improved 9.79% and 9.47%; one-term and no-match queries changed -0.93% and +0.33%. On the current repository corpus (8,512 lines at measurement), the six-term query improved 2.79%; other queries changed under 0.3%. Independent review PASS, including parity across 1,000 randomized indexes and three limits each. Focused tests pass 12/12; full suite passes 103/103; validator and preflight pass; synthetic release remains BLOCKED (exit 2); diff check passes. Benchmark: `docs/benchmarks/rag-search-idf-precompute-2026-10-30.json`; review: `docs/reviews/rag-search-idf-precompute-review-2026-10-30.md`. CI/artifact refresh pending.
 
+## F8 candidate artifact refresh after RAG IDF precomputation (2026-10-30)
+
+Rebuilt from source `0438e2f4c6ac075c8fdc963c6d0649c1166c3d1f`. Three builds matched SHA256 `75133db22d9a919fd39225fa6c5cdb4aea87a5874607516ca1a3d3271dd334ae` (38,653 bytes). Standalone `doctor`, exact-byte artifact check, and repository RAG search passed; eight citations returned with `unverified_hits: 0`. GitHub Actions run `41160150104` succeeded: structural validation, 103 tests, and Codex preflight passed (one informational Ubuntu runner image migration notice). Artifact stays local and ignored; no staging or deployment occurred.
+
 ## F8 candidate artifact refresh after cache benchmark/tooling update (2026-10-30)
 
 Rebuilt three times from source commit `b1dd1561979ce5d4793be39118ec6196aa69a089`. All zipapps were byte-identical at 38,484 bytes with SHA256 `10fa476f819d02cf5a383a08e72967ad73e65b5d947c52b9e5b0a44ab24e9e3b`. Standalone `doctor` and exact-byte artifact check passed. Artifact is retained locally under `/private/tmp`; no staging or deployment occurred.
