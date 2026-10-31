@@ -30,7 +30,7 @@
   ],
   "risk": "medium",
   "owner_role": "implementer",
-  "status": "review",
+  "status": "done",
   "depends_on": ["RAG-CACHE-DIGEST-OPTIMIZATION"],
   "evidence_refs": [
     "baseline: d851d408e5437a176ca1d1969ad31fd84ded4249",
@@ -43,7 +43,7 @@
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
     "command: git diff --check (exit 0)",
     "review: docs/reviews/rag-search-candidate-optimization-review-2026-10-30.md (PASS after summation-order and zero-frequency corrections; hash-seed sweep 0..100)",
-    "CI: pending for candidate commit"
+    "CI: GitHub Actions run 41155700805 succeeded for commit a3feb6d882d8bc7a51891fef57b547000d44eddc"
   ],
   "blocker": null,
   "approval_ref": null

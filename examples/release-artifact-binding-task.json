@@ -54,6 +54,8 @@
     "artifact: source commit 4fdd21aceb51e0bd39387fef27ef81bbb710a2b1; three independent zipapp builds byte-identical at SHA256 95098ab205bac9afebeba863467feea1319b84c01f69c6b9ee834b3dfe06f881",
     "artifact validation: zipapp doctor PASS; matching digest PASS; stale digest FAIL exit 1; matching synthetic release dossier BLOCKED exit 2",
     "CI: GitHub Actions run 41155050200 succeeded for commit 4fdd21aceb51e0bd39387fef27ef81bbb710a2b1",
+    "refreshed artifact after RAG optimization: source a3feb6d882d8bc7a51891fef57b547000d44eddc; three reproducible builds SHA256 de2d44b2417ba60cdf840ac31f531306a18ed079705f0fe520cfa7ee49eb1758; doctor, digest, synthetic-blocked and RAG cache-hit smoke checks pass",
+    "CI: GitHub Actions run 41155700805 succeeded for current source commit a3feb6d882d8bc7a51891fef57b547000d44eddc",
     "artifact record: docs/CANDIDATE_ARTIFACT.md"
   ],
   "blocker": null,
