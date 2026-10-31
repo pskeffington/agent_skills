@@ -42,7 +42,9 @@
     "command: python3 scripts/codex_preflight.py --repo . (exit 0; worktree dirty during candidate check)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
     "command: git diff --check (exit 0)",
-    "independent security review: PASS; N/A signed dossier admitted; blank rationale blocked; malformed list status rejected"
+    "independent security review: PASS; N/A signed dossier admitted; blank rationale blocked; malformed list status rejected",
+    "artifact: three reproducible builds SHA256 c69fbb2b4d8e03f89356ee4c6f5214db9a79a49b08db11ee4b9debe23a8d5218; doctor/matching digest PASS; synthetic dossier BLOCKED exit 2",
+    "CI: GitHub Actions run 41157657279 succeeded for implementation commit 2e03e056fdb4c35fcb95aad52fc376eaf836ceec"
   ],
   "blocker": null,
   "approval_ref": null

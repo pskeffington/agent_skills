@@ -129,3 +129,7 @@ Rebuilt from source commit `9abbdd45e92a4d75f9ab2fe5853cd7a53b5fab4f`. Three ind
 ## R15 approved NOT_APPLICABLE release gates (2026-10-30)
 
 Task contract: `examples/release-not-applicable-gates-task.json`, based on `41cf2c5e645122e16eae1d62adf8efa766594351`. Policy documents that justified, approved NOT_APPLICABLE gates may admit a candidate, but the evaluator rejected every non-PASS status. The evaluator now accepts PASS or NOT_APPLICABLE while continuing to require gate evidence pointers/reasons and a valid trusted approval over the full dossier. Regression coverage verifies a signed N/A gate is admitted and an incomplete N/A rationale remains BLOCKED. Focused release tests pass 7/7; malformed status regression passes; full suite passes 90/90; validation/preflight pass; synthetic release remains BLOCKED (exit 2). Independent security review PASS: `docs/reviews/release-not-applicable-gates-review-2026-10-30.md`.
+
+## F8 candidate artifact refresh after approved N/A gate support (2026-10-30)
+
+Rebuilt from source commit `2e03e056fdb4c35fcb95aad52fc376eaf836ceec`. Three independent zipapp builds matched SHA256 `c69fbb2b4d8e03f89356ee4c6f5214db9a79a49b08db11ee4b9debe23a8d5218` (37,960 bytes). Artifact `doctor` and matching digest passed; a matching-digest v2 synthetic dossier passed integrity and remained BLOCKED (exit 2) on absent release evidence. GitHub Actions run `41157657279` succeeded for the source commit. No staging or deployment occurred.
