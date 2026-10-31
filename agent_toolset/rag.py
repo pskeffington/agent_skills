@@ -303,40 +303,43 @@ def _read_fd(fd: int, limit: int) -> bytes:
     return data
 
 def _valid_cached_index(index: object, expected_root: Path) -> bool:
-    if not isinstance(index,dict) or set(index)!={"format","root","documents"}:
+    if type(index) is not dict or set(index)!={"format","root","documents"}:
         return False
-    if index.get("format")!=1 or index.get("root")!=str(expected_root) or not isinstance(index.get("documents"),list):
+    if type(index.get("format")) is not int or index["format"]!=1 or index.get("root")!=str(expected_root) or type(index.get("documents")) is not list:
         return False
     validated_digests=set()
+    validated_paths=set()
     for document in index["documents"]:
-        if not isinstance(document,dict) or set(document)!={"path","line","text","sha256","tf"}:
+        if type(document) is not dict or set(document)!={"path","line","text","sha256","tf"}:
             return False
         path=document["path"]
-        if not isinstance(path,str):
+        if type(path) is not str:
             return False
         # Cache paths are POSIX repository-relative names. Avoid constructing a
         # pathlib object for every indexed line: large indexes repeat each path
         # many times and validation is on every cache hit.
-        try:
-            _safe_relative_parts(path)
-        except ValueError:
+        if path not in validated_paths:
+            try:
+                _safe_relative_parts(path)
+            except ValueError:
+                return False
+            validated_paths.add(path)
+        if type(document["line"]) is not int or document["line"]<1:
             return False
-        if not isinstance(document["line"],int) or isinstance(document["line"],bool) or document["line"]<1:
-            return False
-        if not isinstance(document["text"],str) or len(document["text"])>2000:
+        if type(document["text"]) is not str or len(document["text"])>2000:
             return False
         digest=document["sha256"]
-        if not isinstance(digest,str) or len(digest)!=64:
+        if type(digest) is not str or len(digest)!=64:
             return False
         if digest not in validated_digests:
             if any(char not in "0123456789abcdef" for char in digest):
                 return False
             validated_digests.add(digest)
         tf=document["tf"]
-        if not isinstance(tf,dict) or not tf:
+        if type(tf) is not dict or not tf:
             return False
         for term,count in tf.items():
-            if not isinstance(term,str) or not isinstance(count,int) or isinstance(count,bool) or count<1:
+            if type(term) is not str or type(count) is not int or count<1:
                 return False
     return True
 

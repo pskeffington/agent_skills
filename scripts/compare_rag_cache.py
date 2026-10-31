@@ -27,26 +27,6 @@ def _module(name: str, source: pathlib.Path):
     return module
 
 
-def _measure(module, root: pathlib.Path, cache: pathlib.Path, repetitions: int) -> dict:
-    module.load_or_build_cache(root, cache)
-    samples = []
-    for _ in range(repetitions):
-        started = time.perf_counter_ns()
-        module.load_or_build_cache(root, cache)
-        samples.append((time.perf_counter_ns() - started) / 1_000_000)
-    # Measure allocation separately so tracemalloc overhead does not distort
-    # latency comparisons, especially for allocation-heavy JSON validation.
-    tracemalloc.start()
-    module.load_or_build_cache(root, cache)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-    return {
-        "samples_ms": [round(sample, 4) for sample in samples],
-        "median_latency_ms": round(statistics.median(samples), 4),
-        "traced_python_peak_bytes": peak,
-    }
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=pathlib.Path, default=ROOT)
@@ -72,10 +52,33 @@ def main() -> int:
         candidate_module = _module("rag_candidate", candidate_path)
         baseline_cache = temp_path / "baseline-cache"
         candidate_cache = temp_path / "candidate-cache"
-        results = {
-            "baseline": _measure(baseline_module, root, baseline_cache, args.repetitions),
-            "candidate": _measure(candidate_module, root, candidate_cache, args.repetitions),
+        baseline_module.load_or_build_cache(root, baseline_cache)
+        candidate_module.load_or_build_cache(root, candidate_cache)
+        samples = {"baseline": [], "candidate": []}
+        operations = {
+            "baseline": (baseline_module, baseline_cache),
+            "candidate": (candidate_module, candidate_cache),
         }
+        for repetition in range(args.repetitions):
+            order = ("baseline", "candidate") if repetition % 2 == 0 else ("candidate", "baseline")
+            for label in order:
+                module, cache = operations[label]
+                started = time.perf_counter_ns()
+                module.load_or_build_cache(root, cache)
+                samples[label].append((time.perf_counter_ns() - started) / 1_000_000)
+        results = {}
+        for label, (module, cache) in operations.items():
+            # Measure allocation separately so tracemalloc overhead does not
+            # distort latency comparisons.
+            tracemalloc.start()
+            module.load_or_build_cache(root, cache)
+            _, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            results[label] = {
+                "samples_ms": [round(sample, 4) for sample in samples[label]],
+                "median_latency_ms": round(statistics.median(samples[label]), 4),
+                "traced_python_peak_bytes": peak,
+            }
         baseline_fingerprint, _, baseline_records = baseline_module.cache_fingerprint(root)
         fingerprint, _, candidate_records = candidate_module.cache_fingerprint(root)
         baseline_manifest = [(path, digest) for path, _, digest in baseline_records]

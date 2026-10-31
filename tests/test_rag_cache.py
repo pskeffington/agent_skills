@@ -48,6 +48,14 @@ class RagCacheTests(unittest.TestCase):
                 document={**valid_doc,"path":invalid_path}
                 self.assertFalse(_valid_cached_index({"format":1,"root":str(base),"documents":[document]},base))
 
+    def test_cached_index_rejects_noninteger_format_versions(self):
+        from agent_toolset.rag import _valid_cached_index
+        base=Path("/repo")
+        valid_doc={"path":"docs/guide.md","line":1,"text":"safe","sha256":"a"*64,"tf":{"safe":1}}
+        for format_version in (True,1.0):
+            with self.subTest(format=format_version):
+                self.assertFalse(_valid_cached_index({"format":format_version,"root":str(base),"documents":[valid_doc]},base))
+
     def test_cache_digest_hex_validation_rejects_invalid_repeated_digest(self):
         with tempfile.TemporaryDirectory() as temp:
             base=Path(temp); repo=base/"repo"; cache=base/"cache"
