@@ -14,5 +14,6 @@
 | CLI | JSON machine output and stable exit | bad args and corrupted state fail closed |
 | RAG citation provenance | batch verification matches per-hit validity and reads each distinct source once | stale text/hash, bool line number, traversal path, symlink swap, unreadable source |
 | RAG cache memory benchmark | baseline/candidate source manifests match; warm-hit memory and cold-miss latency are both recorded | output report accidentally enters the measured corpus or benchmark omits cold-miss cost |
+| RAG search optimization | paired baseline/candidate runs use exact output equality, representative rare/common/no-match queries, and a pinned corpus fingerprint | changed score/order, mutable-index staleness, unbounded sidecar memory, or gains limited to unrepresentative queries |
 
 Record test name, exact command, exit code and host environment. Mark unrun test BLOCKED, not PASS.
