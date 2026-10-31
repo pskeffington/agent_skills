@@ -178,6 +178,10 @@ Rebuilt from source `0438e2f4c6ac075c8fdc963c6d0649c1166c3d1f`. Three builds mat
 
 Task contract: `examples/rag-search-candidate-memory-task.json`, based on `a7d4e37084cb4aefb456876e9d9e48c20958214b`. Search now accumulates total token length without a parallel per-document lengths list and stores matched query term-frequency pairs as tuples. Across 31 paired runs on 20,000 indexed lines, exact outputs matched: query latency changes ranged from -2.17% to +0.70%; traced peak allocation for `value function` fell from 4,832,375 to 4,019,479 bytes (16.8%). On the 9,058-line repository corpus, all three query medians improved 1.98–3.14%. Independent review PASS, including differential parity on 3,000 randomized indexes at three result limits. Focused RAG tests pass 12/12; full suite passes 103/103; validator, preflight and diff check pass; synthetic release remains BLOCKED (exit 2). Evidence: `docs/benchmarks/rag-search-candidate-memory-optimization-2026-10-30.json`; review: `docs/reviews/rag-search-candidate-memory-review-2026-10-30.md`. CI/artifact refresh pending.
 
+## F8 candidate artifact refresh after RAG search candidate memory reduction (2026-10-30)
+
+Rebuilt from source `dae099ce739f9b6733cc89c8f53bc971f19c0e74`. Three zipapps matched SHA256 `12f6f61e9c698200930a8d6d745b0a0092ece607784395c1b1b7436f2520f6ab` (38,661 bytes). Standalone `doctor`, exact-byte artifact check, and RAG search passed; eight citations returned with `unverified_hits: 0`. GitHub Actions run `41160395720` succeeded: structural validation, 103 unit tests, and Codex preflight passed (one informational Ubuntu runner image migration notice). Artifact remains local and ignored; no staging or deployment occurred.
+
 ## F8 candidate artifact refresh after cache benchmark/tooling update (2026-10-30)
 
 Rebuilt three times from source commit `b1dd1561979ce5d4793be39118ec6196aa69a089`. All zipapps were byte-identical at 38,484 bytes with SHA256 `10fa476f819d02cf5a383a08e72967ad73e65b5d947c52b9e5b0a44ab24e9e3b`. Standalone `doctor` and exact-byte artifact check passed. Artifact is retained locally under `/private/tmp`; no staging or deployment occurred.
