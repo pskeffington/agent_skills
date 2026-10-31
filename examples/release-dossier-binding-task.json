@@ -36,7 +36,7 @@
   ],
   "risk": "high",
   "owner_role": "implementer",
-  "status": "review",
+  "status": "done",
   "depends_on": [
     "F8 release artifact binding"
   ],
@@ -48,7 +48,9 @@
     "command: python3 -m unittest discover -s tests -q (exit 0, 88 tests)",
     "command: python3 scripts/codex_preflight.py --repo . (exit 0; worktree dirty during candidate check)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
-    "command: git diff --check (exit 0)"
+    "command: git diff --check (exit 0)",
+    "CI: GitHub Actions structural check run 41157145868 succeeded for implementation commit a7d5bb9214130532001f04106f0b31879f753673",
+    "candidate artifact: three reproducible zipapp builds SHA256 1becc8dc4e660bf43ffd1288ff8dc963edc0ccbd841d6ae4938ae6621cbc8e91; doctor/matching digest PASS; stale digest FAIL exit 1"
   ],
   "blocker": null,
   "approval_ref": null
