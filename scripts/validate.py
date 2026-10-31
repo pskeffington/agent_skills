@@ -16,6 +16,7 @@ EXAMPLE_SCHEMAS = {
     "f5-containment-verifier-task.json": "task-contract.schema.json",
     "f5-probe-containment-readiness-task.json": "task-contract.schema.json",
     "release-artifact-path-hardening-task.json": "task-contract.schema.json",
+    "rag-cache-framing-followup-task.json": "task-contract.schema.json",
     "release-artifact-binding-task.json": "task-contract.schema.json",
     "release-dossier-binding-task.json": "task-contract.schema.json",
     "release-dossier-schema-version-task.json": "task-contract.schema.json",

@@ -1,0 +1,80 @@
+{
+  "scope": "paired local warm-hit and cold-miss cache comparison with peak Python allocation; observational; no cross-machine claim",
+  "baseline_revision": "f87fa41aa370b0ef41e603573b88c3d365d1bb60",
+  "baseline_source_sha256": "748d70c2febfcee2caab1812b9609ace0e6bd332d81b1d10535c828f10b3f71f",
+  "candidate_source_sha256": "748d70c2febfcee2caab1812b9609ace0e6bd332d81b1d10535c828f10b3f71f",
+  "corpus_root": "/private/tmp/rag-scale-r17",
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+  },
+  "excluded_paths": [],
+  "corpus_fingerprint": "e59e23cf38397c1d03f7db6868b4f30fddfe0e8d4793ca7b3ca2527fdce500e9",
+  "source_files": 500,
+  "source_manifest_equal": true,
+  "repetitions": 11,
+  "results": {
+    "baseline": {
+      "samples_ms": [
+        42.2302,
+        41.2932,
+        42.4817,
+        42.2195,
+        43.113,
+        42.171,
+        42.0467,
+        41.4196,
+        42.0638,
+        42.3781,
+        42.6733
+      ],
+      "median_latency_ms": 42.2195,
+      "cold_cache_samples_ms": [
+        63.8503,
+        64.6588,
+        65.6247,
+        65.1958,
+        66.2897,
+        66.4681,
+        63.7107,
+        66.1874,
+        64.8239,
+        64.9914,
+        65.393
+      ],
+      "cold_cache_median_latency_ms": 65.1958,
+      "traced_python_peak_bytes": 22591116
+    },
+    "candidate": {
+      "samples_ms": [
+        41.185,
+        41.0988,
+        42.0862,
+        42.266,
+        42.409,
+        41.9,
+        41.8781,
+        42.043,
+        41.8287,
+        42.4008,
+        42.5526
+      ],
+      "median_latency_ms": 42.043,
+      "cold_cache_samples_ms": [
+        63.5962,
+        64.5103,
+        64.9634,
+        64.3598,
+        64.0874,
+        67.7165,
+        64.3583,
+        64.5236,
+        66.8258,
+        65.7215,
+        65.4735
+      ],
+      "cold_cache_median_latency_ms": 64.5236,
+      "traced_python_peak_bytes": 22591690
+    }
+  }
+}
