@@ -219,17 +219,29 @@ def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
     docs=index["documents"]
     if not docs:
         return []
-    df=Counter(t for d in docs for t in q if t in d["tf"])
-    lengths=[sum(d["tf"].values()) for d in docs]
+    df={term:0 for term in q}
+    lengths=[]
+    candidates=[]
+    for document in docs:
+        frequencies=document["tf"]
+        length=sum(frequencies.values())
+        lengths.append(length)
+        matches=[]
+        for term in q:
+            if term in frequencies:
+                df[term]+=1
+                frequency=frequencies[term]
+                if frequency:
+                    matches.append((term,frequency))
+        if matches:
+            candidates.append((document,length,matches))
     avg=sum(lengths)/len(docs)
     results=[]
-    for d,length in zip(docs,lengths):
+    for d,length,matches in candidates:
         score=0.0
-        for term in q:
-            frequency=d["tf"].get(term,0)
-            if frequency:
-                idf=math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5))
-                score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
+        for term,frequency in matches:
+            idf=math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5))
+            score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
         if score:
             results.append({"path":d["path"],"line":d["line"],"sha256":d["sha256"],"text":d["text"],"score":round(score,8)})
     return sorted(results,key=lambda hit:(-hit["score"],hit["path"],hit["line"]))[:limit]

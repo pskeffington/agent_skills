@@ -1,3 +1,7 @@
+from collections import Counter
+import hashlib
+import itertools
+import math
 import tempfile
 import unittest
 from pathlib import Path
@@ -5,7 +9,60 @@ from unittest.mock import patch
 from agent_toolset import rag
 from agent_toolset.rag import build_index, search, verify_hit
 
+
+def legacy_search(index, query, limit=8):
+    """Reference the pre-optimization accumulation and key-presence semantics."""
+    documents=index["documents"]
+    query_terms=set(rag.terms(query))
+    df=Counter(term for document in documents for term in query_terms if term in document["tf"])
+    lengths=[sum(document["tf"].values()) for document in documents]
+    average=sum(lengths)/len(documents) if documents else 0
+    results=[]
+    for document,length in zip(documents,lengths):
+        score=0.0
+        for term in query_terms:
+            frequency=document["tf"].get(term,0)
+            if frequency:
+                idf=math.log(1+(len(documents)-df[term]+0.5)/(df[term]+0.5))
+                score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/average)))
+        if score:
+            results.append({"path":document["path"],"line":document["line"],"sha256":document["sha256"],"text":document["text"],"score":round(score,8)})
+    return sorted(results,key=lambda hit:(-hit["score"],hit["path"],hit["line"]))[:limit]
+
 class RagTests(unittest.TestCase):
+    def test_search_preserves_float_accumulation_order_exactly(self):
+        words=("amber","birch","cobalt","delta","ember","forest","garnet","harbor","indigo")
+        identifier=hashlib.sha256(b"order-sensitive").hexdigest()
+        for combo in itertools.combinations(words,5):
+            query_terms=set(combo)
+            if list(query_terms)==sorted(query_terms):
+                continue
+            for values in itertools.permutations((5,15,25,83,92)):
+                frequencies=dict(zip(sorted(query_terms),values))
+                frequencies["filler"] = 1
+                document={"path":"order.md","line":1,"text":"order sensitive","sha256":identifier,"tf":frequencies}
+                index={"format":1,"root":"/repo","documents":[document]}
+                query=" ".join(query_terms)
+                expected=legacy_search(index,query)
+                sorted_order_score=0.0
+                length=sum(frequencies.values())
+                idf=math.log(4/3)
+                for term in sorted(query_terms):
+                    frequency=frequencies[term]
+                    sorted_order_score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/length)))
+                if expected and expected[0]["score"]!=round(sorted_order_score,8):
+                    self.assertEqual(expected,search(index,query))
+                    return
+        self.fail("could not construct an order-sensitive score fixture")
+
+    def test_search_document_frequency_uses_key_presence_for_zero_frequency(self):
+        docs=[
+            {"path":"a.md","line":1,"text":"zero then beta","sha256":"a"*64,"tf":{"alpha":0,"beta":1}},
+            {"path":"b.md","line":1,"text":"alpha beta","sha256":"b"*64,"tf":{"alpha":1,"beta":1}},
+        ]
+        index={"format":1,"root":"/repo","documents":docs}
+        self.assertEqual(legacy_search(index,"alpha beta"),search(index,"alpha beta"))
+
     def test_ranking_and_provenance(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

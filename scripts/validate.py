@@ -17,6 +17,7 @@ EXAMPLE_SCHEMAS = {
     "rag-cache-optimization-task.json": "task-contract.schema.json",
     "rag-source-scan-optimization-task.json": "task-contract.schema.json",
     "rag-cache-digest-validation-optimization-task.json": "task-contract.schema.json",
+    "rag-search-candidate-optimization-task.json": "task-contract.schema.json",
     "rag-source-scan-optimization-task.json": "task-contract.schema.json",
     "feature-handoff.json": "handoff.schema.json",
     "feature-evidence.json": "evidence.schema.json",
