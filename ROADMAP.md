@@ -60,3 +60,7 @@ Build a portable, auditable, resource-bounded software-development agent control
 ## Next Codex invocation
 
 Read `AGENTS.md`, `docs/IMPLEMENTATION_QUEUE.md`, `docs/RELEASE_GATES.md`, `docs/BRANCH_PROTECTION.md`, and `docs/CODEX_PRIORITY_KICKOFF_2026-10-31.md`. First produce a baseline/PR dependency audit and test report; then implement the first unblocked scoped engineering task. Preserve the blocking F5 and G6 decisions until real admissible evidence exists.
+
+## Local-model interoperability workstream (LM-00–LM-07)
+
+Qwen, exact ChatGLM2/GLM checkpoints, and comparable local models are addressed in [docs/LOCAL_MODEL_COMPATIBILITY.md](docs/LOCAL_MODEL_COMPATIBILITY.md) and [catalog/local-model-profiles.json](catalog/local-model-profiles.json). Initial scope is read-only model discovery, structured proposals, and reproducible evaluation. Do not claim actual inference or tool-call compatibility until specific checkpoint/runtime probes pass. Executable model-driven tools depend on F5 containment and the existing release gates. Prioritize LM-00/LM-01 alongside C31-04, then LM-02–05; defer LM-06 to after C31-01.

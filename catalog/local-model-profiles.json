@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "status": "examples-unverified",
+  "default_policy": {
+    "local_only": true,
+    "allow_remote": false,
+    "allow_automatic_model_download": false,
+    "allow_cloud_fallback": false,
+    "enable_tools": false,
+    "requires_f5_for_code_execution": true
+  },
+  "profiles": [
+    {
+      "id": "qwen-local",
+      "family": "Qwen",
+      "backend_options": [
+        "ollama",
+        "vllm",
+        "llama.cpp",
+        "lm-studio"
+      ],
+      "transport": "openai-chat-completions",
+      "endpoint_example": "http://127.0.0.1:11434/v1",
+      "model_id": null,
+      "checkpoint_revision": null,
+      "tool_support": "probe-required",
+      "json_schema_support": "probe-required",
+      "allowed_task_classes": [
+        "read-only-research",
+        "read-only-documentation-proposal"
+      ]
+    },
+    {
+      "id": "chatglm2-local",
+      "family": "ChatGLM2",
+      "backend_options": [
+        "native-transformers",
+        "compatible-http-if-proven"
+      ],
+      "transport": "native-or-adapted",
+      "endpoint_example": null,
+      "model_id": null,
+      "checkpoint_revision": null,
+      "tool_support": "unknown",
+      "json_schema_support": "unknown",
+      "allowed_task_classes": [
+        "read-only-research"
+      ]
+    },
+    {
+      "id": "glm-modern-local",
+      "family": "GLM",
+      "backend_options": [
+        "vllm",
+        "sglang",
+        "compatible-http-if-proven"
+      ],
+      "transport": "openai-chat-completions-if-proven",
+      "endpoint_example": "http://127.0.0.1:8000/v1",
+      "model_id": null,
+      "checkpoint_revision": null,
+      "tool_support": "probe-required",
+      "json_schema_support": "probe-required",
+      "allowed_task_classes": [
+        "read-only-research"
+      ]
+    },
+    {
+      "id": "generic-local",
+      "family": "other",
+      "backend_options": [
+        "ollama",
+        "llama.cpp",
+        "lm-studio",
+        "vllm",
+        "sglang"
+      ],
+      "transport": "openai-chat-completions-if-proven",
+      "endpoint_example": null,
+      "model_id": null,
+      "checkpoint_revision": null,
+      "tool_support": "probe-required",
+      "json_schema_support": "probe-required",
+      "allowed_task_classes": [
+        "read-only-research"
+      ]
+    }
+  ]
+}
