@@ -295,6 +295,7 @@ def _valid_cached_index(index: object, expected_root: Path) -> bool:
         return False
     if index.get("format")!=1 or index.get("root")!=str(expected_root) or not isinstance(index.get("documents"),list):
         return False
+    validated_digests=set()
     for document in index["documents"]:
         if not isinstance(document,dict) or set(document)!={"path","line","text","sha256","tf"}:
             return False
@@ -313,8 +314,12 @@ def _valid_cached_index(index: object, expected_root: Path) -> bool:
         if not isinstance(document["text"],str) or len(document["text"])>2000:
             return False
         digest=document["sha256"]
-        if not isinstance(digest,str) or len(digest)!=64 or any(char not in "0123456789abcdef" for char in digest):
+        if not isinstance(digest,str) or len(digest)!=64:
             return False
+        if digest not in validated_digests:
+            if any(char not in "0123456789abcdef" for char in digest):
+                return False
+            validated_digests.add(digest)
         tf=document["tf"]
         if not isinstance(tf,dict) or not tf:
             return False

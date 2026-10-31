@@ -48,6 +48,19 @@ class RagCacheTests(unittest.TestCase):
                 document={**valid_doc,"path":invalid_path}
                 self.assertFalse(_valid_cached_index({"format":1,"root":str(base),"documents":[document]},base))
 
+    def test_cache_digest_hex_validation_rejects_invalid_repeated_digest(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base=Path(temp); repo=base/"repo"; cache=base/"cache"
+            repo.mkdir(); (repo/"doc.md").write_text("first line\nsecond line\n",encoding="utf-8")
+            _,fingerprint,_=load_or_build_cache(repo,cache)
+            target=cache/f"index-{fingerprint}.json"
+            envelope=json.loads(target.read_text(encoding="utf-8"))
+            envelope["index"]["documents"][1]["sha256"]="z"*64
+            content={"fingerprint":envelope["fingerprint"],"index":envelope["index"]}
+            envelope["sha256"]=hashlib.sha256(json.dumps(content,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
+            target.write_text(json.dumps(envelope),encoding="utf-8")
+            with self.assertRaises(ValueError): load_or_build_cache(repo,cache)
+
     def test_excluded_ancestor_of_repository_excludes_all_sources(self):
         from agent_toolset.rag import _source_records
         with tempfile.TemporaryDirectory() as temp:

@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "scope": "Paired local warm-cache validation comparison; observational; no cross-machine claim.",
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "baseline_commit": "bf8f52f32742b797d12945bde3d1945bfa76111f",
+    "baseline_source_sha256": "5eeed324efe81051462515fc3abad70c837179da15698ee544089bb262b9efba",
+    "candidate_source_sha256": "e1c01c224f845fd8018e7bb19a7d39a74b8fc099c32532e18d2028ad4920137f",
+    "corpus_root": "/Users/null/GitHub/agent_skills",
+    "corpus_fingerprint": "877a80945d8d4ecbe5999e4fe39dedfc66dc551fecc7119e4a0e9ca95d4308dd",
+    "source_files": 115,
+    "source_manifest_equal": true,
+    "repetitions": 7,
+    "command": "python3 scripts/compare_rag_cache.py --baseline HEAD --repetitions 7"
+  },
+  "results": {
+    "baseline_warm_cache_load": {
+      "samples_ms": [
+        151.86,
+        150.2803,
+        151.253,
+        151.114,
+        151.7227,
+        152.1763,
+        152.4405
+      ],
+      "median_latency_ms": 151.7227,
+      "median_python_peak_bytes": 12847802
+    },
+    "candidate_warm_cache_load": {
+      "samples_ms": [
+        138.264,
+        138.3815,
+        138.4523,
+        138.109,
+        138.5186,
+        138.258,
+        138.04
+      ],
+      "median_latency_ms": 138.264,
+      "median_python_peak_bytes": 12847831
+    },
+    "median_latency_change_percent": -8.87,
+    "median_peak_memory_change_bytes": 29
+  },
+  "interpretation": "Validating each distinct digest once rather than once per indexed line reduced paired median warm-cache validation latency by 8.87% on this local corpus. Peak traced memory increased by 29 bytes. Manifest equality and malformed-digest rejection passed; no cross-machine performance claim is made."
+}
