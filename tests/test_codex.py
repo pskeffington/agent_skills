@@ -8,6 +8,7 @@ sys.path.insert(0,str(ROOT/"scripts"))
 from release_gate import evaluate,example,REQUIRED
 from codex_preflight import preflight
 from agent_toolset.assurance.approval import dossier_binding_sha256
+from agent_toolset.assurance.artifact import verify_artifact
 
 class CodexTests(unittest.TestCase):
     def test_default_dossier_fails_closed(self):
@@ -38,6 +39,15 @@ class CodexTests(unittest.TestCase):
             digest=hashlib.sha256(artifact.read_bytes()).hexdigest()
             result=evaluate(self.packet(digest),approval_verifier=verifier,artifact_path=artifact)
             self.assertTrue(result["release_ready"],result)
+
+    def test_malformed_artifact_paths_are_blocked_without_exception(self):
+        for path in (1, {}, "bad\x00path"):
+            with self.subTest(path=repr(path)):
+                result=verify_artifact(path,"a"*64)
+                self.assertEqual("BLOCKED",result["status"])
+        result=evaluate(self.packet(),approval_verifier=lambda *_:True,artifact_path={"invalid":True})
+        self.assertEqual("BLOCKED",result["status"])
+        self.assertEqual("BLOCKED",result["artifact_integrity"]["status"])
 
     def test_obsolete_dossier_schema_is_blocked_even_with_matching_binding(self):
         with tempfile.TemporaryDirectory() as tmp:

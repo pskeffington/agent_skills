@@ -18,9 +18,12 @@ def verify_artifact(path: str | pathlib.Path, expected_sha256: str) -> dict[str,
         return {"status": "BLOCKED", "issues": ["expected SHA256 must be 64 lowercase hexadecimal characters"]}
     if not hasattr(os, "O_NOFOLLOW"):
         return {"status": "BLOCKED", "issues": ["safe artifact verification requires O_NOFOLLOW support"]}
-    target = pathlib.Path(path).expanduser()
-    if not target.is_absolute():
-        target = pathlib.Path.cwd() / target
+    try:
+        target = pathlib.Path(path).expanduser()
+        if not target.is_absolute():
+            target = pathlib.Path.cwd() / target
+    except (OSError, RuntimeError, TypeError, ValueError) as exc:
+        return {"status": "BLOCKED", "issues": [f"artifact path is invalid: {type(exc).__name__}"]}
     if ".." in target.parts:
         return {"status": "BLOCKED", "issues": ["artifact path must not contain parent traversal"]}
     if not hasattr(os, "O_DIRECTORY") or os.open not in os.supports_dir_fd:
@@ -33,8 +36,8 @@ def verify_artifact(path: str | pathlib.Path, expected_sha256: str) -> dict[str,
             os.close(directory_fd)
             directory_fd = next_fd
         descriptor = os.open(target.name, os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NONBLOCK", 0), dir_fd=directory_fd)
-    except OSError as exc:
-        return {"status": "BLOCKED", "issues": [f"artifact cannot be opened safely: {exc}"]}
+    except (OSError, TypeError, ValueError) as exc:
+        return {"status": "BLOCKED", "issues": [f"artifact cannot be opened safely: {type(exc).__name__}"]}
     finally:
         if directory_fd is not None:
             os.close(directory_fd)
