@@ -6,6 +6,7 @@ import pathlib
 import re
 import sys
 from .artifact import verify_artifact
+from .approval import dossier_binding_sha256
 
 REQUIRED = ("G0", "G1", "G2", "G3", "G4", "G5", "G6")
 SHA = re.compile(r"^[0-9a-f]{40}$")
@@ -61,6 +62,17 @@ def _evaluate_dossier(doc, approval_verifier=None):
         issues.append("security reviewer must be independent from implementer")
         contradictions=True
     if isinstance(approval,dict):
+        try:
+            expected_dossier_digest=dossier_binding_sha256(doc)
+        except (TypeError,ValueError) as exc:
+            expected_dossier_digest=None
+            issues.append("release dossier approval binding could not be computed: " + str(exc))
+        approval_dossier_digest=approval.get("dossier_sha256")
+        if not isinstance(approval_dossier_digest,str) or not DIGEST.fullmatch(approval_dossier_digest):
+            issues.append("approval dossier content digest missing or invalid")
+        elif expected_dossier_digest is not None and approval_dossier_digest != expected_dossier_digest:
+            issues.append("approval does not bind the current release dossier contents")
+            contradictions=True
         if approval.get("decision") != "APPROVE":
             issues.append("approval decision must explicitly be APPROVE")
             contradictions = contradictions or approval.get("decision") in ("REJECT", "DENY")

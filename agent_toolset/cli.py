@@ -19,6 +19,13 @@ EXIT = {"PASS": 0, "FAIL": 1, "BLOCKED": 2}
 def _json(value: Any) -> None:
     print(json.dumps(value, sort_keys=True, indent=2))
 
+def _unique_object(pairs):
+    result={}
+    for key,value in pairs:
+        if key in result: raise ValueError(f"duplicate release dossier key: {key}")
+        result[key]=value
+    return result
+
 def parser() -> argparse.ArgumentParser:
     p=argparse.ArgumentParser(prog="agent-toolset",description="Local-first engineering task control plane")
     sub=p.add_subparsers(dest="command",required=True)
@@ -74,23 +81,17 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "release-check":
             from .assurance.release import evaluate
             from .assurance.approval import load_trust_store, make_openssl_approval_verifier
-            def unique_pairs(pairs):
-                result={}
-                for key,value in pairs:
-                    if key in result: raise ValueError(f"duplicate release dossier key: {key}")
-                    result[key]=value
-                return result
-            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8"),object_pairs_hook=unique_pairs)
+            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8"),object_pairs_hook=_unique_object)
             verifier=None
             if args.approval_trust_store:
                 verifier=make_openssl_approval_verifier(load_trust_store(args.approval_trust_store))
             result=evaluate(doc,approval_verifier=verifier,artifact_path=args.artifact)
             _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
         if args.command == "approval-payload":
-            from .assurance.approval import canonical_approval_payload
-            doc=json.loads(pathlib.Path(args.dossier).read_text(encoding="utf-8"))
+            from .assurance.approval import approval_payload_for_dossier
+            doc=json.loads(pathlib.Path(args.dossier).read_text(encoding="utf-8"),object_pairs_hook=_unique_object)
             try:
-                payload=canonical_approval_payload(doc.get("approval"))
+                payload=approval_payload_for_dossier(doc)
             except ValueError as exc:
                 print(json.dumps({"status":"BLOCKED","error":str(exc)}),file=sys.stderr); return 2
             sys.stdout.buffer.write(payload); return 0

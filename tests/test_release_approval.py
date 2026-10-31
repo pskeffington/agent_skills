@@ -1,4 +1,5 @@
 import base64
+import copy
 import hashlib
 import json
 import os
@@ -11,6 +12,7 @@ import unittest
 
 from agent_toolset.assurance.approval import (
     canonical_approval_payload,
+    dossier_binding_sha256,
     load_trust_store,
     make_openssl_approval_verifier,
 )
@@ -49,6 +51,7 @@ class ReleaseApprovalTests(unittest.TestCase):
             "evidence_ref": "approval:request-42",
             "subject_commit": "a" * 40,
             "artifact_sha256": "b" * 64,
+            "dossier_sha256": "c" * 64,
             "invocation_id": "approval-run-42",
             "decision": "APPROVE",
             "approver_id": "operator-42",
@@ -89,9 +92,9 @@ class ReleaseApprovalTests(unittest.TestCase):
             "evidence_ref": ref, "subject_commit": commit,
             "artifact_sha256": artifact, "invocation_id": run,
         }
-        approval = self.sign({**attestation("approval:request-42", "approver-run"),
-            "decision": "APPROVE", "approver_id": "operator-42",
-            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"})
+        approval = {**attestation("approval:request-42", "approver-run"),
+            "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
+            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
             "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
@@ -101,9 +104,20 @@ class ReleaseApprovalTests(unittest.TestCase):
             "staging": attestation("staging:42", "staging-run"),
             "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
         }
+        approval["dossier_sha256"] = dossier_binding_sha256(dossier)
+        dossier["approval"] = self.sign(approval)
         verifier = make_openssl_approval_verifier(self.approvers, openssl=OPENSSL)
         self.assertEqual("BLOCKED", evaluate(dossier)["status"])
         self.assertEqual("PASS", evaluate(dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["target_environment"] = "production"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["gates"]["G0"]["evidence_ref"] = "check:substituted"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["rollback_ref"] = "rollback:other"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
         dossier["artifact_sha256"] = "c" * 64
         self.assertEqual("FAIL", evaluate(dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
 
@@ -116,9 +130,9 @@ class ReleaseApprovalTests(unittest.TestCase):
             "evidence_ref": ref, "subject_commit": commit,
             "artifact_sha256": artifact, "invocation_id": run,
         }
-        approval = self.sign({**attestation("approval:request-42", "approver-run"),
-            "decision": "APPROVE", "approver_id": "operator-42",
-            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"})
+        approval = {**attestation("approval:request-42", "approver-run"),
+            "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
+            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
             "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
@@ -128,6 +142,8 @@ class ReleaseApprovalTests(unittest.TestCase):
             "staging": attestation("staging:42", "staging-run"),
             "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
         }
+        approval["dossier_sha256"] = dossier_binding_sha256(dossier)
+        dossier["approval"] = self.sign(approval)
         dossier_path = self.root / "release.json"
         dossier_path.write_text(json.dumps(dossier), encoding="utf-8")
         trust_path = self.root / "trust.json"

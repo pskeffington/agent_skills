@@ -107,3 +107,8 @@ Task contract: `examples/rag-cache-entry-framing-optimization-task.json`, based 
 ## F8 candidate artifact refresh after RAG cache entry framing optimization (2026-10-30)
 
 Rebuilt from source commit `ea24956c3910e21f67ba51600157a8516af9edda`. Three independent zipapp builds matched SHA256 `f524b17a14110ddaca61cabe6be68492dac841f18504b84bcc24b24807ad660f` (37,424 bytes). Artifact `doctor`, matching digest, stale-digest rejection, and standalone RAG cache miss/hit with verified citations all passed. GitHub Actions run `41156636091` succeeded for the source commit. Staging and deployment evidence remain absent; no deployment occurred.
+
+
+## R13 release approval dossier binding (2026-10-30)
+
+Task contract: `examples/release-dossier-binding-task.json`, based on `d27ab2906c4b71d4c58204ffeefbdf1802706971`. Review found that the detached approval signature bound approver, decision, commit, and artifact but did not cover gate dispositions, target environment, rollback reference, attestations, or check provenance. Approval payloads now include a SHA-256 of the canonical full dossier, excluding only the detached signature and its own digest field. The evaluator recomputes and compares that digest; changed dossier contents fail release evaluation. The CLI rejects duplicate JSON keys when generating approval bytes, the release schema requires the new digest, and operator/security documentation describes regeneration and re-signing after any dossier edit. Focused release/CLI/Codex tests pass 23/23; full suite passes 88/88; schema validation/preflight pass; synthetic release remains BLOCKED (exit 2). Independent security review PASS: `docs/reviews/release-dossier-signature-binding-review-2026-10-30.md`. CI evidence is pending for this commit.

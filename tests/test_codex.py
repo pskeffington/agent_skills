@@ -7,6 +7,7 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
 from release_gate import evaluate,example,REQUIRED
 from codex_preflight import preflight
+from agent_toolset.assurance.approval import dossier_binding_sha256
 
 class CodexTests(unittest.TestCase):
     def test_default_dossier_fails_closed(self):
@@ -17,7 +18,7 @@ class CodexTests(unittest.TestCase):
     def packet(self,digest="b"*64):
         commit="a"*40
         attestation=lambda ref, invocation: {"evidence_ref":ref,"subject_commit":commit,"artifact_sha256":digest,"invocation_id":invocation}
-        return {"commit":commit,"artifact_sha256":digest,"target_environment":"staging",
+        dossier={"commit":commit,"artifact_sha256":digest,"target_environment":"staging",
           "gates":{g:{"status":"PASS","evidence_ref":f"evidence:{g}","reason":"required checks passed"} for g in REQUIRED},
           "implementation":attestation("implementation:12","implementer-run"),
           "independent_review":attestation("review:12","reviewer-run"),
@@ -25,6 +26,8 @@ class CodexTests(unittest.TestCase):
           "staging":attestation("stage:12","stage-run"),
           "approval":{**attestation("approval:12","approver-run"),"decision":"APPROVE","approver_id":"operator-42","authority_ref":"change-control:42"},
           "rollback_ref":"runbook:12","check_provenance":["ci:123"]}
+        dossier["approval"]["dossier_sha256"]=dossier_binding_sha256(dossier)
+        return dossier
 
     def test_structured_exact_subject_dossier_classifies_ready_only(self):
         self.assertFalse(evaluate(self.packet())["release_ready"])
@@ -52,7 +55,7 @@ class CodexTests(unittest.TestCase):
         packet=self.packet(); packet["independent_review"]="review:12"
         result=evaluate(packet)
         self.assertFalse(result["release_ready"])
-        self.assertEqual("BLOCKED",result["status"])
+        self.assertEqual("FAIL",result["status"])
 
     def test_same_invocation_cannot_review_or_secure_approval(self):
         packet=self.packet(); packet["independent_review"]["invocation_id"]="implementer-run"

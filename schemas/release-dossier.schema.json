@@ -340,6 +340,7 @@
         "evidence_ref",
         "subject_commit",
         "artifact_sha256",
+        "dossier_sha256",
         "invocation_id",
         "decision",
         "approver_id",
@@ -357,6 +358,10 @@
           "pattern": "^[0-9a-f]{40}$"
         },
         "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "dossier_sha256": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
         },

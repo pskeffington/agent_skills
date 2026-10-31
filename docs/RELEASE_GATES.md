@@ -17,7 +17,7 @@ All gate outcomes must be **PASS**, **FAIL**, **BLOCKED**, or **NOT_APPLICABLE**
 - `FAIL`: check ran and found an unacceptable defect; return to owning stage.
 - `NOT_APPLICABLE`: require a documented rationale; cannot disguise unrun mandatory checks.
 - On new commit, re-evaluate affected downstream evidence.
-- Approval signatures are checked against an operator-managed public-key trust store and bind the approver, authority reference, invocation, decision, exact source commit, and artifact digest. Accepted keys are RSA >=2048 bits or ECDSA P-256/P-384/P-521. A signature does not authenticate external CI, review, security, or staging references.
+- Approval signatures are checked against an operator-managed public-key trust store and bind the approver, authority reference, invocation, decision, exact source commit, artifact digest, and SHA-256 of the complete canonical dossier. The dossier binding excludes only the detached signature and its own digest field. Any change to gates, target, rollback, attestations, or provenance requires a new signature. Accepted keys are RSA >=2048 bits or ECDSA P-256/P-384/P-521. A signature does not authenticate external CI, review, security, or staging references.
 - Deployment, migration, external publication and irreversible changes require a separate, explicit human authorization. A green documentation check does not constitute authorization.
 
 ## Example checkpoint

@@ -41,7 +41,7 @@ class CLITests(unittest.TestCase):
             failed=self.run_cli("release-check",str(dossier),"--artifact",str(artifact)); self.assertEqual(1,failed.returncode); self.assertEqual("FAIL",json.loads(failed.stdout)["status"])
             self.assertEqual("FAIL",json.loads(failed.stdout)["artifact_integrity"]["status"])
     def test_approval_payload_command_emits_exact_canonical_bytes(self):
-        from agent_toolset.assurance.approval import canonical_approval_payload
+        from agent_toolset.assurance.approval import approval_payload_for_dossier, dossier_binding_sha256
         approval={"evidence_ref":"approval:42","subject_commit":"a"*40,"artifact_sha256":"b"*64,
           "invocation_id":"approval-run-42","decision":"APPROVE","approver_id":"operator-42",
           "authority_ref":"change-control:42","signature_algorithm":"openssl-dgst-sha256"}
@@ -50,7 +50,12 @@ class CLITests(unittest.TestCase):
             dossier.write_text(json.dumps({"approval":approval}),encoding="utf-8")
             result=self.run_cli("approval-payload",str(dossier))
             self.assertEqual(0,result.returncode,result.stderr)
-            self.assertEqual(canonical_approval_payload(approval),result.stdout.encode())
+            self.assertEqual(approval_payload_for_dossier({"approval":approval}),result.stdout.encode())
+            signed=json.loads(result.stdout)
+            self.assertEqual(dossier_binding_sha256({"approval":approval}),signed["dossier_sha256"])
+            dossier.write_text('{"approval":{"evidence_ref":"one","evidence_ref":"two"}}',encoding="utf-8")
+            duplicate=self.run_cli("approval-payload",str(dossier))
+            self.assertEqual(2,duplicate.returncode)
     def test_artifact_check_pass_fail_and_symlink_blocked(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=pathlib.Path(tmp).resolve(); artifact=root/"candidate.pyz"; artifact.write_bytes(b"immutable candidate bytes\n")
