@@ -4,17 +4,17 @@
 | --- | --- | --- | --- |
 | A0 research | DONE | primary sources, role/skill/runtime distinction | research links and architecture recorded |
 | A1 design | DONE | L0–L5 hierarchy, stage DAG and resource provenance | machine-readable catalogs |
-| A2 skills | AUTHORED; UNVERIFIED | portable orchestrator and specialist skills | each has valid SKILL.md |
-| A3 contracts | AUTHORED; UNVERIFIED | task, handoff and evidence schemas + examples | stdlib validator and tests pass |
-| A4 automation | SCAFFOLDED; CI UNVERIFIED | CI harness and runtime-specific adapters | permissions, branch protection, no self-approval |
-| A5 pilot | PLANNED | run a bounded change in one selected target repo | real traces, evidence, failure recovery |
+| A2 skills | AUTHORED; STRUCTURALLY VERIFIED | portable orchestrator and specialist skills | role/skill registry and resource-chain checks pass; runtime skill loading/use remains unverified |
+| A3 contracts | IMPLEMENTED; VERIFIED | task, handoff and evidence schemas + examples | stdlib validator and 103-test suite pass; current CI run 41160740474 passed |
+| A4 automation | CI VERIFIED; BRANCH PROTECTION AND RUNTIME BLOCKED | CI harness and runtime-specific adapters | `structural` workflow passes; GitHub rulesets empty and `main` reports unprotected; Codex CLI 0.147.0 flags present, but Docker daemon unavailable and `sandbox-exec` denied |
+| A5 pilot | LOCAL LIBRARY CHANGES VERIFIED; REAL AGENT PILOT BLOCKED | run a bounded change in one selected target repo | local change evidence exists; actual Codex model execution and trusted host-containment trace remain unavailable |
 | A6 production | BLOCKED | controlled deployment integration | owner approval, threat review, rollback, monitoring |
 
 ## Next work queue
-1. Establish local checks as a required protected-branch check after CI is configured.
-2. Add Codex/Copilot-specific role adapters without hardwiring proprietary syntax into portable skills.
-3. Add transaction-safe event logging, a work-lease mechanism and handoff replay tests.
-4. Pilot a small, non-production task and evaluate false PASS, missing evidence, duplicate handoffs, context load and cost.
+1. Repository administrator: require the existing `structural` check for the default branch and provide read-back evidence; see `docs/BRANCH_PROTECTION.md`.
+2. Host runtime owner: provision approved process containment and a trusted verifier that emits task-bound attestations; Docker daemon is unavailable and macOS `sandbox-exec` currently returns `Operation not permitted`.
+3. After A4 unblocks, run a real bounded Codex CLI pilot in a dedicated worktree and retain invocation, containment, output, and failure-recovery traces.
+4. Keep staging, approval, and rollback evidence human-owned; evaluate staging only after an operator-designated target and explicit authorization exist.
 5. Add signed build provenance and per-repository permissions only after an authorized runtime exists.
 
 This commit establishes the control plane; it does not deploy or execute a multi-agent service.
