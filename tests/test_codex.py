@@ -19,14 +19,14 @@ class CodexTests(unittest.TestCase):
     def packet(self,digest="b"*64):
         commit="a"*40
         attestation=lambda ref, invocation: {"evidence_ref":ref,"subject_commit":commit,"artifact_sha256":digest,"invocation_id":invocation}
-        dossier={"schema_version":"2.0.0","commit":commit,"artifact_sha256":digest,"target_environment":"staging",
+        dossier={"schema_version":"3.0.0","commit":commit,"artifact_sha256":digest,"target_environment":"staging",
           "gates":{g:{"status":"PASS","evidence_ref":f"evidence:{g}","reason":"required checks passed"} for g in REQUIRED},
           "implementation":attestation("implementation:12","implementer-run"),
           "independent_review":attestation("review:12","reviewer-run"),
           "security_review":attestation("security:12","security-run"),
           "staging":attestation("stage:12","stage-run"),
           "approval":{**attestation("approval:12","approver-run"),"decision":"APPROVE","approver_id":"operator-42","authority_ref":"change-control:42"},
-          "rollback_ref":"runbook:12","check_provenance":["ci:123"]}
+          "rollback_ref":"runbook:12","check_provenance":[{"name":"CI check","command":["ci","run","123"],"result":"PASS","subject_commit":commit,"artifact_sha256":digest,"evidence_ref":"ci:123","invocation_id":"ci-run-123","output_sha256":"c"*64}]}
         dossier["approval"]["dossier_sha256"]=dossier_binding_sha256(dossier)
         return dossier
 
@@ -59,7 +59,21 @@ class CodexTests(unittest.TestCase):
             verifier=lambda approval, commit, artifact_digest: True
             result=evaluate(packet,approval_verifier=verifier,artifact_path=artifact)
             self.assertEqual("BLOCKED",result["status"])
-            self.assertEqual(["unsupported release dossier schema version (expected 2.0.0)"],result["issues"])
+            self.assertEqual(["unsupported release dossier schema version (expected 3.0.0)"],result["issues"])
+
+    def test_check_provenance_is_structured_and_bound_to_candidate(self):
+        packet=self.packet()
+        packet["check_provenance"]=["ci:123"]
+        self.assertIn("check provenance entry 1 is malformed",evaluate(packet)["issues"])
+        packet=self.packet()
+        packet["check_provenance"][0]["subject_commit"]="f"*40
+        self.assertIn("check provenance entry 1 is for a different commit",evaluate(packet)["issues"])
+        packet=self.packet()
+        packet["check_provenance"][0]["artifact_sha256"]="f"*64
+        self.assertIn("check provenance entry 1 is for a different artifact",evaluate(packet)["issues"])
+        packet=self.packet()
+        packet["check_provenance"][0]["result"]="BLOCKED"
+        self.assertIn("check provenance entry 1 is not PASS",evaluate(packet)["issues"])
 
     def test_malformed_unhashable_gate_status_fails_closed(self):
         packet=self.packet()

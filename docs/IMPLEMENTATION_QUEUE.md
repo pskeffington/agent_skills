@@ -22,6 +22,10 @@ Task/evidence: `examples/a4-ci-runtime-readiness-task.json` and `examples/a4-ci-
 
 Independent review of HEAD `12f98fd3f12a829ca19bfdca4d3d2281bad2cd21` found that the verifier checks task/run/worktree/base fields before launch but is not given the resulting PID or containment handle; Codex is later started directly with `subprocess.Popen()`. Synthetic verifier tests are routing tests and do not prove platform containment. Docker daemon is unavailable (`docker info` exit 1); deny-by-default `sandbox-exec` probe is denied (exit 71, `Operation not permitted`). Task `examples/f5-process-bound-launch-task.json` is BLOCKED pending an authorized host executor that launches Codex within the boundary, returns process-bound evidence, and controls complete process-tree cancellation. Review: `docs/reviews/f5-process-bound-containment-review-2026-10-31.md`. No model invocation occurred.
 
+## F8 structured check provenance (2026-10-31)
+
+Task: `examples/release-check-provenance-task.json`. Release dossier schema advances to `3.0.0`: each check record now requires an argv array, result, candidate commit, artifact digest, evidence reference, invocation ID, and output SHA-256. The evaluator rejects malformed records, non-PASS results, and records for another commit or artifact. Approval binding continues to cover the full dossier, including provenance. These fields validate record shape and subject consistency; evidence authenticity still requires verification in its source system. Focused release/approval tests pass 17/17, full suite 104/104, validator and preflight pass, and synthetic release remains BLOCKED (exit 2). Independent review PASS: `docs/reviews/release-check-provenance-review-2026-10-31.md`. No release gate was promoted.
+
 ## Task handoff discipline
 For each row, create task ID `F<n>-<workstream>`, scope include/exclude files, baseline SHA, owner, fixture, tested acceptance, exact exit code, blocked reason and reviewer. Commit each phase separately.
 

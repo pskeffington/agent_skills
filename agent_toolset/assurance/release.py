@@ -9,7 +9,7 @@ from .artifact import verify_artifact
 from .approval import dossier_binding_sha256
 
 REQUIRED = ("G0", "G1", "G2", "G3", "G4", "G5", "G6")
-DOSSIER_SCHEMA_VERSION = "2.0.0"
+DOSSIER_SCHEMA_VERSION = "3.0.0"
 SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^[0-9a-f]{64}$")
 ATTESTATIONS = ("implementation", "independent_review", "security_review", "staging", "approval")
@@ -108,8 +108,38 @@ def _evaluate_dossier(doc, approval_verifier=None):
     if not _pointer(doc.get("rollback_ref")): issues.append("rollback plan missing")
     if not _pointer(doc.get("target_environment")): issues.append("target environment missing")
     provenance=doc.get("check_provenance")
-    if not isinstance(provenance,list) or not provenance or not all(_pointer(item) for item in provenance):
+    if not isinstance(provenance,list) or not provenance:
         issues.append("checks lack provenance")
+    else:
+        required_check_fields={"name","command","result","subject_commit","artifact_sha256","evidence_ref","invocation_id","output_sha256"}
+        for number,check in enumerate(provenance,1):
+            label=f"check provenance entry {number}"
+            if type(check) is not dict or set(check)!=required_check_fields:
+                issues.append(label + " is malformed")
+                continue
+            if not _pointer(check.get("name")):
+                issues.append(label + " name missing")
+            command=check.get("command")
+            if not isinstance(command,list) or not command or not all(isinstance(part,str) and part for part in command):
+                issues.append(label + " command must be a nonempty argument array")
+            result=check.get("result")
+            if result not in ("PASS","FAIL","BLOCKED"):
+                issues.append(label + " has invalid result")
+            elif result != "PASS":
+                issues.append(label + " is not PASS")
+                contradictions = contradictions or result == "FAIL"
+            if not isinstance(commit,str) or check.get("subject_commit") != commit:
+                issues.append(label + " is for a different commit")
+                contradictions=True
+            if not isinstance(digest,str) or check.get("artifact_sha256") != digest:
+                issues.append(label + " is for a different artifact")
+                contradictions=True
+            if not _pointer(check.get("evidence_ref")):
+                issues.append(label + " evidence reference missing")
+            if not _pointer(check.get("invocation_id")):
+                issues.append(label + " invocation ID missing")
+            if not isinstance(check.get("output_sha256"),str) or not DIGEST.fullmatch(check["output_sha256"]):
+                issues.append(label + " output SHA256 missing or invalid")
     release_ready=not issues
     status="PASS" if release_ready else ("FAIL" if contradictions else "BLOCKED")
     return {"release_ready":release_ready,"status":status,"issues":issues,"notice":"Read-only evaluation. No deployment performed."}

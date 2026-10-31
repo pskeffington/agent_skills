@@ -28,6 +28,7 @@ EXAMPLE_SCHEMAS = {
     "release-artifact-binding-task.json": "task-contract.schema.json",
     "release-dossier-binding-task.json": "task-contract.schema.json",
     "release-dossier-schema-version-task.json": "task-contract.schema.json",
+    "release-check-provenance-task.json": "task-contract.schema.json",
     "release-not-applicable-gates-task.json": "task-contract.schema.json",
     "rag-cache-optimization-task.json": "task-contract.schema.json",
     "rag-source-scan-optimization-task.json": "task-contract.schema.json",

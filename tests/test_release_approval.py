@@ -96,13 +96,13 @@ class ReleaseApprovalTests(unittest.TestCase):
             "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
             "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
-            "schema_version": "2.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "schema_version": "3.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
             "implementation": attestation("implementation:42", "implementer-run"),
             "independent_review": attestation("review:42", "review-run"),
             "security_review": attestation("security:42", "security-run"),
             "staging": attestation("staging:42", "staging-run"),
-            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
+            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": [{"name":"unit tests","command":["python3","-m","unittest","discover","-s","tests"],"result":"PASS","subject_commit":commit,"artifact_sha256":artifact,"evidence_ref":"ci:run-42","invocation_id":"ci-run-42","output_sha256":"d"*64}],
         }
         approval["dossier_sha256"] = dossier_binding_sha256(dossier)
         dossier["approval"] = self.sign(approval)
@@ -138,6 +138,9 @@ class ReleaseApprovalTests(unittest.TestCase):
         altered_dossier["gates"]["G0"]["evidence_ref"] = "check:substituted"
         self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
         altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["check_provenance"][0]["result"] = "BLOCKED"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
         altered_dossier["rollback_ref"] = "rollback:other"
         self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
         dossier["artifact_sha256"] = "c" * 64
@@ -156,13 +159,13 @@ class ReleaseApprovalTests(unittest.TestCase):
             "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
             "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
-            "schema_version": "2.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "schema_version": "3.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
             "implementation": attestation("implementation:42", "implementer-run"),
             "independent_review": attestation("review:42", "review-run"),
             "security_review": attestation("security:42", "security-run"),
             "staging": attestation("staging:42", "staging-run"),
-            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
+            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": [{"name":"unit tests","command":["python3","-m","unittest","discover","-s","tests"],"result":"PASS","subject_commit":commit,"artifact_sha256":artifact,"evidence_ref":"ci:run-42","invocation_id":"ci-run-42","output_sha256":"d"*64}],
         }
         approval["dossier_sha256"] = dossier_binding_sha256(dossier)
         dossier["approval"] = self.sign(approval)

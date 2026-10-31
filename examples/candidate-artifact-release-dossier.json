@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "3.0.0",
   "commit": "dae099ce739f9b6733cc89c8f53bc971f19c0e74",
   "artifact_sha256": "12f6f61e9c698200930a8d6d745b0a0092ece607784395c1b1b7436f2520f6ab",
   "target_environment": "local-readiness-evaluation",

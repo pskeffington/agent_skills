@@ -2,7 +2,7 @@
 
 All gate outcomes must be **PASS**, **FAIL**, **BLOCKED**, or **NOT_APPLICABLE** with a reason and evidence pointer. Only PASS or a justified NOT_APPLICABLE disposition included in the trusted, dossier-bound approval admits a candidate. Missing N/A rationale/pointer or unavailable approval verification remains BLOCKED; FAIL remains rejecting. No invented success or bypass based on missing tooling.
 
-Release dossiers use schema version `2.0.0`; the evaluator blocks older or unknown versions. Version 2 adds the signed `dossier_sha256` binding.
+Release dossiers use schema version `3.0.0`; the evaluator blocks older or unknown versions. Version 3 adds structured check provenance bound to the subject commit and artifact digest.
 
 | Gate | Owner | Minimum evidence |
 | --- | --- | --- |
