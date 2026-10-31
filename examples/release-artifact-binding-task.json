@@ -40,7 +40,7 @@
   ],
   "risk": "high",
   "owner_role": "integrator",
-  "status": "review",
+  "status": "done",
   "depends_on": [],
   "evidence_refs": [
     "base: 7aa3b3b5b843e6ede3405279500f47f6958719e4",
@@ -50,8 +50,12 @@
     "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
     "review: independent code review PASS on current tree",
-    "review: security assurance PASS; deployment must use the same immutable bytes checked"
+    "review: security assurance PASS; deployment must use the same immutable bytes checked",
+    "artifact: source commit 4fdd21aceb51e0bd39387fef27ef81bbb710a2b1; three independent zipapp builds byte-identical at SHA256 95098ab205bac9afebeba863467feea1319b84c01f69c6b9ee834b3dfe06f881",
+    "artifact validation: zipapp doctor PASS; matching digest PASS; stale digest FAIL exit 1; matching synthetic release dossier BLOCKED exit 2",
+    "CI: GitHub Actions run 41155050200 succeeded for commit 4fdd21aceb51e0bd39387fef27ef81bbb710a2b1",
+    "artifact record: docs/CANDIDATE_ARTIFACT.md"
   ],
-  "blocker": "Rebuild and verify the standalone candidate artifact from the final implementation commit; staging and release authorization remain outside this task.",
+  "blocker": null,
   "approval_ref": null
 }
