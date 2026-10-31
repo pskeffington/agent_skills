@@ -23,6 +23,7 @@ IGNORED_DIRS = {
 IGNORED_FILES = {".env", ".npmrc", ".pypirc", "id_rsa", "id_ed25519", "id_ecdsa", "known_hosts"}
 IGNORED_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".jks", ".keystore"}
 CACHE_FORMAT = 1
+CACHE_ENTRY_MAGIC = b"AGENT-TOOLSET-CACHE/2\n"
 _ORIGINAL_OS_OPEN = os.open
 
 def terms(value: str) -> list[str]:
@@ -343,6 +344,39 @@ def _valid_cached_index(index: object, expected_root: Path) -> bool:
                 return False
     return True
 
+def _encode_cache_entry(fingerprint: str, index: dict) -> bytes:
+    """Frame canonical index JSON so its digest can be checked without re-encoding it."""
+    payload=json.dumps(index,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode("utf-8")
+    digest=hashlib.sha256(payload).hexdigest().encode("ascii")
+    return CACHE_ENTRY_MAGIC+fingerprint.encode("ascii")+b"\n"+digest+b"\n"+payload
+
+def _decode_cache_entry(data: bytes, expected_fingerprint: str) -> dict:
+    if not data.startswith(CACHE_ENTRY_MAGIC):
+        raise ValueError("corrupt cache entry: unsupported format")
+    fingerprint_start=len(CACHE_ENTRY_MAGIC)
+    fingerprint_end=data.find(b"\n",fingerprint_start)
+    digest_end=data.find(b"\n",fingerprint_end+1) if fingerprint_end>=0 else -1
+    try:
+        if fingerprint_end<0 or digest_end<0:
+            raise ValueError("corrupt cache entry: malformed header")
+        fingerprint=data[fingerprint_start:fingerprint_end]
+        digest=data[fingerprint_end+1:digest_end]
+        if fingerprint.decode("ascii")!=expected_fingerprint:
+            raise ValueError("corrupt cache entry: source fingerprint mismatch")
+        if len(digest)!=64 or any(byte not in b"0123456789abcdef" for byte in digest):
+            raise ValueError("corrupt cache entry: malformed digest")
+        payload_start=digest_end+1
+        if hashlib.sha256(memoryview(data)[payload_start:]).hexdigest().encode("ascii")!=digest:
+            raise ValueError("corrupt cache entry: digest mismatch")
+        index=json.loads(data[payload_start:])
+    except (UnicodeError,json.JSONDecodeError,ValueError) as exc:
+        if isinstance(exc,ValueError) and str(exc).startswith("corrupt cache entry:"):
+            raise
+        raise ValueError(f"corrupt cache entry: {exc}") from exc
+    if type(index) is not dict:
+        raise ValueError("corrupt cache entry: invalid index")
+    return index
+
 def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEFAULT_SUFFIXES) -> tuple[dict,str,bool]:
     """Load/create an atomic content-addressed cache; corrupt or symlinked entries fail closed."""
     base=Path(root).resolve(strict=True)
@@ -357,7 +391,7 @@ def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEF
     directory_fd=_open_directory_nofollow(directory)
     try:
         fingerprint,_,records=cache_fingerprint(base,suffixes=suffixes,exclude_paths=(directory.resolve(strict=True),))
-        entry_name=f"index-{fingerprint}.json"
+        entry_name=f"index-v2-{fingerprint}.json"
         try:
             entry_fd=_ORIGINAL_OS_OPEN(entry_name,os.O_RDONLY|os.O_NOFOLLOW|getattr(os,"O_CLOEXEC",0),dir_fd=directory_fd)
         except FileNotFoundError:
@@ -371,27 +405,15 @@ def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEF
                 metadata=os.fstat(entry_fd)
                 if not stat.S_ISREG(metadata.st_mode) or metadata.st_size>64_000_000:
                     raise ValueError("corrupt cache entry: invalid file or size limit exceeded")
-                try:
-                    envelope=json.loads(_read_fd(entry_fd,64_000_000).decode("utf-8"))
-                except (UnicodeError,json.JSONDecodeError) as exc:
-                    raise ValueError(f"corrupt cache entry: {exc}") from exc
+                data=_read_fd(entry_fd,64_000_000)
             finally:
                 os.close(entry_fd)
-            if not isinstance(envelope,dict) or set(envelope)!={"fingerprint","index","sha256"}:
-                raise ValueError("corrupt cache entry: invalid envelope")
-            content={"fingerprint":envelope["fingerprint"],"index":envelope["index"]}
-            digest=hashlib.sha256(json.dumps(content,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
-            index=envelope["index"]
-            if envelope["fingerprint"]!=fingerprint or envelope["sha256"]!=digest:
-                raise ValueError("corrupt cache entry: digest or source fingerprint mismatch")
+            index=_decode_cache_entry(data,fingerprint)
             if not _valid_cached_index(index,base):
                 raise ValueError("corrupt cache entry: invalid index")
             return index,fingerprint,True
         index=_make_index(base,records)
-        content={"fingerprint":fingerprint,"index":index}
-        digest=hashlib.sha256(json.dumps(content,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
-        envelope={**content,"sha256":digest}
-        data=(json.dumps(envelope,sort_keys=True,separators=(",",":"),ensure_ascii=False)+"\n").encode()
+        data=_encode_cache_entry(fingerprint,index)
         temporary=f".index-{secrets.token_hex(12)}.tmp"
         flags=os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW|getattr(os,"O_CLOEXEC",0)
         temp_fd=_ORIGINAL_OS_OPEN(temporary,flags,0o600,dir_fd=directory_fd)
