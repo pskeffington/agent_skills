@@ -74,7 +74,12 @@ def main() -> int:
             "baseline": _measure(baseline_module, root, baseline_cache, args.repetitions),
             "candidate": _measure(candidate_module, root, candidate_cache, args.repetitions),
         }
-        fingerprint, _, records = candidate_module.cache_fingerprint(root)
+        baseline_fingerprint, _, baseline_records = baseline_module.cache_fingerprint(root)
+        fingerprint, _, candidate_records = candidate_module.cache_fingerprint(root)
+        baseline_manifest = [(path, digest) for path, _, digest in baseline_records]
+        candidate_manifest = [(path, digest) for path, _, digest in candidate_records]
+        if baseline_manifest != candidate_manifest or baseline_fingerprint != fingerprint:
+            raise RuntimeError("baseline and candidate source manifests differ")
     print(json.dumps({
         "scope": "paired local warm-cache validation comparison; observational; no cross-machine claim",
         "baseline_revision": args.baseline,
@@ -82,7 +87,8 @@ def main() -> int:
         "candidate_source_sha256": hashlib.sha256(candidate).hexdigest(),
         "corpus_root": str(root),
         "corpus_fingerprint": fingerprint,
-        "source_files": len(records),
+        "source_files": len(candidate_records),
+        "source_manifest_equal": True,
         "repetitions": args.repetitions,
         "results": results,
     }, indent=2))

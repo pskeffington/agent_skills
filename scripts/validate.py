@@ -15,6 +15,8 @@ EXAMPLE_SCHEMAS = {
     "codex-runner-task.json": "task-contract.schema.json",
     "release-artifact-binding-task.json": "task-contract.schema.json",
     "rag-cache-optimization-task.json": "task-contract.schema.json",
+    "rag-source-scan-optimization-task.json": "task-contract.schema.json",
+    "rag-source-scan-optimization-task.json": "task-contract.schema.json",
     "feature-handoff.json": "handoff.schema.json",
     "feature-evidence.json": "evidence.schema.json",
     "rag-evaluation.json": "rag-evaluation.schema.json",

@@ -111,24 +111,85 @@ def _is_sensitive(relative: str) -> bool:
 
 def _source_records(root: Path, suffixes: Iterable[str], exclude_paths: Iterable[Path] = ()) -> list[tuple[str, bytes, str]]:
     root = root.resolve(strict=True)
-    excluded=[Path(item).absolute() for item in exclude_paths]
-    records=[]
-    for path in sorted(root.rglob("*")):
-        absolute=path.absolute()
-        if any(absolute == item or item in absolute.parents for item in excluded):
-            continue
-        relative=path.relative_to(root)
-        relative_name=relative.as_posix()
-        if _is_sensitive(relative_name):
-            continue
-        if path.is_symlink() or path.suffix.lower() not in suffixes:
-            continue
+    excluded=[]
+    exclude_root=False
+    for item in exclude_paths:
+        absolute=Path(item).absolute()
         try:
-            raw=_read_confined_file(root,relative_name)
-            raw.decode("utf-8")
-        except (UnicodeError,OSError,ValueError):
+            relative=absolute.relative_to(root).as_posix()
+            excluded.append(relative)
+        except ValueError:
+            if absolute==root or absolute in root.parents:
+                exclude_root=True
             continue
-        records.append((relative_name,raw,hashlib.sha256(raw).hexdigest()))
+    if exclude_root:
+        return []
+    records=[]
+    flags=os.O_RDONLY | getattr(os,"O_CLOEXEC",0)
+    directory_flags=flags | getattr(os,"O_DIRECTORY",0) | os.O_NOFOLLOW
+
+    def is_excluded(relative: str) -> bool:
+        return any(relative==item or item=="." or relative.startswith(item+"/") for item in excluded)
+
+    def visit(directory_fd: int, prefix: str) -> None:
+        # scandir consumes its descriptor, so scan a duplicate and retain the
+        # original directory handle for safe dir_fd-relative child opens.
+        try:
+            with os.scandir(os.dup(directory_fd)) as iterator:
+                entries=sorted(iterator,key=lambda entry:entry.name)
+        except OSError:
+            return
+        for entry in entries:
+            relative=f"{prefix}/{entry.name}" if prefix else entry.name
+            if is_excluded(relative) or _is_sensitive(relative):
+                continue
+            try:
+                metadata=os.stat(entry.name,dir_fd=directory_fd,follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISDIR(metadata.st_mode):
+                try:
+                    child_fd=_ORIGINAL_OS_OPEN(entry.name,directory_flags,dir_fd=directory_fd)
+                except OSError:
+                    continue
+                try:
+                    if stat.S_ISDIR(os.fstat(child_fd).st_mode):
+                        visit(child_fd,relative)
+                finally:
+                    os.close(child_fd)
+                continue
+            if not stat.S_ISREG(metadata.st_mode) or Path(entry.name).suffix.lower() not in suffixes:
+                continue
+            try:
+                file_fd=_ORIGINAL_OS_OPEN(entry.name,flags|os.O_NOFOLLOW,dir_fd=directory_fd)
+                try:
+                    metadata=os.fstat(file_fd)
+                    if not stat.S_ISREG(metadata.st_mode) or metadata.st_size>MAX_BYTES:
+                        continue
+                    chunks=[]
+                    remaining=MAX_BYTES+1
+                    while remaining:
+                        chunk=os.read(file_fd,min(65536,remaining))
+                        if not chunk:
+                            break
+                        chunks.append(chunk)
+                        remaining-=len(chunk)
+                    raw=b"".join(chunks)
+                    if len(raw)>MAX_BYTES:
+                        continue
+                finally:
+                    os.close(file_fd)
+                raw.decode("utf-8")
+            except (UnicodeError,OSError,ValueError):
+                continue
+            records.append((relative,raw,hashlib.sha256(raw).hexdigest()))
+
+    root_fd=_open_directory_nofollow(root)
+    try:
+        visit(root_fd,"")
+    finally:
+        os.close(root_fd)
+    records.sort(key=lambda record:record[0])
     return records
 
 def _make_index(root: Path, records: list[tuple[str,bytes,str]]) -> dict:

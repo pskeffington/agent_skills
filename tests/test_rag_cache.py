@@ -48,6 +48,13 @@ class RagCacheTests(unittest.TestCase):
                 document={**valid_doc,"path":invalid_path}
                 self.assertFalse(_valid_cached_index({"format":1,"root":str(base),"documents":[document]},base))
 
+    def test_excluded_ancestor_of_repository_excludes_all_sources(self):
+        from agent_toolset.rag import _source_records
+        with tempfile.TemporaryDirectory() as temp:
+            parent=Path(temp); repo=parent/"repo"; repo.mkdir()
+            (repo/"notes.md").write_text("excluded by ancestor\n",encoding="utf-8")
+            self.assertEqual([],_source_records(repo, {".md"}, exclude_paths=(parent.resolve(),)))
+
     def test_symlinked_cache_directory_and_entry_rejected(self):
         with tempfile.TemporaryDirectory() as temp, tempfile.TemporaryDirectory() as other:
             base=pathlib.Path(temp); repo=base/"repo"; repo.mkdir(); (repo/"doc.md").write_text("link test\\n")
