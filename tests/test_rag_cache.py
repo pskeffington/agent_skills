@@ -24,6 +24,31 @@ class RagCacheTests(unittest.TestCase):
             self.assertFalse(hit3); self.assertNotEqual(fingerprint1,fingerprint3)
             self.assertTrue(search(third,"violet"))
 
+    def test_cache_hit_and_miss_each_scan_source_once(self):
+        from unittest.mock import patch
+        import agent_toolset.rag as rag
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); cache=root/"cache"; repo=root/"repo"; repo.mkdir()
+            (repo/"doc.md").write_text("single source scan\n",encoding="utf-8")
+            real=rag.cache_fingerprint
+            with patch.object(rag,"cache_fingerprint",wraps=real) as fingerprint:
+                _,_,hit=load_or_build_cache(repo,cache)
+                self.assertFalse(hit); self.assertEqual(1,fingerprint.call_count)
+            with patch.object(rag,"cache_fingerprint",wraps=real) as fingerprint:
+                _,_,hit=load_or_build_cache(repo,cache)
+                self.assertTrue(hit); self.assertEqual(1,fingerprint.call_count)
+
+    def test_cache_excluded_outputs_do_not_change_fingerprint(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo=Path(temp)/"repo"; cache=Path(temp)/"cache"; repo.mkdir()
+            (repo/"doc.md").write_text("stable corpus\n",encoding="utf-8")
+            output=repo/"benchmark.json"; output.write_text("first",encoding="utf-8")
+            first,fp1,hit1=load_or_build_cache(repo,cache,exclude_paths=(output,))
+            output.write_text("different unrelated output",encoding="utf-8")
+            second,fp2,hit2=load_or_build_cache(repo,cache,exclude_paths=(output,))
+            self.assertFalse(hit1); self.assertTrue(hit2); self.assertEqual(fp1,fp2)
+            self.assertEqual(first,second)
+
     def test_corrupt_cache_entry_fails_closed(self):
         with tempfile.TemporaryDirectory() as temp:
             base=pathlib.Path(temp); repo=base/"repo"; cache=base/"cache"

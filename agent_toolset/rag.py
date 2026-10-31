@@ -403,7 +403,7 @@ def _decode_cache_entry(data: bytes, expected_fingerprint: str) -> dict:
         raise ValueError("corrupt cache entry: invalid index")
     return index
 
-def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEFAULT_SUFFIXES) -> tuple[dict,str,bool]:
+def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEFAULT_SUFFIXES, exclude_paths: Iterable[Path] = ()) -> tuple[dict,str,bool]:
     """Load/create an atomic content-addressed cache; corrupt or symlinked entries fail closed."""
     base=Path(root).resolve(strict=True)
     requested=Path(cache_dir).expanduser().absolute()
@@ -416,7 +416,8 @@ def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEF
     _reject_symlink(directory,"cache directory")
     directory_fd=_open_directory_nofollow(directory)
     try:
-        fingerprint,_,records=cache_fingerprint(base,suffixes=suffixes,exclude_paths=(directory.resolve(strict=True),))
+        excluded=tuple(exclude_paths)+(directory.resolve(strict=True),)
+        fingerprint,_,records=cache_fingerprint(base,suffixes=suffixes,exclude_paths=excluded)
         entry_name=f"index-v2-{fingerprint}.json"
         try:
             entry_fd=_ORIGINAL_OS_OPEN(entry_name,os.O_RDONLY|os.O_NOFOLLOW|getattr(os,"O_CLOEXEC",0),dir_fd=directory_fd)
