@@ -45,7 +45,9 @@
     "command: python3 scripts/codex_preflight.py --repo . (exit 0; worktree dirty during candidate check)",
     "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
     "command: git diff --check (exit 0)",
-    "independent security review: PASS; docs/reviews/release-dossier-schema-version-review-2026-10-30.md"
+    "independent security review: PASS; docs/reviews/release-dossier-schema-version-review-2026-10-30.md",
+    "CI: GitHub Actions run 41157417446 succeeded for implementation commit 9abbdd45e92a4d75f9ab2fe5853cd7a53b5fab4f",
+    "artifact: three reproducible builds SHA256 96067b1e6f845b66d8e954ebb2dcdf138a0669297b854134fa28d0e42be3fd0c; doctor PASS; matching-digest synthetic dossier remained BLOCKED exit 2"
   ],
   "blocker": null,
   "approval_ref": null

@@ -121,3 +121,7 @@ Rebuilt from source commit `a7d5bb9214130532001f04106f0b31879f753673`. Three ind
 ## R14 release dossier schema versioning (2026-10-30)
 
 Task contract: `examples/release-dossier-schema-version-task.json`, based on `b2ad00d210494be3048aa2c10a03d37624df4765`. The signed dossier digest is a breaking contract change, so the release dossier schema and example move to version `2.0.0`; evaluator blocks missing/obsolete versions. Generic example validation now derives expected versions from registered schemas instead of hardcoding `1.0.0`. Targeted release/CLI/Codex tests pass 24/24; validator passes; full suite passes 89/89; preflight passes; synthetic release remains BLOCKED (exit 2). Independent security review PASS: `docs/reviews/release-dossier-schema-version-review-2026-10-30.md`.
+
+## F8 candidate artifact refresh after dossier schema versioning (2026-10-30)
+
+Rebuilt from source commit `9abbdd45e92a4d75f9ab2fe5853cd7a53b5fab4f`. Three independent zipapp builds matched SHA256 `96067b1e6f845b66d8e954ebb2dcdf138a0669297b854134fa28d0e42be3fd0c` (37,930 bytes). Artifact `doctor` and matching digest passed; a matching-digest v2 synthetic dossier passed integrity and remained BLOCKED (exit 2) on absent release evidence. GitHub Actions run `41157417446` succeeded for the source commit. No staging or deployment occurred.
