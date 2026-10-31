@@ -166,6 +166,10 @@ Task contract: `examples/rag-search-streaming-topk-task.json`, based on `08c943a
 
 Rebuilt from source `9a42f18486b1fbbf4d9fcadc69ee04037b0bdbd6`. Three builds matched SHA256 `000d2900ae119ffdb34815fdcb0f06e99e063ac3f964edb0187e9e02003ebed5` (38,652 bytes). Standalone `doctor`, exact-byte artifact check, and repository search passed; search returned eight citations with `unverified_hits: 0`. GitHub Actions run `41160011453` succeeded: structural validation, 102 tests, and Codex preflight passed; no annotations returned. Artifact remains local and ignored. No staging or deployment occurred.
 
+## R20 RAG per-query IDF precomputation (2026-10-30)
+
+Task contract: `examples/rag-search-idf-precompute-task.json`, based on `08e68efe6caac0b36631320281f2f0934858cfe1`. The BM25 IDF expression is now computed once per query term after document frequencies are known, then reused without changing the score expression or term accumulation order. Paired 31-run benchmarks confirm exact ordered results. On 20,000 lines, common multi-term queries improved 9.79% and 9.47%; one-term and no-match queries changed -0.93% and +0.33%. On the current repository corpus (8,512 lines at measurement), the six-term query improved 2.79%; other queries changed under 0.3%. Independent review PASS, including parity across 1,000 randomized indexes and three limits each. Focused tests pass 12/12; full suite passes 103/103; validator and preflight pass; synthetic release remains BLOCKED (exit 2); diff check passes. Benchmark: `docs/benchmarks/rag-search-idf-precompute-2026-10-30.json`; review: `docs/reviews/rag-search-idf-precompute-review-2026-10-30.md`. CI/artifact refresh pending.
+
 ## F8 candidate artifact refresh after cache benchmark/tooling update (2026-10-30)
 
 Rebuilt three times from source commit `b1dd1561979ce5d4793be39118ec6196aa69a089`. All zipapps were byte-identical at 38,484 bytes with SHA256 `10fa476f819d02cf5a383a08e72967ad73e65b5d947c52b9e5b0a44ab24e9e3b`. Standalone `doctor` and exact-byte artifact check passed. Artifact is retained locally under `/private/tmp`; no staging or deployment occurred.

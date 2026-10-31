@@ -238,12 +238,12 @@ def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
         if matches:
             candidates.append((document,length,matches))
     avg=sum(lengths)/len(docs)
+    idf={term:math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5)) for term in q}
     def scored_hits():
         for document,length,matches in candidates:
             score=0.0
             for term,frequency in matches:
-                idf=math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5))
-                score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
+                score+=idf[term]*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
             if score:
                 yield {"path":document["path"],"line":document["line"],"sha256":document["sha256"],"text":document["text"],"score":round(score,8)}
     return heapq.nsmallest(limit,scored_hits(),key=lambda hit:(-hit["score"],hit["path"],hit["line"]))

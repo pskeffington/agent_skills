@@ -82,6 +82,16 @@ class RagTests(unittest.TestCase):
         self.assertEqual(expected,search(index,"shared",limit=8))
         self.assertEqual([f"entry {i}" for i in range(8)],[hit["text"] for hit in search(index,"shared",limit=8)])
 
+    def test_search_computes_idf_once_per_query_term(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            for i in range(20):
+                (root/f"{i:02}.md").write_text("alpha beta alpha\n",encoding="utf-8")
+            index=build_index(root)
+            with patch.object(rag.math,"log",wraps=math.log) as logarithm:
+                search(index,"alpha beta",limit=8)
+            self.assertEqual(2,logarithm.call_count)
+
     def test_batch_verification_reads_each_source_once(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
