@@ -9,6 +9,7 @@ from .artifact import verify_artifact
 from .approval import dossier_binding_sha256
 
 REQUIRED = ("G0", "G1", "G2", "G3", "G4", "G5", "G6")
+DOSSIER_SCHEMA_VERSION = "2.0.0"
 SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^[0-9a-f]{64}$")
 ATTESTATIONS = ("implementation", "independent_review", "security_review", "staging", "approval")
@@ -21,6 +22,8 @@ def _evaluate_dossier(doc, approval_verifier=None):
         return {"release_ready":False,"status":"BLOCKED","issues":["dossier must be an object"],"notice":"Read-only evaluation. No deployment performed."}
     issues=[]
     contradictions=False
+    if doc.get("schema_version") != DOSSIER_SCHEMA_VERSION:
+        issues.append(f"unsupported release dossier schema version (expected {DOSSIER_SCHEMA_VERSION})")
     commit=doc.get("commit")
     digest=doc.get("artifact_sha256")
     if not isinstance(commit,str) or not SHA.fullmatch(commit): issues.append("missing valid immutable commit")
@@ -133,7 +136,7 @@ def evaluate(doc, approval_verifier=None, *, artifact_path=None):
     return result
 
 def example():
-    return {"commit":"0"*40,"artifact_sha256":"0"*64,"target_environment":"example",
+    return {"schema_version":DOSSIER_SCHEMA_VERSION,"commit":"0"*40,"artifact_sha256":"0"*64,"target_environment":"example",
             "gates":{g:{"status":"BLOCKED","evidence_ref":None,"reason":"synthetic example"} for g in REQUIRED},
             "independent_review":None,"security_review":None,"staging":None,"approval":None,"rollback_ref":None,"check_provenance":[]}
 

@@ -18,7 +18,7 @@ class CodexTests(unittest.TestCase):
     def packet(self,digest="b"*64):
         commit="a"*40
         attestation=lambda ref, invocation: {"evidence_ref":ref,"subject_commit":commit,"artifact_sha256":digest,"invocation_id":invocation}
-        dossier={"commit":commit,"artifact_sha256":digest,"target_environment":"staging",
+        dossier={"schema_version":"2.0.0","commit":commit,"artifact_sha256":digest,"target_environment":"staging",
           "gates":{g:{"status":"PASS","evidence_ref":f"evidence:{g}","reason":"required checks passed"} for g in REQUIRED},
           "implementation":attestation("implementation:12","implementer-run"),
           "independent_review":attestation("review:12","reviewer-run"),
@@ -38,6 +38,18 @@ class CodexTests(unittest.TestCase):
             digest=hashlib.sha256(artifact.read_bytes()).hexdigest()
             result=evaluate(self.packet(digest),approval_verifier=verifier,artifact_path=artifact)
             self.assertTrue(result["release_ready"],result)
+
+    def test_obsolete_dossier_schema_is_blocked_even_with_matching_binding(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            artifact=(pathlib.Path(tmp)/"candidate.pyz").resolve(); artifact.write_bytes(b"candidate")
+            digest=hashlib.sha256(artifact.read_bytes()).hexdigest()
+            packet=self.packet(digest)
+            packet["schema_version"]="1.0.0"
+            packet["approval"]["dossier_sha256"]=dossier_binding_sha256(packet)
+            verifier=lambda approval, commit, artifact_digest: True
+            result=evaluate(packet,approval_verifier=verifier,artifact_path=artifact)
+            self.assertEqual("BLOCKED",result["status"])
+            self.assertEqual(["unsupported release dossier schema version (expected 2.0.0)"],result["issues"])
 
     def test_approval_requires_explicit_decision_and_verification(self):
         packet=self.packet(); packet["approval"]["decision"]="REJECT"

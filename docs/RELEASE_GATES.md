@@ -2,6 +2,8 @@
 
 All gate outcomes must be **PASS**, **FAIL**, **BLOCKED**, or **NOT_APPLICABLE** with a reason. Only PASS or justified, approved NOT_APPLICABLE admits a candidate. No invented success or bypass based on missing tooling.
 
+Release dossiers use schema version `2.0.0`; the evaluator blocks older or unknown versions. Version 2 adds the signed `dossier_sha256` binding.
+
 | Gate | Owner | Minimum evidence |
 | --- | --- | --- |
 | G0 intake | Orchestrator | repository, baseline SHA, objective, allowed scope, risk |

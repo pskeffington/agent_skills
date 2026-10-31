@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RELEASE-DOSSIER-SCHEMA-VERSION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "b2ad00d210494be3048aa2c10a03d37624df4765",
+  "objective": "Version the breaking release dossier approval-binding contract and prevent evaluators from accepting dossiers that declare an obsolete schema version.",
+  "scope": {
+    "include": [
+      "agent_toolset/assurance/release.py",
+      "schemas/release-dossier.schema.json",
+      "examples/release-dossier.json",
+      "scripts/validate.py",
+      "tests/test_codex.py",
+      "tests/test_release_approval.py",
+      "docs/RELEASE_GATES.md",
+      "docs/RELEASE_RUNBOOK.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/release-dossier-schema-version-task.json",
+      "docs/reviews/release-dossier-schema-version-review-2026-10-30.md"
+    ],
+    "exclude": [
+      "deployment execution",
+      "production publication",
+      "credentials"
+    ]
+  },
+  "acceptance": [
+    "Release dossier schema advances to 2.0.0 to reflect required signed dossier digest",
+    "Release evaluator blocks missing or unsupported dossier versions",
+    "Schema validation resolves example versions from each registered schema",
+    "Regression coverage confirms unsupported version cannot be admitted even with a matching dossier binding",
+    "Full repository acceptance passes and synthetic release remains BLOCKED"
+  ],
+  "risk": "high",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [
+    "RELEASE-DOSSIER-SIGNATURE-BINDING"
+  ],
+  "evidence_refs": [
+    "reason: requiring a new signed field changes the dossier contract incompatibly; preserving schema version 1.0.0 would misrepresent compatibility",
+    "command: python3 -m unittest tests.test_codex tests.test_release_approval tests.test_cli -q (exit 0, 24 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 -m unittest discover -s tests -q (exit 0, 89 tests)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0; worktree dirty during candidate check)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "independent security review: PASS; docs/reviews/release-dossier-schema-version-review-2026-10-30.md"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

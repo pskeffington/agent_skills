@@ -96,7 +96,7 @@ class ReleaseApprovalTests(unittest.TestCase):
             "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
             "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
-            "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "schema_version": "2.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
             "implementation": attestation("implementation:42", "implementer-run"),
             "independent_review": attestation("review:42", "review-run"),
@@ -134,7 +134,7 @@ class ReleaseApprovalTests(unittest.TestCase):
             "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
             "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
-            "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "schema_version": "2.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
             "implementation": attestation("implementation:42", "implementer-run"),
             "independent_review": attestation("review:42", "review-run"),

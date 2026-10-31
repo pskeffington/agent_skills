@@ -117,3 +117,7 @@ Task contract: `examples/release-dossier-binding-task.json`, based on `d27ab2906
 ## F8 candidate artifact refresh after release dossier signature binding (2026-10-30)
 
 Rebuilt from source commit `a7d5bb9214130532001f04106f0b31879f753673`. Three independent zipapp builds matched SHA256 `1becc8dc4e660bf43ffd1288ff8dc963edc0ccbd841d6ae4938ae6621cbc8e91` (37,852 bytes). Artifact `doctor`, matching digest, and stale-digest rejection passed. GitHub Actions structural check run `41157145868` succeeded. Release staging and deployment evidence remain absent; no deployment occurred.
+
+## R14 release dossier schema versioning (2026-10-30)
+
+Task contract: `examples/release-dossier-schema-version-task.json`, based on `b2ad00d210494be3048aa2c10a03d37624df4765`. The signed dossier digest is a breaking contract change, so the release dossier schema and example move to version `2.0.0`; evaluator blocks missing/obsolete versions. Generic example validation now derives expected versions from registered schemas instead of hardcoding `1.0.0`. Targeted release/CLI/Codex tests pass 24/24; validator passes; full suite passes 89/89; preflight passes; synthetic release remains BLOCKED (exit 2). Independent security review PASS: `docs/reviews/release-dossier-schema-version-review-2026-10-30.md`.

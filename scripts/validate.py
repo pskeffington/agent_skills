@@ -15,6 +15,7 @@ EXAMPLE_SCHEMAS = {
     "codex-runner-task.json": "task-contract.schema.json",
     "release-artifact-binding-task.json": "task-contract.schema.json",
     "release-dossier-binding-task.json": "task-contract.schema.json",
+    "release-dossier-schema-version-task.json": "task-contract.schema.json",
     "rag-cache-optimization-task.json": "task-contract.schema.json",
     "rag-source-scan-optimization-task.json": "task-contract.schema.json",
     "rag-cache-digest-validation-optimization-task.json": "task-contract.schema.json",
@@ -123,11 +124,13 @@ def validate():
     for path in sorted((ROOT/"examples").glob("*.json")):
         try:
             example=json.loads(path.read_text(encoding="utf-8"))
-            if example.get("schema_version")!="1.0.0": errors.append("invalid example version: "+path.name)
             schema_name=EXAMPLE_SCHEMAS.get(path.name)
             if schema_name is None: errors.append("example has no registered schema: "+path.name)
             elif schema_name not in schema_docs: errors.append("missing schema "+schema_name+" for "+path.name)
             else:
+                version_schema=schema_docs[schema_name].get("properties",{}).get("schema_version",{})
+                expected_version=version_schema.get("const","1.0.0")
+                if example.get("schema_version")!=expected_version: errors.append("invalid example version: "+path.name)
                 errors.extend(f"{path.name}{error[1:]}" for error in validate_document(example,schema_docs[schema_name]))
         except (OSError,json.JSONDecodeError,AttributeError) as exc: errors.append("invalid example JSON: "+path.name+": "+str(exc))
     return errors
