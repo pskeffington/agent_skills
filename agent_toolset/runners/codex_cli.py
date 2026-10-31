@@ -13,7 +13,7 @@ import tempfile
 import threading
 import time
 import uuid
-from typing import Any
+from typing import Any, Callable
 
 from ..contracts import ContractError, validate_repo_path, validate_task
 from .base import RunnerResult
@@ -42,12 +42,14 @@ class CodexCLIAdapter:
         executable: str | None = None,
         timeout_seconds: int = 300,
         max_output_bytes: int = _MAX_OUTPUT,
+        containment_verifier: Callable[[dict[str, Any]], bool] | None = None,
     ):
         self.enabled = enabled
         self.minimum_version = minimum_version
         self.executable = executable
         self.timeout_seconds = max(1, min(int(timeout_seconds), _MAX_TASK_SECONDS))
         self.max_output_bytes = max(1024, min(int(max_output_bytes), _MAX_OUTPUT))
+        self.containment_verifier = containment_verifier
         self._processes: dict[str, subprocess.Popen[bytes]] = {}
         self._cancelled: set[str] = set()
         self._lock = threading.Lock()
@@ -111,13 +113,16 @@ class CodexCLIAdapter:
             return RunnerResult("BLOCKED", "codex-probe", self.name, None, probe, probe["reason"])
         try:
             validate_task(task)
-            root, head = self._validate_workspace(task, capabilities)
+            run_id = capabilities.get("run_id") or "prepare"
+            if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", run_id):
+                raise ValueError("sandbox.run_id has an invalid format")
+            root, head = self._validate_workspace(task, capabilities, run_id)
         except (ContractError, ValueError, OSError, subprocess.SubprocessError) as exc:
             return RunnerResult("BLOCKED", "codex-prepare", self.name, None, probe, str(exc))
         info = {**probe, "workspace": str(root), "head": head, "task_id": task["task_id"]}
         return RunnerResult("PASS", "codex-prepare", self.name, 0, info, "Codex CLI and task worktree are ready.")
 
-    def _validate_workspace(self, task: dict[str, Any], sandbox: dict[str, Any]) -> tuple[pathlib.Path, str]:
+    def _validate_workspace(self, task: dict[str, Any], sandbox: dict[str, Any], run_id: str) -> tuple[pathlib.Path, str]:
         git_binary = shutil.which("git")
         if not git_binary:
             raise ValueError("Git executable is unavailable")
@@ -129,8 +134,20 @@ class CodexCLIAdapter:
             raise ValueError("sandbox.worktree is not a directory")
         if sandbox.get("dedicated_worktree") is not True:
             raise ValueError("sandbox must assert dedicated_worktree=true")
-        if sandbox.get("external_process_containment") is not True or not isinstance(sandbox.get("containment_ref"), str) or not sandbox["containment_ref"].strip():
-            raise ValueError("sandbox must provide external process containment and a containment_ref")
+        attestation = sandbox.get("containment_attestation")
+        if self.containment_verifier is None or not isinstance(attestation, dict):
+            raise ValueError("trusted external process-containment verifier and structured attestation are required")
+        expected = {"task_id": task["task_id"], "run_id": run_id, "worktree": str(root), "base_commit": task["base_commit"]}
+        if any(attestation.get(key) != value for key, value in expected.items()):
+            raise ValueError("containment attestation is not bound to this task, run, worktree, and base commit")
+        if not isinstance(attestation.get("evidence_ref"), str) or not attestation["evidence_ref"].strip():
+            raise ValueError("containment attestation must include a nonempty evidence_ref")
+        try:
+            verified = self.containment_verifier(dict(attestation)) is True
+        except Exception as exc:
+            raise ValueError(f"containment attestation verification failed: {type(exc).__name__}") from None
+        if not verified:
+            raise ValueError("containment attestation was not trusted")
         def git(*args: str) -> str:
             cp = subprocess.run([git_binary, "-C", str(root), "-c", "core.fsmonitor=false", *args], capture_output=True, text=True, timeout=5, shell=False, env=self._git_env())
             if cp.returncode:
@@ -200,14 +217,14 @@ class CodexCLIAdapter:
             return RunnerResult("BLOCKED", "codex-execution", self.name, None, probe, probe["reason"])
         try:
             validate_task(task)
-            root, base_head = self._validate_workspace(task, sandbox)
+            run_id = sandbox.get("run_id") or ("codex:" + uuid.uuid4().hex)
+            if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", run_id):
+                raise ValueError("sandbox.run_id has an invalid format")
+            root, base_head = self._validate_workspace(task, sandbox, run_id)
             prompt = self._prompt(task)
         except (ContractError, ValueError, OSError, subprocess.SubprocessError) as exc:
             return RunnerResult("BLOCKED", "codex-execution", self.name, None, {}, str(exc))
         binary = probe["binary"]
-        run_id = sandbox.get("run_id") or ("codex:" + uuid.uuid4().hex)
-        if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", run_id):
-            return RunnerResult("BLOCKED", "codex-execution", self.name, None, {}, "sandbox.run_id has an invalid format")
         with tempfile.TemporaryDirectory(prefix="agent-toolset-codex-") as temp_dir:
             last_message = pathlib.Path(temp_dir) / "last-message.txt"
             argv = [binary, "exec", "--strict-config", "--json", "--ephemeral", "--ignore-user-config", "--sandbox", "workspace-write", "--cd", str(root), "--output-last-message", str(last_message), "-"]
@@ -308,7 +325,7 @@ class CodexCLIAdapter:
                 "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(), "exit_code": exit_code,
                 "timed_out": timed_out, "output_truncated": overflow.is_set(), "stdout_bytes_captured": len(stdout),
                 "stderr_bytes_captured": len(output["stderr"]), "event_count": len(events),
-                "containment_ref": sandbox["containment_ref"], "prompt_write_failed": bool(write_error),
+                "containment_ref": sandbox["containment_attestation"]["evidence_ref"], "prompt_write_failed": bool(write_error),
                 "process_tree_stopped": process_tree_stopped,
                 "turn_completed": event_complete, "changed_paths": changed, "scope_verified": scope_ok,
                 "stdout_sha256": hashlib.sha256(stdout).hexdigest(),

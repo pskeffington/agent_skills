@@ -9,17 +9,22 @@ The F5 adapter is currently a Python API, not a CLI `run` backend. A caller must
 ```python
 from agent_toolset.runners.codex_cli import CodexCLIAdapter
 
-runner = CodexCLIAdapter(enabled=True, timeout_seconds=300)
+runner = CodexCLIAdapter(enabled=True, timeout_seconds=300, containment_verifier=trusted_platform_verifier)
 result = runner.execute(task, {
     "worktree": "/tmp/task-worktree",
     "dedicated_worktree": True,
-    "external_process_containment": True,
-    "containment_ref": "operator-evidence:container/job-object-id",
     "run_id": "task-123-worker-1",
+    "containment_attestation": {
+        "task_id": task["task_id"],
+        "run_id": "task-123-worker-1",
+        "worktree": "/tmp/task-worktree",
+        "base_commit": task["base_commit"],
+        "evidence_ref": "operator-evidence:container/job-object-id",
+    },
 })
 ```
 
-The adapter probes the installed CLI version and required `codex exec` flags before execution. It uses a fixed `workspace-write` sandbox, disables user configuration, accepts the prompt on stdin under the execution timeout, caps output, terminates remaining POSIX process-group members, and verifies tracked, untracked and ignored changes against `scope.include` before reporting success. It requires an operator-provided external process-containment attestation because process groups alone cannot contain descendants that detach or create new sessions; this adapter does not create a container/cgroup/Windows Job Object itself. Without that verified external containment and reference, execution is BLOCKED. Supply `run_id` so another thread can call `runner.cancel(run_id)`; cancelled executions report `BLOCKED`. Any worktree that begins dirty or contains ignored files is rejected. A scope violation marks the task `FAIL`; discard that isolated worktree rather than integrating it. Offline tests use a fake CLI; an actual model invocation and platform sandbox enforcement have not been validated. Do not pass secrets in the task contract.
+The adapter probes the installed CLI version and required `codex exec` flags before execution. It uses a fixed `workspace-write` sandbox, disables user configuration, accepts the prompt on stdin under the execution timeout, caps output, terminates remaining POSIX process-group members, and verifies tracked, untracked and ignored changes against `scope.include` before reporting success. It requires an injected trusted platform verifier plus an attestation bound to the task ID, run ID, resolved worktree, and base commit. A caller-supplied boolean or reference alone is not evidence. The verifier must validate platform evidence in the host execution system; a test stub only exercises adapter routing and proves no actual containment. This adapter does not create a container/cgroup/Windows Job Object itself, and execution without the verifier or a valid attestation is BLOCKED. Supply an explicit `run_id` and bind the attestation to it; `prepare()` and `execute()` are separate calls and each validates its own attestation, while `cancel(run_id)` uses the execution run ID. Cancelled executions report `BLOCKED`. Any worktree that begins dirty or contains ignored files is rejected. A scope violation marks the task `FAIL`; discard that isolated worktree rather than integrating it. Offline tests use a fake CLI; an actual model invocation and platform sandbox enforcement have not been validated. Do not pass secrets in the task contract.
 
 ## Commands
 

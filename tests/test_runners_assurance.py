@@ -29,11 +29,28 @@ class RunnerAssuranceTests(unittest.TestCase):
             repo=self._worktree(temp); binary=self._fake_codex(temp)
             result=CodexCLIAdapter(enabled=True,executable=binary).execute(self._task(repo),{"worktree":str(repo),"dedicated_worktree":True})
             self.assertEqual("BLOCKED",result.status)
-            self.assertIn("external process containment",result.message)
+            self.assertIn("trusted external process-containment verifier",result.message)
+
+    def test_codex_rejects_untrusted_or_misbound_attestation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo=self._worktree(temp); binary=self._fake_codex(temp); task=self._task(repo)
+            sandbox=self._sandbox(task,repo)
+            rejected=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:False)
+            self.assertEqual("BLOCKED",rejected.execute(task,sandbox).status)
+            throwing=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:(_ for _ in ()).throw(RuntimeError("synthetic")))
+            self.assertEqual("BLOCKED",throwing.execute(task,sandbox).status)
+            sandbox["containment_attestation"]["base_commit"]="f"*40
+            trusted=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:True)
+            result=trusted.execute(task,sandbox)
+            self.assertEqual("BLOCKED",result.status)
+            self.assertIn("not bound",result.message)
 
     def _task(self, root):
         head=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],check=True,capture_output=True,text=True).stdout.strip()
         return {"schema_version":"1.0.0","task_id":"DEV-001","repository":"example/project","base_commit":head,"objective":"Implement a bounded fixture change.","scope":{"include":["allowed.txt"],"exclude":[]},"acceptance":["The fixture file is updated correctly"],"risk":"low","owner_role":"implementer","status":"ready"}
+
+    def _sandbox(self, task, root, run_id="codex-test-run"):
+        return {"worktree":str(root),"dedicated_worktree":True,"run_id":run_id,"containment_attestation":{"task_id":task["task_id"],"run_id":run_id,"worktree":str(root.resolve()),"base_commit":task["base_commit"],"evidence_ref":"synthetic-test://contained-runtime"}}
 
     def _fake_codex(self, directory, *, outside=False, ignored=False, sleep_seconds=0, ready_file=None, late_child=False):
         script=pathlib.Path(directory)/"codex-fake"
@@ -60,8 +77,8 @@ class RunnerAssuranceTests(unittest.TestCase):
             repo=self._worktree(temp); binary=self._fake_codex(temp); marker=pathlib.Path(temp)/"fsmonitor-ran"
             subprocess.run(["git","-C",str(repo),"config","core.fsmonitor",f"!touch {marker}"],check=True)
             task=self._task(repo)
-            adapter=CodexCLIAdapter(enabled=True,executable=binary)
-            sandbox={"worktree":str(repo),"dedicated_worktree":True,"external_process_containment":True,"containment_ref":"test://contained-runtime"}
+            adapter=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:True)
+            sandbox=self._sandbox(task,repo)
             result=adapter.execute(task,sandbox)
             self.assertEqual("PASS",result.status,f"{result.message}: {result.provenance}")
             self.assertEqual(["allowed.txt"],result.provenance["changed_paths"])
@@ -72,8 +89,8 @@ class RunnerAssuranceTests(unittest.TestCase):
     def test_codex_blocks_dirty_wrong_base_and_out_of_scope_changes(self):
         with tempfile.TemporaryDirectory() as temp:
             repo=self._worktree(temp); binary=self._fake_codex(temp,outside=True)
-            task=self._task(repo); adapter=CodexCLIAdapter(enabled=True,executable=binary)
-            sandbox={"worktree":str(repo),"dedicated_worktree":True,"external_process_containment":True,"containment_ref":"test://contained-runtime"}
+            task=self._task(repo); adapter=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:True)
+            sandbox=self._sandbox(task,repo)
             (repo/"dirty.txt").write_text("dirty")
             self.assertEqual("BLOCKED",adapter.execute(task,sandbox).status)
             (repo/"dirty.txt").unlink()
@@ -85,15 +102,15 @@ class RunnerAssuranceTests(unittest.TestCase):
 
     def test_codex_detects_ignored_out_of_scope_changes(self):
         with tempfile.TemporaryDirectory() as temp:
-            repo=self._worktree(temp); binary=self._fake_codex(temp,ignored=True)
-            result=CodexCLIAdapter(enabled=True,executable=binary).execute(self._task(repo),{"worktree":str(repo),"dedicated_worktree":True,"external_process_containment":True,"containment_ref":"test://contained-runtime"})
+            repo=self._worktree(temp); binary=self._fake_codex(temp,ignored=True); task=self._task(repo)
+            result=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:True).execute(task,self._sandbox(task,repo))
             self.assertEqual("FAIL",result.status)
             self.assertIn("ignored.txt",result.message)
 
     def test_codex_kills_descendant_before_reporting_success(self):
         with tempfile.TemporaryDirectory() as temp:
-            repo=self._worktree(temp); late=pathlib.Path(temp)/"late-outside.txt"; binary=self._fake_codex(temp,late_child=True)
-            result=CodexCLIAdapter(enabled=True,executable=binary).execute(self._task(repo),{"worktree":str(repo),"dedicated_worktree":True,"external_process_containment":True,"containment_ref":"test://contained-runtime"})
+            repo=self._worktree(temp); late=pathlib.Path(temp)/"late-outside.txt"; binary=self._fake_codex(temp,late_child=True); task=self._task(repo)
+            result=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:True).execute(task,self._sandbox(task,repo))
             self.assertIn(result.status,{"PASS","BLOCKED"},result.message)
             if result.status == "PASS":
                 self.assertTrue(result.provenance["process_tree_stopped"])
@@ -105,17 +122,18 @@ class RunnerAssuranceTests(unittest.TestCase):
     def test_codex_timeout_terminates_process_and_reports_blocked(self):
         with tempfile.TemporaryDirectory() as temp:
             repo=self._worktree(temp); binary=self._fake_codex(temp,sleep_seconds=3)
-            adapter=CodexCLIAdapter(enabled=True,executable=binary,timeout_seconds=1)
-            result=adapter.execute(self._task(repo),{"worktree":str(repo),"dedicated_worktree":True,"external_process_containment":True,"containment_ref":"test://contained-runtime"})
+            task=self._task(repo); adapter=CodexCLIAdapter(enabled=True,executable=binary,timeout_seconds=1,containment_verifier=lambda _:True)
+            result=adapter.execute(task,self._sandbox(task,repo))
             self.assertEqual("BLOCKED",result.status)
             self.assertTrue(result.provenance["timed_out"])
 
     def test_codex_cancel_terminates_active_process(self):
         with tempfile.TemporaryDirectory() as temp:
             repo=self._worktree(temp); ready=pathlib.Path(temp)/"ready"; binary=self._fake_codex(temp,sleep_seconds=5,ready_file=ready)
-            adapter=CodexCLIAdapter(enabled=True,executable=binary,timeout_seconds=10)
+            adapter=CodexCLIAdapter(enabled=True,executable=binary,timeout_seconds=10,containment_verifier=lambda _:True)
             results=[]
-            worker=threading.Thread(target=lambda:results.append(adapter.execute(self._task(repo),{"worktree":str(repo),"dedicated_worktree":True,"run_id":"test-cancel-run","external_process_containment":True,"containment_ref":"test://contained-runtime"})))
+            task=self._task(repo); sandbox=self._sandbox(task,repo,"test-cancel-run")
+            worker=threading.Thread(target=lambda:results.append(adapter.execute(task,sandbox)))
             worker.start()
             deadline=time.monotonic()+4
             while time.monotonic()<deadline and not ready.exists():
@@ -130,15 +148,15 @@ class RunnerAssuranceTests(unittest.TestCase):
     def test_codex_rejects_duplicate_active_run_id(self):
         with tempfile.TemporaryDirectory() as temp:
             repo=self._worktree(temp); ready=pathlib.Path(temp)/"ready"; binary=self._fake_codex(temp,sleep_seconds=2,ready_file=ready)
-            adapter=CodexCLIAdapter(enabled=True,executable=binary,timeout_seconds=5)
-            sandbox={"worktree":str(repo),"dedicated_worktree":True,"run_id":"same-run","external_process_containment":True,"containment_ref":"test://contained-runtime"}
+            adapter=CodexCLIAdapter(enabled=True,executable=binary,timeout_seconds=5,containment_verifier=lambda _:True)
+            task=self._task(repo); sandbox=self._sandbox(task,repo,"same-run")
             first=[]
-            worker=threading.Thread(target=lambda:first.append(adapter.execute(self._task(repo),sandbox)))
+            worker=threading.Thread(target=lambda:first.append(adapter.execute(task,sandbox)))
             worker.start()
             deadline=time.monotonic()+4
             while time.monotonic()<deadline and not ready.exists():
                 time.sleep(.02)
-            second=adapter.execute(self._task(repo),sandbox)
+            second=adapter.execute(task,sandbox)
             worker.join(timeout=5)
             self.assertFalse(worker.is_alive())
             self.assertEqual("BLOCKED",second.status)
