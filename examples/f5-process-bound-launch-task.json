@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F5-PROCESS-BOUND-CONTAINMENT-EXECUTOR",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "12f98fd3f12a829ca19bfdca4d3d2281bad2cd21",
+  "objective": "Replace pre-launch attestation-only containment checks with a trusted executor that launches Codex inside an OS/container boundary and binds evidence and complete process-tree lifecycle controls to the actual execution handle.",
+  "scope": {
+    "include": [
+      "agent_toolset/runners/codex_cli.py",
+      "tests/test_runners_assurance.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "ROADMAP.md",
+      "examples/f5-process-bound-launch-task.json"
+    ],
+    "exclude": [
+      "production deployment",
+      "secrets and credential stores",
+      "claiming synthetic executor fixtures as platform containment evidence"
+    ]
+  },
+  "acceptance": [
+    "The configured executor creates Codex inside the approved OS/container boundary; no direct uncontained Popen fallback exists.",
+    "Execution evidence is bound to the actual process or containment handle and the task, run ID, worktree, and base commit.",
+    "Timeout and cancellation terminate and verify the complete contained process tree on every supported platform.",
+    "Platform integration tests prove filesystem/process containment and fail closed when boundary setup or handle verification fails.",
+    "Real host evidence and independent security review are recorded before F5 runtime admission changes from BLOCKED."
+  ],
+  "risk": "high",
+  "owner_role": "build-integration",
+  "status": "blocked",
+  "depends_on": [],
+  "evidence_refs": [
+    "docs/reviews/f5-process-bound-containment-review-2026-10-31.md",
+    "command: docker info (exit 1; Docker daemon socket unavailable)",
+    "command: sandbox-exec deny-by-default probe (exit 71; Operation not permitted)"
+  ],
+  "blocker": "This host cannot provide or measure an OS/container containment executor: Docker daemon is unavailable and sandbox-exec is denied. The current pre-launch verifier is not bound to the subsequently launched process. Provision an authorized host runtime with a trusted executor and process-handle evidence, then implement and test this task.",
+  "approval_ref": null
+}

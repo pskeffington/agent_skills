@@ -21,6 +21,7 @@ EXAMPLE_SCHEMAS = {
     "rag-cache-framing-followup-task.json": "task-contract.schema.json",
     "rag-search-length-cache-investigation-task.json": "task-contract.schema.json",
     "rag-search-deferred-length-investigation-task.json": "task-contract.schema.json",
+    "f5-process-bound-launch-task.json": "task-contract.schema.json",
     "rag-search-streaming-topk-task.json": "task-contract.schema.json",
     "rag-search-idf-precompute-task.json": "task-contract.schema.json",
     "rag-search-candidate-memory-task.json": "task-contract.schema.json",
