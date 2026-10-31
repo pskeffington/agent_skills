@@ -8,6 +8,7 @@ This is local build evidence for a reproducible executable candidate. It is not 
 - Artifact size: 38,661 bytes
 - `doctor`: PASS; Codex execution is disabled by default
 - Matching digest check: PASS; standalone RAG search returned eight citations with `unverified_hits: 0`
+- Bound release evaluation: artifact integrity PASS against `examples/candidate-artifact-release-dossier.json`; overall readiness BLOCKED (exit 2) on missing G0-G6, attestations, rollback, and provenance. Structured evidence: `examples/candidate-artifact-release-evaluation-evidence.json`.
 - GitHub Actions run `41160395720`: success for source commit `dae099ce739f9b6733cc89c8f53bc971f19c0e74`; structural validation, 103 unit tests, and Codex preflight passed (one informational Ubuntu runner image migration notice)
 - Synthetic release dossier remains BLOCKED (exit 2) on missing release/staging evidence
 - No staging, deployment, or production action was performed.

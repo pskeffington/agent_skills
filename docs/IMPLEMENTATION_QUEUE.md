@@ -182,6 +182,10 @@ Task contract: `examples/rag-search-candidate-memory-task.json`, based on `a7d4e
 
 Rebuilt from source `dae099ce739f9b6733cc89c8f53bc971f19c0e74`. Three zipapps matched SHA256 `12f6f61e9c698200930a8d6d745b0a0092ece607784395c1b1b7436f2520f6ab` (38,661 bytes). Standalone `doctor`, exact-byte artifact check, and RAG search passed; eight citations returned with `unverified_hits: 0`. GitHub Actions run `41160395720` succeeded: structural validation, 103 unit tests, and Codex preflight passed (one informational Ubuntu runner image migration notice). Artifact remains local and ignored; no staging or deployment occurred.
 
+## F8 candidate artifact release evaluation (2026-10-30)
+
+Task and evidence: `examples/candidate-artifact-release-evaluation-task.json`, `examples/candidate-artifact-release-evaluation-evidence.json`; bound synthetic dossier: `examples/candidate-artifact-release-dossier.json`. Command `python3 dist/agent-toolset.pyz release-check examples/candidate-artifact-release-dossier.json --artifact dist/agent-toolset.pyz` returned exit 2. Artifact integrity is PASS for SHA256 `12f6f61e9c698200930a8d6d745b0a0092ece607784395c1b1b7436f2520f6ab` and 38,661 bytes, while overall release readiness remains BLOCKED on 14 missing G0-G6/attestation/rollback/provenance requirements. The dossier is explicitly synthetic and no deployment occurred. This supplies current byte-level evidence for the candidate without changing the release decision.
+
 ## F8 candidate artifact refresh after cache benchmark/tooling update (2026-10-30)
 
 Rebuilt three times from source commit `b1dd1561979ce5d4793be39118ec6196aa69a089`. All zipapps were byte-identical at 38,484 bytes with SHA256 `10fa476f819d02cf5a383a08e72967ad73e65b5d947c52b9e5b0a44ab24e9e3b`. Standalone `doctor` and exact-byte artifact check passed. Artifact is retained locally under `/private/tmp`; no staging or deployment occurred.

@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0.0",
+  "commit": "dae099ce739f9b6733cc89c8f53bc971f19c0e74",
+  "artifact_sha256": "12f6f61e9c698200930a8d6d745b0a0092ece607784395c1b1b7436f2520f6ab",
+  "target_environment": "local-readiness-evaluation",
+  "gates": {
+    "G0": {
+      "status": "BLOCKED",
+      "evidence_ref": "fixture:synthetic",
+      "reason": "synthetic example only"
+    },
+    "G1": {
+      "status": "BLOCKED",
+      "evidence_ref": "fixture:synthetic",
+      "reason": "synthetic example only"
+    },
+    "G2": {
+      "status": "BLOCKED",
+      "evidence_ref": "fixture:synthetic",
+      "reason": "synthetic example only"
+    },
+    "G3": {
+      "status": "BLOCKED",
+      "evidence_ref": "fixture:synthetic",
+      "reason": "synthetic example only"
+    },
+    "G4": {
+      "status": "BLOCKED",
+      "evidence_ref": "fixture:synthetic",
+      "reason": "synthetic example only"
+    },
+    "G5": {
+      "status": "BLOCKED",
+      "evidence_ref": "fixture:synthetic",
+      "reason": "synthetic example only"
+    },
+    "G6": {
+      "status": "BLOCKED",
+      "evidence_ref": "fixture:synthetic",
+      "reason": "synthetic example only"
+    }
+  },
+  "implementation": null,
+  "independent_review": null,
+  "security_review": null,
+  "staging": null,
+  "approval": null,
+  "rollback_ref": null,
+  "check_provenance": []
+}
