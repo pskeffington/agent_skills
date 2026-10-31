@@ -82,7 +82,16 @@ class CodexCLIAdapter:
 
     def probe(self) -> dict[str, Any]:
         if not self.enabled:
-            return {"available": False, "status": "BLOCKED", "reason": "Codex CLI adapter is not enabled"}
+            return {"available": False, "status": "BLOCKED", "reason": "Codex CLI adapter is not enabled", "containment_verifier_configured": self.containment_verifier is not None, "containment_status": "UNVERIFIED"}
+        if self.containment_verifier is None:
+            return {
+                "available": False,
+                "status": "BLOCKED",
+                "reason": "trusted external process-containment verifier is not configured",
+                "execution_enabled": False,
+                "containment_verifier_configured": False,
+                "containment_status": "BLOCKED",
+            }
         binary = self._binary()
         if not binary:
             return {"available": False, "status": "BLOCKED", "reason": "codex executable not found"}
@@ -105,7 +114,11 @@ class CodexCLIAdapter:
         missing_flags = [flag for flag in required_flags if flag not in help_text]
         if help_result.returncode != 0 or missing_flags:
             return {"available": False, "status": "BLOCKED", "reason": "Codex CLI exec does not support required flags", "version": version, "missing_flags": missing_flags}
-        return {"available": True, "status": "PASS", "binary": binary, "version": version, "execution_enabled": True}
+        return {
+            "available": True, "status": "PASS", "binary": binary, "version": version,
+            "adapter_enabled": True, "containment_verifier_configured": True,
+            "containment_status": "UNVERIFIED",
+        }
 
     def prepare(self, task: dict[str, Any], capabilities: dict[str, Any]) -> RunnerResult:
         probe = self.probe()

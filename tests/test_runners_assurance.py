@@ -24,6 +24,27 @@ class RunnerAssuranceTests(unittest.TestCase):
         self.assertEqual("BLOCKED",CodexCLIAdapter().prepare({},{}).status)
         self.assertEqual("BLOCKED",CodexCLIAdapter().execute({},{}).status)
 
+    def test_codex_probe_blocks_before_cli_probe_without_verifier(self):
+        from unittest.mock import patch
+        adapter=CodexCLIAdapter(enabled=True,executable="codex-that-must-not-run")
+        with patch("agent_toolset.runners.codex_cli.subprocess.run",side_effect=AssertionError("CLI process must not start")) as run:
+            result=adapter.probe()
+        self.assertEqual("BLOCKED",result["status"])
+        self.assertFalse(result["available"])
+        self.assertFalse(result["execution_enabled"])
+        self.assertEqual("BLOCKED",result["containment_status"])
+        run.assert_not_called()
+
+    def test_codex_probe_does_not_claim_containment_from_verifier_configuration(self):
+        with tempfile.TemporaryDirectory() as temp:
+            binary=self._fake_codex(temp)
+            result=CodexCLIAdapter(enabled=True,executable=binary,containment_verifier=lambda _:True).probe()
+            self.assertTrue(result["available"])
+            self.assertTrue(result["adapter_enabled"])
+            self.assertTrue(result["containment_verifier_configured"])
+            self.assertNotIn("execution_enabled",result)
+            self.assertEqual("UNVERIFIED",result["containment_status"])
+
     def test_codex_requires_external_process_containment_evidence(self):
         with tempfile.TemporaryDirectory() as temp:
             repo=self._worktree(temp); binary=self._fake_codex(temp)

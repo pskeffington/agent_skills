@@ -14,6 +14,7 @@ EXAMPLE_SCHEMAS = {
     "artifact-digest-task.json": "task-contract.schema.json",
     "codex-runner-task.json": "task-contract.schema.json",
     "f5-containment-verifier-task.json": "task-contract.schema.json",
+    "f5-probe-containment-readiness-task.json": "task-contract.schema.json",
     "release-artifact-binding-task.json": "task-contract.schema.json",
     "release-dossier-binding-task.json": "task-contract.schema.json",
     "release-dossier-schema-version-task.json": "task-contract.schema.json",
