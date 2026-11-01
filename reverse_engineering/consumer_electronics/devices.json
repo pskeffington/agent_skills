@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0.0",
+  "status": "model_identification_required",
+  "devices": [
+    {
+      "id": "CE-SONY-01",
+      "vendor": "Sony",
+      "family": "BRAVIA TV",
+      "exact_model": null,
+      "firmware_version": null,
+      "software_family": null,
+      "target_features": [
+        "local_control",
+        "offline_playback",
+        "custom_firmware_feasibility"
+      ],
+      "initial_level": "L0",
+      "highest_approved_level": "L1",
+      "verified_hardware": false,
+      "agent_routes": [
+        "RE-100",
+        "RE-200",
+        "RE-400",
+        "RE-600",
+        "RE-700"
+      ],
+      "sources": [
+        "https://helpguide.sony.net/tv/naep3/v1/en/contents/TP1002274403.html",
+        "https://pro-bravia.sony.net/remote-display-control/"
+      ]
+    },
+    {
+      "id": "CE-BOSE-01",
+      "vendor": "Bose",
+      "family": "soundbar",
+      "exact_model": null,
+      "firmware_version": null,
+      "software_family": null,
+      "target_features": [
+        "account_free_volume",
+        "local_input_control",
+        "offline_audio"
+      ],
+      "initial_level": "L0",
+      "highest_approved_level": "L1",
+      "verified_hardware": false,
+      "agent_routes": [
+        "RE-200",
+        "RE-400",
+        "RE-600",
+        "RE-700"
+      ],
+      "sources": [
+        "https://assets.bosecreative.com/m/496577402d128874/original/SoundTouch-Web-API.pdf",
+        "https://assets.bose.com/content/dam/Bose_DAM/Web/consumer_electronics/global/products/speakers/bose-smart-soundbar/pdf/892389_OG_SSB-SOUNDBAR_en.pdf"
+      ]
+    },
+    {
+      "id": "CE-GENERIC-01",
+      "vendor": null,
+      "family": "community_supported_consumer_hardware",
+      "exact_model": null,
+      "firmware_version": null,
+      "software_family": null,
+      "target_features": [
+        "hardware_longevity",
+        "open_control"
+      ],
+      "initial_level": "L0",
+      "highest_approved_level": "L1",
+      "verified_hardware": false,
+      "agent_routes": [
+        "RE-020",
+        "RE-200",
+        "RE-300",
+        "RE-700"
+      ],
+      "sources": [
+        "https://openwrt.org/supported_devices",
+        "https://toh.openwrt.org/"
+      ]
+    }
+  ]
+}
