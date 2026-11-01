@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sony Android TV read-only inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "asset_id",
+    "captured_at_utc",
+    "collection_mode",
+    "identity_confirmed",
+    "observations",
+    "errors",
+    "validation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "asset_id": {
+      "const": "CE-SONY-01"
+    },
+    "captured_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "collection_mode": {
+      "const": "adb_read_only"
+    },
+    "identity_confirmed": {
+      "type": "boolean"
+    },
+    "observations": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "android": {
+          "type": "string"
+        },
+        "patch": {
+          "type": "string"
+        },
+        "build": {
+          "type": "string"
+        },
+        "kernel": {
+          "type": "string"
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "disabled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "errors": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "validation": {
+      "enum": [
+        "not_run",
+        "passed",
+        "failed"
+      ]
+    }
+  }
+}
