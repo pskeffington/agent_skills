@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "search_date": "2026-10-31",
+  "device": "KD-55X80K",
+  "assessment": "no_public_model_specific_flashable_rom_identified",
+  "scope_limit": "web discovery is not proof of absence",
+  "records": [
+    {
+      "id": "PRJ-001",
+      "name": "CleanYourTV",
+      "url": "https://github.com/Gathin23/cleanyourtv",
+      "match": "BRAVIA_VH21 platform",
+      "exact_model_verified": false,
+      "category": "launcher_debloat",
+      "flashable_rom": false,
+      "confidence": "high",
+      "notes": "Community examples include KD-65X85K and XR-75X91K; regional package differences"
+    },
+    {
+      "id": "PRJ-002",
+      "name": "sony-bravia-launcher",
+      "url": "https://github.com/udeshvirk/sony-bravia-launcher",
+      "match": "KD-55X80J prior model",
+      "exact_model_verified": false,
+      "category": "launcher_control",
+      "flashable_rom": false,
+      "confidence": "high",
+      "notes": "Android TV 12; distinct VH2 platform"
+    },
+    {
+      "id": "PRJ-003",
+      "name": "tv-launcher",
+      "url": "https://github.com/yurchornyi/tv-launcher",
+      "match": "BRAVIA_VH21 KD-65X85K example",
+      "exact_model_verified": false,
+      "category": "launcher_debloat",
+      "flashable_rom": false,
+      "confidence": "high",
+      "notes": "Reference examples; do not apply package names without inventory"
+    },
+    {
+      "id": "PRJ-004",
+      "name": "Sony OSS",
+      "url": "https://oss.sony.net/Products/Linux/TV/category02.html",
+      "match": "KD-55X80K explicitly listed",
+      "exact_model_verified": true,
+      "category": "manufacturer_kernel_sources",
+      "flashable_rom": false,
+      "confidence": "high",
+      "notes": "Gated matching of source archive to actual firmware still needed"
+    }
+  ],
+  "blocked": [
+    "do_not_flash_related_model_image",
+    "do_not_reuse_region_specific_disable_list",
+    "bootloader_unlock_unknown",
+    "recovery_unknown"
+  ]
+}
