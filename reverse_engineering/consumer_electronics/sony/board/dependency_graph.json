@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0.0",
+  "date": "2026-10-31",
+  "device": "Sony KD-55X80K",
+  "status": "research_not_hardware_verified",
+  "board_family": "BM5A candidate",
+  "board_revision": null,
+  "components": [
+    {
+      "id": "HW-SOC",
+      "name": "SoC/CPU/GPU/VPU",
+      "candidate": "unknown",
+      "evidence_path": "read_only_getprop_device_tree",
+      "rom_dependency": "boot graphics video HAL",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-DRAM",
+      "name": "RAM and memory controller",
+      "candidate": "unknown",
+      "evidence_path": "proc_meminfo_and_board_markings",
+      "rom_dependency": "boot memory initialization",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-STORAGE",
+      "name": "eMMC or UFS storage",
+      "candidate": "unknown",
+      "evidence_path": "sysfs_block_metadata",
+      "rom_dependency": "partition and boot partitions",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-BOOT",
+      "name": "Boot ROM, loader, verified boot",
+      "candidate": "unknown",
+      "evidence_path": "official_ota_metadata_and_source",
+      "rom_dependency": "bootable signed image / recovery",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-LCD",
+      "name": "LCD panel and T-CON",
+      "candidate": "51-pin CN4200 to U1 TCON candidate",
+      "evidence_path": "service_connector_and_panel_label",
+      "rom_dependency": "panel drive and backlight",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-WLAN",
+      "name": "WLAN/BT module",
+      "candidate": "CN3801 to J1 20-pin candidate",
+      "evidence_path": "service_and_sysfs",
+      "rom_dependency": "wifi bluetooth firmware",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-HDMI",
+      "name": "HDMI inputs / CEC / eARC",
+      "candidate": "4 HDMI reported",
+      "evidence_path": "sony_spec_and_android_services",
+      "rom_dependency": "video input switching and Bose audio",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-AUDIO",
+      "name": "Codec amplifier and speakers",
+      "candidate": "4-pin speaker harness candidate",
+      "evidence_path": "service_and_audio_policy",
+      "rom_dependency": "sound output and optical audio",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-TUNER",
+      "name": "RF tuner/demodulator",
+      "candidate": "unknown",
+      "evidence_path": "dvb_hal_and_board_markings",
+      "rom_dependency": "OTA TV reception",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-PSU",
+      "name": "Power board, standby and backlight",
+      "candidate": "variant dependent",
+      "evidence_path": "service_assembly_revision",
+      "rom_dependency": "safe power transitions",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-REMOTE",
+      "name": "IR/Bluetooth remote receiver",
+      "candidate": "unknown",
+      "evidence_path": "input_device_names",
+      "rom_dependency": "remote, wake and accessibility",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-AUX",
+      "name": "HT2 auxiliary assembly",
+      "candidate": "CN1200 to CN102 25-pin candidate",
+      "evidence_path": "service_diagram",
+      "rom_dependency": "unknown",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    },
+    {
+      "id": "HW-CONTROL",
+      "name": "RS-232C control port",
+      "candidate": "manufacturer described",
+      "evidence_path": "sony_manual",
+      "rom_dependency": "control, not confirmed UART",
+      "driver": null,
+      "android_hal": null,
+      "firmware_blob": null,
+      "physical_verification": false,
+      "rom_gate": "unknown"
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC-SONY-OSS",
+      "url": "https://oss.sony.net/Products/Linux/TV/category02.html",
+      "type": "manufacturer_source_index"
+    },
+    {
+      "id": "SRC-SONY-KERNEL",
+      "url": "https://oss.sony.net/Products/Linux/TV/XR-65A95K_USA_Ver65771.html",
+      "type": "manufacturer_source_archive"
+    },
+    {
+      "id": "SRC-SERVICE",
+      "url": "https://www.manualslib.com/manual/3364482/Sony-Kd-43x80k.html",
+      "type": "service_parts"
+    },
+    {
+      "id": "SRC-BOARD",
+      "url": "https://www.tvparts.ca/tvdetail.php?id=20212",
+      "type": "secondary_board_compatibility"
+    }
+  ],
+  "release_blockers": [
+    "SoC not established",
+    "Physical board revision unknown",
+    "Verified boot and recovery not characterized",
+    "Display HAL/driver compatibility unknown",
+    "Hardware specific firmware dependency unknown"
+  ]
+}
