@@ -1,0 +1,30 @@
+name: Validate Agent Skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch public repository without external Actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --no-tags --depth=1 origin "${GITHUB_REF}"
+          git checkout --detach FETCH_HEAD
+      - name: Validate index and source matrix
+        run: |
+          python3 scripts/validate_skills.py
+          python3 scripts/index_skills.py --check
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v

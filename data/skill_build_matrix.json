@@ -1,0 +1,363 @@
+{
+  "schema_version": 1,
+  "goal": "Build research-backed standalone skills with no sibling repo dependencies",
+  "status": "planned_not_implemented",
+  "admission_gates": [
+    "G0",
+    "G1",
+    "G2",
+    "G3",
+    "G4",
+    "G5"
+  ],
+  "offline_baseline": true,
+  "skills": [
+    {
+      "name": "research-synthesis",
+      "phase": 1,
+      "priority": 1,
+      "description": "Review and synthesize academic or technical claims with provenance, limitations, and reproducible source tables.",
+      "research": [
+        "AS-001",
+        "ML-024"
+      ],
+      "category": "reports",
+      "status": "planned",
+      "implementation_path": ".agents/skills/research-synthesis",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "evidence-audit",
+      "phase": 1,
+      "priority": 2,
+      "description": "Audit a claim against evidence, extract supported provisions, confidence and gaps.",
+      "research": [
+        "ML-021",
+        "ML-022"
+      ],
+      "category": "research",
+      "status": "planned",
+      "implementation_path": ".agents/skills/evidence-audit",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "literature-matrix",
+      "phase": 1,
+      "priority": 3,
+      "description": "Build and maintain a structured local research matrix with identifiers and provenance.",
+      "research": [
+        "ML-024"
+      ],
+      "category": "research",
+      "status": "planned",
+      "implementation_path": ".agents/skills/literature-matrix",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "repository-indexing",
+      "phase": 1,
+      "priority": 4,
+      "description": "Index a supplied local repository's files and architecture without external repository calls.",
+      "research": [
+        "ML-023",
+        "AS-001"
+      ],
+      "category": "engineering",
+      "status": "planned",
+      "implementation_path": ".agents/skills/repository-indexing",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "task-planning",
+      "phase": 1,
+      "priority": 5,
+      "description": "Translate requirements into phased implementation with prerequisites and acceptance gates.",
+      "research": [
+        "OA-006"
+      ],
+      "category": "engineering",
+      "status": "planned",
+      "implementation_path": ".agents/skills/task-planning",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "test-design",
+      "phase": 1,
+      "priority": 6,
+      "description": "Create executable deterministic tests and failure-focused cases for a software component.",
+      "research": [
+        "ML-023"
+      ],
+      "category": "engineering",
+      "status": "planned",
+      "implementation_path": ".agents/skills/test-design",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "code-review",
+      "phase": 2,
+      "priority": 1,
+      "description": "Review local code diffs for defects, maintainability and regression risk.",
+      "research": [
+        "ML-023"
+      ],
+      "category": "engineering",
+      "status": "planned",
+      "implementation_path": ".agents/skills/code-review",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "debugging-triage",
+      "phase": 2,
+      "priority": 2,
+      "description": "Diagnose reported failures with reproducible local traces and minimal change proposals.",
+      "research": [
+        "ML-023"
+      ],
+      "category": "engineering",
+      "status": "planned",
+      "implementation_path": ".agents/skills/debugging-triage",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "release-readiness",
+      "phase": 2,
+      "priority": 3,
+      "description": "Audit artifact readiness, rollback, provenance, licensing and release evidence.",
+      "research": [
+        "NIST-011"
+      ],
+      "category": "operations",
+      "status": "planned",
+      "implementation_path": ".agents/skills/release-readiness",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "security-threat-model",
+      "phase": 2,
+      "priority": 4,
+      "description": "Create a threat model for a bounded product, repository, or workflow.",
+      "research": [
+        "OA-008",
+        "NIST-011"
+      ],
+      "category": "security",
+      "status": "planned",
+      "implementation_path": ".agents/skills/security-threat-model",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "prompt-injection-audit",
+      "phase": 2,
+      "priority": 5,
+      "description": "Test untrusted instructions, tools, and retrieved-content boundaries.",
+      "research": [
+        "OA-009",
+        "MCP-012"
+      ],
+      "category": "security",
+      "status": "planned",
+      "implementation_path": ".agents/skills/prompt-injection-audit",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "data-quality-audit",
+      "phase": 2,
+      "priority": 6,
+      "description": "Inspect tabular or structured input for missingness, leakage, schema drift and validity.",
+      "research": [
+        "ML-022"
+      ],
+      "category": "data",
+      "status": "planned",
+      "implementation_path": ".agents/skills/data-quality-audit",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "agent-evaluation",
+      "phase": 3,
+      "priority": 1,
+      "description": "Specify and run offline trigger, task-success and misuse evaluations with evidence.",
+      "research": [
+        "ML-021",
+        "ML-023"
+      ],
+      "category": "ai",
+      "status": "planned",
+      "implementation_path": ".agents/skills/agent-evaluation",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "feedback-curation",
+      "phase": 3,
+      "priority": 2,
+      "description": "Curate permissioned human/AI preference examples with immutable splits and rubrics.",
+      "research": [
+        "ML-013",
+        "ML-014",
+        "ML-015"
+      ],
+      "category": "ai",
+      "status": "planned",
+      "implementation_path": ".agents/skills/feedback-curation",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "model-benchmarking",
+      "phase": 3,
+      "priority": 3,
+      "description": "Compare recorded model outputs on quality, calibration, latency and cost.",
+      "research": [
+        "ML-021",
+        "ML-022"
+      ],
+      "category": "ai",
+      "status": "planned",
+      "implementation_path": ".agents/skills/model-benchmarking",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "model-routing",
+      "phase": 3,
+      "priority": 4,
+      "description": "Design and evaluate an offline bounded router with strong-model fallback.",
+      "research": [
+        "ML-019",
+        "ML-020"
+      ],
+      "category": "ai",
+      "status": "planned",
+      "implementation_path": ".agents/skills/model-routing",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "prompt-optimization",
+      "phase": 3,
+      "priority": 5,
+      "description": "Compare prompt variants with strict holdouts and grounded metrics.",
+      "research": [
+        "ML-018",
+        "ML-024"
+      ],
+      "category": "ai",
+      "status": "planned",
+      "implementation_path": ".agents/skills/prompt-optimization",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "critique-and-revision",
+      "phase": 3,
+      "priority": 6,
+      "description": "Run bounded generate-critique-revise with objective stopping criteria.",
+      "research": [
+        "ML-016"
+      ],
+      "category": "ai",
+      "status": "planned",
+      "implementation_path": ".agents/skills/critique-and-revision",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "episodic-feedback",
+      "phase": 3,
+      "priority": 7,
+      "description": "Record, bound and evaluate task-scoped reflections without neural training.",
+      "research": [
+        "ML-017"
+      ],
+      "category": "ai",
+      "status": "planned",
+      "implementation_path": ".agents/skills/episodic-feedback",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "experiment-analysis",
+      "phase": 4,
+      "priority": 1,
+      "description": "Design and analyze reproducible controlled evaluations with uncertainty.",
+      "research": [
+        "ML-021"
+      ],
+      "category": "data",
+      "status": "planned",
+      "implementation_path": ".agents/skills/experiment-analysis",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "documentation-authoring",
+      "phase": 4,
+      "priority": 2,
+      "description": "Produce structured, source-traceable technical documentation with link checks.",
+      "research": [
+        "AS-001"
+      ],
+      "category": "reports",
+      "status": "planned",
+      "implementation_path": ".agents/skills/documentation-authoring",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "handoff-checkpoint",
+      "phase": 4,
+      "priority": 3,
+      "description": "Write resumable engineering checkpoints with blockers, evidence and next gates.",
+      "research": [
+        "OA-006"
+      ],
+      "category": "operations",
+      "status": "planned",
+      "implementation_path": ".agents/skills/handoff-checkpoint",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "incident-triage",
+      "phase": 4,
+      "priority": 4,
+      "description": "Structure incident severity, evidence timeline and safe recovery planning.",
+      "research": [
+        "NIST-011"
+      ],
+      "category": "operations",
+      "status": "planned",
+      "implementation_path": ".agents/skills/incident-triage",
+      "independent": true,
+      "requires_sibling_repositories": false
+    },
+    {
+      "name": "dependency-audit",
+      "phase": 4,
+      "priority": 5,
+      "description": "Audit local module dependency boundaries and construct offline supply-chain reports.",
+      "research": [
+        "GH-010"
+      ],
+      "category": "security",
+      "status": "planned",
+      "implementation_path": ".agents/skills/dependency-audit",
+      "independent": true,
+      "requires_sibling_repositories": false
+    }
+  ]
+}
