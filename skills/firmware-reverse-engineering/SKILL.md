@@ -32,3 +32,6 @@ Produce `artifacts/firmware_manifest.json`, `reports/triage.md`, `reports/eviden
 No agent may override recovery gates based on a model-generated assertion.
 
 Read references/tool-matrix.md for tool choice and references/evidence-schema.md for review gates.
+
+## Tool suite
+Read references/tool-suite.json to select reviewed upstream repositories; entries are references, not automatic installations. The stdlib-only scripts/re_suite.py provides `intake <firmware> --out <manifest.json>` and `validate-tools <references/tool-suite.json>`. Run `python -m unittest discover -s tests -v` from this skill folder before shipping changes. CI validates both tool manifest and intake. Do not execute untrusted extracted binaries or flash hardware as part of this skill.
