@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0.0",
+  "reviewed_on": "2026-10-31",
+  "status": "candidate_index",
+  "record_count": 18,
+  "records": [
+    {
+      "id": "LIT-RE-001",
+      "name": "Ghidra",
+      "agent_id": "RE-100",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-002",
+      "name": "Rizin",
+      "agent_id": "RE-100",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-003",
+      "name": "Cutter",
+      "agent_id": "RE-100",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-004",
+      "name": "angr",
+      "agent_id": "RE-500",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-005",
+      "name": "Binwalk",
+      "agent_id": "RE-200",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-006",
+      "name": "EMBA",
+      "agent_id": "RE-200",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-007",
+      "name": "FACT",
+      "agent_id": "RE-200",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-008",
+      "name": "LIEF",
+      "agent_id": "RE-100",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-009",
+      "name": "Kaitai Struct",
+      "agent_id": "RE-400",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-010",
+      "name": "ImHex",
+      "agent_id": "RE-100",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-011",
+      "name": "Frida",
+      "agent_id": "RE-500",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-012",
+      "name": "OpenOCD",
+      "agent_id": "RE-300",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-013",
+      "name": "sigrok",
+      "agent_id": "RE-300",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-014",
+      "name": "Wireshark",
+      "agent_id": "RE-400",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-015",
+      "name": "Scapy",
+      "agent_id": "RE-400",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-016",
+      "name": "AFL++",
+      "agent_id": "RE-700",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-017",
+      "name": "Syft",
+      "agent_id": "RE-700",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    },
+    {
+      "id": "LIT-RE-018",
+      "name": "Grype",
+      "agent_id": "RE-700",
+      "capability": "tool_candidate",
+      "source_url": "https://github.com",
+      "verification": "candidate_unverified",
+      "execution_status": "not_tested"
+    }
+  ]
+}
