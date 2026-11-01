@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "asset_id": "CE-SONY-01",
+  "manufacturer": "Sony",
+  "model": "KD-55X80K",
+  "model_year": 2022,
+  "manufacture_month": "2022-10",
+  "product_class": "television",
+  "platform": "Android TV / Google TV",
+  "device_firmware_version": null,
+  "device_ip": null,
+  "device_mac": null,
+  "unifi_candidate": "172.20.30.167 (UNVERIFIED)",
+  "official_firmware": {
+    "version": "6.8224",
+    "region": "North America",
+    "published": "2026-07-14",
+    "prerequisite_min_version": "6.3628",
+    "intermediate_if_older": "6.7612",
+    "source": "https://www.sony.com/electronics/support/lcd-tvs-android-x85k_x86k_x89k_85x80k-series/kd-75x85k/software/00355755"
+  },
+  "paths": {
+    "official_update": "documented",
+    "reversible_launcher": "investigate",
+    "local_control": "model_verification_required",
+    "custom_firmware": "unverified",
+    "flash_permission": "blocked_pending_manual_approval"
+  },
+  "next_task": "SONY-000",
+  "risk_gate": "read_only_until_identified_and_recovery_planned",
+  "references": [
+    "https://www.sony.com/electronics/support/product/kd-55x80k/downloads",
+    "https://www.sony.com/electronics/support/televisions-projectors-lcd-tvs-android-/kd-55x80k/specifications",
+    "https://github.com/Gathin23/cleanyourtv",
+    "https://github.com/udeshvirk/sony-bravia-launcher"
+  ]
+}
