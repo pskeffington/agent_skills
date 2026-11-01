@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RE literature",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "reviewed_on",
+    "record_count",
+    "records"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "reviewed_on": {
+      "type": "string",
+      "format": "date"
+    },
+    "record_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "agent_id",
+          "capability",
+          "source_url",
+          "verification",
+          "execution_status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^LIT-RE-[0-9]{3}$"
+          },
+          "agent_id": {
+            "type": "string",
+            "pattern": "^RE-[0-9]{3}$"
+          },
+          "source_url": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "execution_status": {
+            "enum": [
+              "not_tested",
+              "passed",
+              "failed",
+              "skipped"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
