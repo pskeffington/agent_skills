@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "suite": "firmware-reverse-engineering",
+  "policy": "reference-only; do not install or execute upstream tools automatically",
+  "tools": [
+    {
+      "name": "binwalk",
+      "repository": "https://github.com/ReFirmLabs/binwalk",
+      "stage": "triage",
+      "priority": "P0",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "unblob",
+      "repository": "https://github.com/onekey-sec/unblob",
+      "stage": "extraction",
+      "priority": "P0",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "ghidra",
+      "repository": "https://github.com/NationalSecurityAgency/ghidra",
+      "stage": "static",
+      "priority": "P0",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "rizin",
+      "repository": "https://github.com/rizinorg/rizin",
+      "stage": "static",
+      "priority": "P0",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "FACT_core",
+      "repository": "https://github.com/fkie-cad/FACT_core",
+      "stage": "firmware-comparison",
+      "priority": "P1",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "emba",
+      "repository": "https://github.com/e-m-b-a/emba",
+      "stage": "security-scan",
+      "priority": "P1",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "ofrak",
+      "repository": "https://github.com/redballoonsecurity/ofrak",
+      "stage": "binary-structure",
+      "priority": "P1",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "qiling",
+      "repository": "https://github.com/qilingframework/qiling",
+      "stage": "emulation",
+      "priority": "P2",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "renode",
+      "repository": "https://github.com/renode/renode",
+      "stage": "emulation",
+      "priority": "P2",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "angr",
+      "repository": "https://github.com/angr/angr",
+      "stage": "symbolic",
+      "priority": "P2",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "wireshark",
+      "repository": "https://github.com/wireshark/wireshark",
+      "stage": "protocol",
+      "priority": "P0",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "sigrok",
+      "repository": "https://github.com/sigrokproject/libsigrok",
+      "stage": "logic-analysis",
+      "priority": "P1",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "syft",
+      "repository": "https://github.com/anchore/syft",
+      "stage": "sbom",
+      "priority": "P1",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "grype",
+      "repository": "https://github.com/anchore/grype",
+      "stage": "vuln-review",
+      "priority": "P1",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "frida",
+      "repository": "https://github.com/frida/frida",
+      "stage": "dynamic",
+      "priority": "P2",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "kaitai_struct",
+      "repository": "https://github.com/kaitai-io/kaitai_struct",
+      "stage": "format-spec",
+      "priority": "P1",
+      "install_default": false,
+      "hardware_write_allowed": false
+    },
+    {
+      "name": "flashrom",
+      "repository": "https://github.com/flashrom/flashrom",
+      "stage": "hardware-read",
+      "priority": "P3",
+      "install_default": false,
+      "hardware_write_allowed": false
+    }
+  ]
+}
