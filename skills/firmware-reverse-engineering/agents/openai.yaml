@@ -1,0 +1,3 @@
+interface:
+  display_name: "Firmware Reverse Engineering"
+  short_description: "Evidence-first firmware and local-control analysis"
