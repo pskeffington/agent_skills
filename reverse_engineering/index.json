@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0.0",
+  "division": "reverse_engineering",
+  "status": "scaffold_not_validated",
+  "updated": "2026-10-31",
+  "entrypoint": "reverse_engineering/README.md",
+  "agents": [
+    {
+      "id": "RE-000",
+      "role": "orchestration",
+      "priority": 0,
+      "inputs": [
+        "authorization",
+        "goal",
+        "artifact_manifest"
+      ],
+      "outputs": [
+        "case_plan",
+        "task_graph"
+      ],
+      "gate": "scope_approved"
+    },
+    {
+      "id": "RE-010",
+      "role": "evidence_acquisition",
+      "priority": 1,
+      "inputs": [
+        "artifact"
+      ],
+      "outputs": [
+        "sha256",
+        "provenance"
+      ],
+      "gate": "immutable_source"
+    },
+    {
+      "id": "RE-020",
+      "role": "triage",
+      "priority": 2,
+      "inputs": [
+        "evidence_manifest"
+      ],
+      "outputs": [
+        "format_map",
+        "risk_assessment"
+      ],
+      "gate": "isolation_confirmed"
+    },
+    {
+      "id": "RE-100",
+      "role": "binary_static",
+      "priority": 3,
+      "tools": [
+        "ghidra",
+        "rizin",
+        "cutter",
+        "lief",
+        "imhex"
+      ],
+      "outputs": [
+        "function_map",
+        "annotated_findings"
+      ]
+    },
+    {
+      "id": "RE-200",
+      "role": "firmware",
+      "priority": 3,
+      "tools": [
+        "binwalk",
+        "emba",
+        "fact"
+      ],
+      "outputs": [
+        "partition_map",
+        "filesystem_inventory",
+        "sbom"
+      ]
+    },
+    {
+      "id": "RE-300",
+      "role": "hardware",
+      "priority": 3,
+      "tools": [
+        "openocd",
+        "sigrok",
+        "pulseview"
+      ],
+      "outputs": [
+        "pinout_notes",
+        "signal_capture_manifest"
+      ]
+    },
+    {
+      "id": "RE-400",
+      "role": "protocol",
+      "priority": 3,
+      "tools": [
+        "wireshark",
+        "tshark",
+        "scapy",
+        "kaitai"
+      ],
+      "outputs": [
+        "message_schema",
+        "state_model"
+      ]
+    },
+    {
+      "id": "RE-500",
+      "role": "dynamic_analysis",
+      "priority": 4,
+      "tools": [
+        "gdb",
+        "lldb",
+        "frida",
+        "angr"
+      ],
+      "outputs": [
+        "trace_evidence",
+        "behavioral_report"
+      ],
+      "gate": "isolated_authorized_target"
+    },
+    {
+      "id": "RE-600",
+      "role": "compatibility_engineering",
+      "priority": 5,
+      "outputs": [
+        "interface_spec",
+        "clean_room_design",
+        "reference_tests"
+      ],
+      "gate": "licensing_review"
+    },
+    {
+      "id": "RE-700",
+      "role": "validation",
+      "priority": 6,
+      "tools": [
+        "afl++",
+        "libfuzzer",
+        "syft",
+        "grype"
+      ],
+      "outputs": [
+        "regression_results",
+        "reproducibility_report"
+      ],
+      "gate": "fixtures_pass"
+    },
+    {
+      "id": "RE-800",
+      "role": "knowledge_index",
+      "priority": 7,
+      "outputs": [
+        "redacted_case_summary",
+        "rag_metadata"
+      ],
+      "gate": "privacy_review"
+    }
+  ],
+  "artifact_schema": {
+    "required": [
+      "case_id",
+      "authorization_scope",
+      "artifact_sha256",
+      "tool_versions",
+      "findings",
+      "confidence",
+      "test_results"
+    ],
+    "format": "json",
+    "evidence": "content_addressed_external"
+  },
+  "security_defaults": {
+    "read_only": true,
+    "offline": true,
+    "hardware_flash": "human_approval_required",
+    "remote_targeting": false,
+    "credential_collection": false
+  },
+  "roadmap": "reverse_engineering/CODEX_ROADMAP.md",
+  "references": "reverse_engineering/literature-matrix.md"
+}
