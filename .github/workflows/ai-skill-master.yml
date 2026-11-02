@@ -1,0 +1,34 @@
+name: AI Skill Master checks
+on:
+  push:
+    paths:
+      - 'skills/ai-skill-architect/**'
+      - 'templates/ai-skill-master/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/ai-skill-master.yml'
+  pull_request:
+    paths:
+      - 'skills/ai-skill-architect/**'
+      - 'templates/ai-skill-master/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/ai-skill-master.yml'
+permissions:
+  contents: read
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Validate architect
+        run: python3 scripts/validate_skill.py skills/ai-skill-architect
+      - name: Generate and validate example
+        run: |
+          python3 scripts/create_skill.py example-agent --description 'Use for converting example inputs into validated outputs; exclude unrelated requests.' --path /tmp
+          python3 scripts/validate_skill.py /tmp/example-agent
