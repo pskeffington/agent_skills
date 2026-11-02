@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Skill Architect"
+  short_description: "Build, audit, and evaluate reusable Agent Skills"
+  default_prompt: "Create a portable Agent Skill from the master template, test its triggering and behavior, and validate the package."
