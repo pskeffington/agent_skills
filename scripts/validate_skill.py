@@ -38,7 +38,7 @@ def validate(path):
         if "://" in target or target.startswith("#"):
             continue
         resolved = (path / target).resolve()
-        if not resolved.is_relative_to(path.resolve()) and not resolved.is_file():
+        if not resolved.is_relative_to(path.resolve()):
             errors.append("Missing referenced file: " + target)
         elif not resolved.is_file():
             errors.append("Missing referenced file: " + target)
