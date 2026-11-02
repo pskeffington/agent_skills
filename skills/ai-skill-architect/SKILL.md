@@ -11,7 +11,7 @@ Build reusable, inspectable skills with the smallest complete instruction set.
 
 1. Define three concrete representative requests: a normal request, an edge case, and a non-trigger. Record expected inputs, outputs, tools, safety constraints, and failure behavior.
 2. Select a narrow capability and a lowercase hyphenated name. Do not encode a generic persona in place of actionable procedures.
-3. Scaffold from [the master template](../../templates/ai-skill-master/SKILL.md.tmpl). Replace all template markers before release.
+3. Scaffold from the repository master template at `templates/ai-skill-master/SKILL.md.tmpl`. Replace all template markers before release.
 4. Write YAML frontmatter with only `name` and `description`. Front-load positive trigger situations and explicitly describe exclusions to reduce false activation.
 5. Put a short operational algorithm in SKILL.md. Store optional technical material under `references/`, deterministic code under `scripts/`, and output ingredients under `assets/`. Do not duplicate reference content in the entrypoint.
 6. Specify entry conditions, preconditions, tool choices, failure/rollback behavior, expected output contract, and hard stop conditions. Never assume access to external credentials, networks, or tools.
