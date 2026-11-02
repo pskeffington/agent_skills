@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "skill_name": "{{skill_name}}",
+  "cases": [
+    {
+      "id": "positive-01",
+      "category": "positive",
+      "prompt": "{{normal_use_case}}",
+      "should_trigger": true,
+      "expected_behavior": "{{expected_normal_behavior}}"
+    },
+    {
+      "id": "negative-01",
+      "category": "boundary",
+      "prompt": "{{out_of_scope_use_case}}",
+      "should_trigger": false,
+      "expected_behavior": "Do not invoke this skill"
+    },
+    {
+      "id": "failure-01",
+      "category": "failure",
+      "prompt": "{{missing_dependency_case}}",
+      "should_trigger": true,
+      "expected_behavior": "Report unavailable dependency without fabricating success"
+    }
+  ]
+}
