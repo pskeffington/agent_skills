@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0",
+  "task_id":"RAG-SEARCH-IDF-PRECOMPUTE",
+  "repository":"pskeffington/agent_skills",
+  "base_commit":"08e68efe6caac0b36631320281f2f0934858cfe1",
+  "objective":"Reduce repeated BM25 inverse-document-frequency calculations without changing exact ranked results.",
+  "scope":{"include":["agent_toolset/rag.py","tests/test_rag.py","docs/benchmarks/rag-search-idf-precompute-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md","examples/rag-search-idf-precompute-task.json","scripts/validate.py","docs/reviews/rag-search-idf-precompute-review-2026-10-30.md"],"exclude":["ranking formula changes","third-party dependencies","deployment"]},
+  "acceptance":["Each distinct query term IDF is computed once per search call.","Exact ordered output, floating accumulation order, and zero-frequency semantics are preserved.","Paired 31-run benchmarks cover large and repository-sized corpora.","Independent review and complete repository acceptance pass."],
+  "risk":"low",
+  "owner_role":"implementer",
+  "status":"done",
+  "depends_on":["RAG-SEARCH-STREAMING-TOPK"],
+  "evidence_refs":["docs/benchmarks/rag-search-idf-precompute-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md R20"],
+  "blocker":null,
+  "approval_ref":null
+}

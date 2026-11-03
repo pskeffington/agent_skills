@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F8-STRUCTURED-CHECK-PROVENANCE",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "83fed955abbae0a6f5c5c7c06b2202158942ac7a",
+  "objective": "Replace free-form release check provenance strings with schema-validated records bound to the dossier commit and artifact digest.",
+  "scope": {
+    "include": [
+      "schemas/release-dossier.schema.json",
+      "agent_toolset/assurance/release.py",
+      "tests/test_codex.py",
+      "tests/test_release_approval.py",
+      "examples/release-dossier.json",
+      "examples/candidate-artifact-release-dossier.json",
+      "docs/RELEASE_GATES.md",
+      "docs/RELEASE_RUNBOOK.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "docs/reviews/release-check-provenance-review-2026-10-31.md",
+      "examples/release-check-provenance-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "changing any blocked release decision to PASS",
+      "authenticating external CI or review systems",
+      "staging or production deployment",
+      "secrets or signing-key management"
+    ]
+  },
+  "acceptance": [
+    "Release dossier schema version advances for the breaking provenance-shape change.",
+    "Each check record requires argv, result, subject commit, artifact digest, evidence reference, invocation ID, and output digest.",
+    "Evaluator rejects malformed records, non-PASS checks, and commit or artifact subject mismatches.",
+    "Approval signature continues to bind the complete canonical dossier including provenance records.",
+    "Synthetic candidate dossier remains BLOCKED and repository acceptance checks pass."
+  ],
+  "risk": "medium",
+  "owner_role": "code-implementation",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "command: python3 -m unittest tests.test_codex tests.test_release_approval -v (17 tests; exit 0)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 -m unittest discover -s tests -v (104 tests; exit 0)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (expected BLOCKED, exit 2)"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}
