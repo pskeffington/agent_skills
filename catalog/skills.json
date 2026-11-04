@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/index_skills.py",
+  "skills": [
+    {
+      "name": "skill-authoring",
+      "description": "Create or review a focused, portable Agent Skill in this repository. Use when asked to scaffold a new SKILL.md workflow, refine skill triggers, audit a skill, or prepare skill admission checks.",
+      "path": ".agents/skills/skill-authoring",
+      "entrypoint": ".agents/skills/skill-authoring/SKILL.md",
+      "resources": [
+        "agents/openai.yaml",
+        "references/review-checklist.md"
+      ]
+    }
+  ]
+}
