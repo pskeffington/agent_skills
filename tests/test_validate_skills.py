@@ -1,5 +1,6 @@
 """Small fixture-driven tests for fail-closed metadata and index behavior."""
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -66,6 +67,18 @@ class SkillTests(unittest.TestCase):
         p.write_text(json.dumps(records), encoding="utf-8")
         self.assertTrue(validate(self.root))
 
+    def test_reject_non_object_literature_records_without_exception(self):
+        self.add_good()
+        p = self.root / "data" / "literature_matrix.json"
+        p.write_text(json.dumps({"schema_version": 1, "sources": [None, {"id": ["unhashable"]}]}), encoding="utf-8")
+        self.assertTrue(any("literature record must be an object" in error for error in validate(self.root)))
+
+    def test_reject_non_object_literature_matrix_without_exception(self):
+        self.add_good()
+        p = self.root / "data" / "literature_matrix.json"
+        p.write_text(json.dumps([]), encoding="utf-8")
+        self.assertTrue(any("invalid literature matrix schema" in error for error in validate(self.root)))
+
     def test_quoted_description_round_trip(self):
         desc = 'Process repo: narrow "task" and value.'
         new_skill(self.root, "quoted-test", desc)
@@ -75,6 +88,45 @@ class SkillTests(unittest.TestCase):
         self.add_good()
         (self.root / ".agents" / "skills" / "test-thing" / "symlink").symlink_to(self.root / "data" / "literature_matrix.json")
         self.assertTrue(validate(self.root))
+
+    def test_refuse_symlinked_skill_directory(self):
+        skills_root = self.root / ".agents" / "skills"
+        skills_root.mkdir(parents=True)
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, outside)
+        external_skill = outside / "test-thing"
+        external_skill.mkdir()
+        (external_skill / "SKILL.md").write_text(
+            "---\nname: test-thing\ndescription: Use this test skill for a narrowly defined task.\n---\n\n# Instructions\nProcess the supplied input.\n",
+            encoding="utf-8",
+        )
+        (skills_root / "test-thing").symlink_to(external_skill, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "symbolic links are not allowed"):
+            build_catalog(self.root)
+
+    def test_refuse_symlinked_skills_root(self):
+        agents_root = self.root / ".agents"
+        agents_root.mkdir()
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, outside)
+        (outside / "test-thing").mkdir()
+        (agents_root / "skills").symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "symbolic links are not allowed in skills root"):
+            build_catalog(self.root)
+
+    def test_refuse_symlinked_agents_parent(self):
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, outside)
+        skills_root = outside / "skills"
+        skill = skills_root / "test-thing"
+        skill.mkdir(parents=True)
+        (skill / "SKILL.md").write_text(
+            "---\nname: test-thing\ndescription: Use this test skill for a narrowly defined task.\n---\n\n# Instructions\nProcess the supplied input.\n",
+            encoding="utf-8",
+        )
+        (self.root / ".agents").symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "symbolic links are not allowed in repository instructions"):
+            build_catalog(self.root)
 
     def test_refuse_overwrite(self):
         self.add_good()
