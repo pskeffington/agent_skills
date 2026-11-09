@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0",
+  "task_id":"RAG-SEARCH-LENGTH-CACHE-INVESTIGATION",
+  "repository":"pskeffington/agent_skills",
+  "base_commit":"09a3c6918838d89d4bacbf3a85da413eb43f1636",
+  "objective":"Measure whether caching per-document token lengths materially improves repeated local retrieval while preserving exact output and safe mutation semantics.",
+  "scope":{"include":["agent_toolset/rag.py (temporary experiment only)","tests/test_rag.py (temporary regression only)","docs/benchmarks/rag-search-length-cache-investigation-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md","examples/rag-search-length-cache-investigation-task.json","scripts/validate.py"],"exclude":["retaining prototype runtime changes","ranking formula changes","third-party dependencies","deployment"]},
+  "acceptance":["Run 21 alternating baseline/candidate measurements on a deterministic 500-file, 20,000-line corpus.","Require exact output equality for all fixed queries.","Record source and corpus provenance and individual paired samples.","Reject changes whose measured gain does not justify mutable-index correctness and memory costs.","Run repository validation and retain fail-closed release behavior."],
+  "risk":"low",
+  "owner_role":"engineering-research",
+  "status":"done",
+  "depends_on":[],
+  "evidence_refs":["docs/benchmarks/rag-search-length-cache-investigation-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md R18"],
+  "blocker":null,
+  "approval_ref":null
+}

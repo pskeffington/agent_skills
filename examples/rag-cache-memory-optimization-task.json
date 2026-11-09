@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-CACHE-PEAK-MEM-OPT",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "42156773f8164d745caab3b9778bbbf97dcd0c84",
+  "objective": "Measure the warm-cache source-byte retention hypothesis and add paired warm-hit and cold-miss benchmark evidence before deciding whether to ship a memory tradeoff.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "tests/test_rag_cache.py",
+      "scripts/compare_rag_cache.py",
+      "scripts/validate.py",
+      "docs/TEST_MATRIX.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "docs/benchmarks/rag-cache-memory-optimization-2026-10-30.json",
+      "docs/benchmarks/rag-cache-memory-scale-optimization-2026-10-30.json",
+      "docs/reviews/rag-cache-memory-optimization-review-2026-10-30.md",
+      "examples/rag-cache-memory-optimization-task.json"
+    ],
+    "exclude": [
+      "production deployment",
+      "secrets and credential stores"
+    ]
+  },
+  "acceptance": [
+    "Fingerprint-only scans produce the same source fingerprint and manifest as content-retaining scans.",
+    "The benchmark compares exact source manifests, warm-hit latency and peak allocations, and cold-miss latency.",
+    "The memory reduction hypothesis is accepted only if measured peak allocation improves without an unjustified cold-miss regression; otherwise no product optimization is shipped.",
+    "Benchmark output files can be excluded consistently from both baseline and candidate corpus scans.",
+    "Full repository validation, tests, and independent review pass; release remains fail-closed."
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "docs/benchmarks/rag-cache-memory-optimization-2026-10-30.json",
+    "docs/benchmarks/rag-cache-memory-scale-optimization-2026-10-30.json",
+    "docs/reviews/rag-cache-memory-optimization-review-2026-10-30.md"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

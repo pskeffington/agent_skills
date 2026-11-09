@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-CITATION-VERIFY-OPT",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "6ccc058d99a6d4b5c685f7313d56c0a94b8a9837",
+  "objective": "Reduce repeated safe source reads when validating multiple RAG hits from the same file.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "agent_toolset/cli.py",
+      "tests/test_rag.py",
+      "tests/test_benchmark_rag_citations.py",
+      "scripts/benchmark_rag_citations.py",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "docs/TEST_MATRIX.md",
+      "docs/benchmarks/rag-citation-verification-optimization-2026-10-30.json",
+      "docs/reviews/rag-citation-verification-optimization-review-2026-10-30.md",
+      "examples/rag-citation-verification-optimization-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "production deployment",
+      "secrets and credential stores"
+    ]
+  },
+  "acceptance": [
+    "Batch verification preserves individual verify_hit validity results, including malformed and stale citations.",
+    "Every distinct source path is safely read and hashed no more than once per batch.",
+    "A reproducible paired benchmark asserts exact result equality and records latency measurements.",
+    "Full repository validation and tests pass; synthetic release remains BLOCKED; independent review is recorded."
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "docs/benchmarks/rag-citation-verification-optimization-2026-10-30.json",
+    "docs/reviews/rag-citation-verification-optimization-review-2026-10-30.md"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

@@ -1,0 +1,69 @@
+{
+  "scope": "paired local warm-cache validation comparison; observational; no cross-machine claim",
+  "baseline_revision": "81aaf5daca24402703761f670973f52b3c50002f",
+  "baseline_source_sha256": "d92d2a5cc72d59a18f5d715c89c32c4c896c8950093b3b26e491e2099c20f99d",
+  "candidate_source_sha256": "830ecaae68021bdffd0ef15a3751098e6159d17b840dacf239a9562371e3f575",
+  "corpus_root": "/Users/null/GitHub/agent_skills",
+  "corpus_fingerprint": "749acd8ae63bb9ba5a272abab7a5c298a366a3ad01c9ae1c0a21ebc380ffed4c",
+  "source_files": 123,
+  "source_manifest_equal": true,
+  "repetitions": 21,
+  "results": {
+    "baseline": {
+      "samples_ms": [
+        30.7501,
+        31.6549,
+        31.6215,
+        31.6579,
+        32.0565,
+        31.3618,
+        31.333,
+        32.3139,
+        31.2637,
+        31.2126,
+        31.8365,
+        31.5222,
+        31.7288,
+        32.0608,
+        31.462,
+        43.2088,
+        34.7589,
+        31.8873,
+        31.7354,
+        31.0612,
+        31.2228
+      ],
+      "median_latency_ms": 31.6549,
+      "traced_python_peak_bytes": 14157981
+    },
+    "candidate": {
+      "samples_ms": [
+        28.1114,
+        29.956,
+        28.313,
+        27.7847,
+        32.7951,
+        29.3815,
+        28.4968,
+        28.5761,
+        28.4,
+        28.279,
+        27.4043,
+        28.0224,
+        28.124,
+        29.2596,
+        27.9651,
+        33.9599,
+        28.903,
+        28.4187,
+        28.4756,
+        28.5352,
+        27.9684
+      ],
+      "median_latency_ms": 28.4187,
+      "traced_python_peak_bytes": 14158786
+    }
+  },
+  "median_latency_change_percent": -10.22,
+  "interpretation": "The candidate had a lower alternating paired median warm-cache validation time with identical source fingerprint. Traced peak allocation increased by 805 bytes. Warm cache remains slower than cold index construction on this small local repository; no cross-machine performance claim."
+}
