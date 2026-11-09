@@ -49,6 +49,14 @@ python3 scripts/index_skills.py --write
 python3 scripts/validate_skills.py
 ```
 
+On POSIX, package one validated canonical skill as a local ZIP (without publishing it):
+
+```sh
+python3 scripts/package_skill.py engineering-research --output /tmp/engineering-research.zip
+```
+
+The output must be a new path outside the repository; the packager refuses existing outputs and symbolic links in the skill bundle. It fails closed on non-POSIX systems because secure descriptor-relative file opens are not available through Python's portable standard library there.
+
 To build and inspect a local standalone executable:
 
 ```sh

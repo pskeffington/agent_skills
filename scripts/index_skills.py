@@ -11,8 +11,9 @@ FIELD_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):\s*(.*)$")
 LINK_RE = re.compile(r"\]\(([^)]+)\)")
 
 
-def parse_skill(path, repository_root=None):
-    content = path.read_text(encoding="utf-8")
+def parse_skill(path, repository_root=None, content=None):
+    if content is None:
+        content = path.read_text(encoding="utf-8")
     if not content.startswith("---\n"):
         raise ValueError(f"{path}: missing opening YAML delimiter")
     end = content.find("\n---\n", 4)
