@@ -1,0 +1,73 @@
+{
+  "status": "PASS",
+  "scope": "local citation verification only; observational timings; exact validity equality required",
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "source_commit": "6ccc058d99a6d4b5c685f7313d56c0a94b8a9837",
+    "worktree_clean": false,
+    "corpus_root": "/Users/null/GitHub/agent_skills",
+    "corpus_fingerprint": "8ac69296b838d1bc7acd5259ea379d00c14fb7bd54c806946a09381464f6628b",
+    "repetitions_per_method_per_query": 3,
+    "measurement": "untraced wall time, alternating method order"
+  },
+  "results": [
+    {
+      "query": "release readiness task journal lease",
+      "hit_count": 8,
+      "distinct_sources": 8,
+      "per_hit_samples_ms": [
+        0.52125,
+        0.51575,
+        0.512791
+      ],
+      "batched_samples_ms": [
+        0.459375,
+        0.459458,
+        0.45475
+      ],
+      "per_hit_median_ms": 0.51575,
+      "batched_median_ms": 0.459375,
+      "median_change_percent": -10.93,
+      "validity_results_equal": true
+    },
+    {
+      "query": "Codex runner containment attestation",
+      "hit_count": 8,
+      "distinct_sources": 5,
+      "per_hit_samples_ms": [
+        0.602083,
+        0.588875,
+        0.587208
+      ],
+      "batched_samples_ms": [
+        0.320917,
+        0.315084,
+        0.314417
+      ],
+      "per_hit_median_ms": 0.588875,
+      "batched_median_ms": 0.315084,
+      "median_change_percent": -46.49,
+      "validity_results_equal": true
+    },
+    {
+      "query": "cache fingerprint validation",
+      "hit_count": 8,
+      "distinct_sources": 3,
+      "per_hit_samples_ms": [
+        0.55275,
+        0.523125,
+        0.517375
+      ],
+      "batched_samples_ms": [
+        0.182708,
+        0.182542,
+        0.169791
+      ],
+      "per_hit_median_ms": 0.523125,
+      "batched_median_ms": 0.182542,
+      "median_change_percent": -65.11,
+      "validity_results_equal": true
+    }
+  ]
+}

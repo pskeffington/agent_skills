@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "DEV-001",
+  "from_role": "implementer",
+  "to_role": "verifier",
+  "input_refs": [
+    "docs/design/DEV-001.md"
+  ],
+  "output_refs": [
+    "commit:0000000000000000000000000000000000000000"
+  ],
+  "status": "READY",
+  "decision": "Implementation complete; independent tests required.",
+  "open_risks": [],
+  "source_commit": "0000000000000000000000000000000000000000",
+  "evidence_refs": []
+}

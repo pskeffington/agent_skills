@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0",
+  "task_id":"F8-CANDIDATE-ARTIFACT-EVALUATION",
+  "repository":"pskeffington/agent_skills",
+  "base_commit":"dae099ce739f9b6733cc89c8f53bc971f19c0e74",
+  "objective":"Evaluate the current reproducible candidate artifact against a dossier bound to its exact source commit and bytes, and preserve the actual fail-closed release result.",
+  "scope":{"include":["examples/candidate-artifact-release-evaluation-task.json","examples/candidate-artifact-release-evaluation-evidence.json","scripts/validate.py","docs/IMPLEMENTATION_QUEUE.md","docs/CANDIDATE_ARTIFACT.md"],"exclude":["staging deployment","production deployment","approval generation or signing","secrets"]},
+  "acceptance":["The recorded artifact digest matches the exact bytes checked by the release evaluator.","Artifact integrity is recorded separately from overall release readiness.","Missing evidence remains BLOCKED with exit code 2 and no deployment side effects.","The evidence object validates against the repository evidence schema."],
+  "risk":"low",
+  "owner_role":"release-readiness",
+  "status":"done",
+  "depends_on":["RAG-SEARCH-CANDIDATE-MEMORY"],
+  "evidence_refs":["examples/candidate-artifact-release-evaluation-evidence.json","docs/IMPLEMENTATION_QUEUE.md F8 candidate evaluation"],
+  "blocker":null,
+  "approval_ref":null
+}

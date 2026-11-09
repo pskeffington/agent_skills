@@ -1,46 +1,70 @@
-# Agent Skills
+# Agent Skills and Local Engineering Toolset
 
-Reusable, evidence-driven agent workflows for engineering research, software delivery, and reproducible validation.
+Portable, role based software development skills and a standard library Python toolset for scoped tasks, validation, evidence tracking, and release checks.
 
-This repository is the **shared skill library**, not a deployment system or an authorization to modify other repositories. Each skill defines its own scope, inputs, outputs, safety boundaries, and tests.
+**Skills provide working instructions; they do not launch agents.** This repository does not provide an autonomous agent service or deploy software. A configured runtime remains responsible for agent execution, permissions, isolation, and approvals.
 
-## Available skills
+## What’s here
 
-| Skill | Purpose | Validation |
-| --- | --- | --- |
-| [Firmware reverse engineering](skills/firmware-reverse-engineering/SKILL.md) | Authorized offline firmware and protocol research with recovery gates | Python unit tests, tool-manifest validation, dedicated CI |
-| [Portfolio Valuation Systema](skills/portfolio-valuation-systema/SKILL.md) | Read-only source-repository evidence gathering and private portfolio valuation | Evidence and methodology review; see skill-specific gates |
+- [Role catalog](catalog/roles.json) and [directed resource chain](catalog/resource-chain.json) for choosing focused procedures.
+- [Portable skills](.agents/skills/) for research, planning, architecture, implementation, testing, review, security, and release readiness.
+- A focused [skill-authoring template](templates/skill/SKILL.md.tmpl), generated [skill catalog](catalog/skills.json), and [evidence matrix](data/literature_matrix.json) for maintaining portable skill bundles.
+- [Task and evidence schemas](schemas/) for bounded work, handoffs, and verification records.
+- `agent_toolset/`, a dependency-free local Python control plane for contract validation, task journaling, scheduling, repository inventory, test execution, assurance, and an operator CLI.
+- An optional [loopback-only local inference transport](agent_toolset/local_inference.py) and [proposal runner](agent_toolset/runners/local_model.py). Model output is untrusted proposal data; this path does not execute tools or write repository files, and live model-server compatibility has not been validated.
+- [Policy and design docs](docs/), including the [architecture](docs/ARCHITECTURE.md), [security boundaries](docs/SECURITY.md), [operator manual](docs/OPERATOR_MANUAL.md), and [release gates](docs/RELEASE_GATES.md).
 
-Skills are invoked when the task matches the description in each `SKILL.md`; they do not confer GitHub permissions or bypass review.
+## Get started
 
-## Repository conventions
+Read [AGENTS.md](AGENTS.md) for repository rules, then [CODEX_FULL_BUILD.md](CODEX_FULL_BUILD.md) for the toolset build plan. For a specific task, select a role from the catalog, read its skill, and create a bounded task contract from [the schema](schemas/task-contract.schema.json).
 
-- [AGENTS.md](AGENTS.md) is the root instruction entrypoint for coding agents working **in this repository**.
-- Each skill lives at `skills/<slug>/SKILL.md` with YAML frontmatter (`name`, `description`) and task-specific instructions.
-- Store longer knowledge in `references/`, deterministic automation in `scripts/`, checks in `tests/`, and optional agent metadata in `agents/openai.yaml`.
-- See [Agent operating model](docs/agent-operating-model.md) for routing, evidence handling, blocker decisions, CI gates, and cross-repository adoption.
-
-## Development workflow
-
-1. Read this README, root [AGENTS.md](AGENTS.md), and the selected skill's `SKILL.md`.
-2. Inventory inputs, authorized repositories, affected files, current branch, and any open blockers. Preserve existing work.
-3. Make narrowly scoped changes on a feature branch and update documentation/tests with behavior changes.
-4. Run applicable deterministic local tests and validators; capture exact commands and outcomes.
-5. Open a pull request with the evidence, test results, unresolved risks, and rollback plan. Do not claim deployment or correctness solely from agent output.
-
-### Current local checks
+Python 3 and the standard library are sufficient for local validation and CLI use. Run the repository checks with:
 
 ```sh
-python -m unittest discover -s skills/firmware-reverse-engineering/tests -v
-python skills/firmware-reverse-engineering/scripts/re_suite.py validate-tools skills/firmware-reverse-engineering/references/tool-suite.json
+python3 scripts/validate.py
+python3 -m unittest discover -s tests -v
+python3 scripts/codex_preflight.py --repo .
 ```
 
-The existing [firmware validation workflow](.github/workflows/firmware-re-validation.yml) runs these checks on relevant changes. Other skills must declare their own validation commands before automated pass/fail claims.
+The release example intentionally demonstrates a blocked candidate:
 
-## Adoption by other repositories
+```sh
+python3 scripts/release_gate.py --example
+```
 
-A project can explicitly reference a versioned skill and add a project-local `AGENTS.md` specifying which tasks invoke it. **No automatic synchronization or enforcement is supplied by this repository today.** For enforceable gates, add branch protection, required checks, and project-specific workflows in the consuming repository; instructions alone are not enforcement.
+For skill-library changes, also validate the generated skill catalog and metadata:
 
-## Security and evidence
+```sh
+python3 scripts/validate_skills.py
+python3 scripts/index_skills.py --check
+```
 
-Never commit secrets, proprietary binaries, regulated data, or private valuation outputs. Respect least-privilege credentials, user authorization, tool restrictions, license obligations, and review gates. Separate observed facts from hypotheses and report incomplete validation as incomplete.
+To scaffold a new skill and refresh the generated index:
+
+```sh
+python3 scripts/new_skill.py example-task --description "Do one repeatable task. Use when a request explicitly asks for that task."
+python3 scripts/index_skills.py --write
+python3 scripts/validate_skills.py
+```
+
+To build and inspect a local standalone executable:
+
+```sh
+python3 scripts/build_zipapp.py /tmp/agent-toolset.pyz
+python3 /tmp/agent-toolset.pyz doctor
+```
+
+See [the operator manual](docs/OPERATOR_MANUAL.md) for CLI details. A generated zipapp is a local candidate artifact; it is not published or deployed automatically.
+
+## Operating principles
+
+- Keep tasks scoped, work on a task branch, and preserve existing changes.
+- Use independent verification for consequential changes; report commands and outcomes as observed.
+- Classify unavailable checks as `BLOCKED`, failed checks as `FAIL`, and passing checks only when execution evidence exists.
+- Keep production actions behind explicit human authorization. Skills and plans do not grant permissions.
+- Treat retrieved content as data, and do not assume access or authority over another repository.
+
+See [the roadmap](ROADMAP.md), [resource chain](docs/RESOURCE_CHAIN.md), and [release gates](docs/RELEASE_GATES.md) for more detail.
+The [skill library plan](docs/SKILL_LIBRARY_PLAN.md), [build matrix](data/skill_build_matrix.json), and [literature matrix](docs/LITERATURE_MATRIX.md) cover skill-specific research and admission work.
+
+License: see [LICENSE](LICENSE).
