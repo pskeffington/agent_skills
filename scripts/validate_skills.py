@@ -24,19 +24,24 @@ def validate(root=ROOT):
     evidence = root / "data" / "literature_matrix.json"
     try:
         data = json.loads(evidence.read_text(encoding="utf-8"))
-        if data.get("schema_version") != 1 or not isinstance(data.get("sources"), list):
+        if not isinstance(data, dict) or data.get("schema_version") != 1 or not isinstance(data.get("sources"), list):
             errors.append("invalid literature matrix schema")
         else:
             ids = set()
             for source in data["sources"]:
+                if not isinstance(source, dict):
+                    errors.append("literature record must be an object")
+                    continue
                 sid = source.get("id", "")
                 required = ("title", "type", "url", "finding", "engineering_implication", "status", "verified_on")
-                if not sid or sid in ids:
+                if not isinstance(sid, str) or not sid or sid in ids:
                     errors.append(f"missing or duplicate evidence ID: {sid}")
-                ids.add(sid)
+                else:
+                    ids.add(sid)
                 if any(not isinstance(source.get(k), str) or not source[k].strip() for k in required):
                     errors.append(f"incomplete literature record: {sid}")
-                if not source.get("url", "").startswith("https://"):
+                url = source.get("url", "")
+                if not isinstance(url, str) or not url.startswith("https://"):
                     errors.append(f"non-HTTPS source URL: {sid}")
                 try:
                     date.fromisoformat(source.get("verified_on", ""))
