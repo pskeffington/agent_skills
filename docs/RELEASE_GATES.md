@@ -30,3 +30,18 @@ G4 BLOCKED (platform fixture unavailable)
 G5 PASS | G6 BLOCKED (depends on G4)
 Next: provision fixture, rerun G4, then reassess G6
 ```
+
+## Skill-library admission gates (G0–G5)
+
+These gates evaluate an individual portable skill bundle. They supplement the toolset release gates above and do not certify a runtime or deployment.
+
+| Gate | Criteria | Evidence |
+| --- | --- | --- |
+| G0 — Source/index foundation | Canonical layout, dated evidence matrix, repository policy, threat model | README, docs, data |
+| G1 — Structural integrity | Skill metadata and links validate; generated catalog is deterministic; unit tests pass | `validate_skills.py`, `index_skills.py --check`, tests, CI trace |
+| G2 — Safety | Provenance, reviewed scripts, injection and least-privilege cases covered | security review and adversarial fixtures |
+| G3 — Behavioral quality | Positive/negative triggers and error handling evaluated against a baseline | per-skill evaluation evidence |
+| G4 — Client compatibility | Each claimed target client is smoke-tested | per-client test record |
+| G5 — Distribution | Version, license, archive integrity, approvals, and rollback are recorded | release manifest and review evidence |
+
+Missing or failed evidence blocks skill admission. A green structural check covers only the checks it actually runs; it does not satisfy G2–G5.

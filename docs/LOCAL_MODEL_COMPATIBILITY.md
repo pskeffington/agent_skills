@@ -79,6 +79,12 @@ A particular checkpoint may require a model-specific chat template and tool pars
 
 ## Vendor docs
 
-- Qwen deployment: https://qwen.readthedocs.io/en/latest/deployment/vllm.html
-- vLLM tool parsers: https://docs.vllm.ai/en/latest/features/tool_calling/
-- Qwen function calling: https://qwen.readthedocs.io/en/v2.5/framework/function_call.html
+Checked 2026-11-09. These sources describe project behavior and supported interfaces; they do not verify any local checkpoint or runtime installation.
+
+- [Qwen vLLM deployment](https://qwen.readthedocs.io/en/latest/deployment/vllm.html)
+- [Qwen function calling (Qwen 2.5)](https://qwen.readthedocs.io/en/v2.5/framework/function_call.html)
+- [Qwen function calling (current guide)](https://qwen.readthedocs.io/en/stable/framework/function_call.html)
+- [vLLM tool calling](https://docs.vllm.ai/en/stable/features/tool_calling/)
+- [vLLM Qwen3 parser](https://docs.vllm.ai/en/latest/api/vllm/parser/qwen3/)
+- [Official ChatGLM2-6B repository](https://github.com/zai-org/ChatGLM2-6B)
+- [Official GLM-4 repository](https://github.com/zai-org/GLM-4)

@@ -21,16 +21,27 @@ class LocalModelProposalRunner:
         self.max_tokens = max_tokens
 
     @staticmethod
+    def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate JSON object key")
+            result[key] = value
+        return result
+
+    @staticmethod
     def _identity(task: dict[str, Any]) -> tuple[str, str]:
         raw = json.dumps(task, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
         digest = hashlib.sha256(raw).hexdigest()
         return "local:" + digest[:16], digest
 
     def prepare(self, task: dict[str, Any], capabilities: dict[str, Any]) -> RunnerResult:
-        run_id, digest = self._identity(task)
-        provenance = {"task_sha256": digest, "model_id": self.client.model_id,
+        run_id = "local:invalid"
+        provenance = {"model_id": getattr(self.client, "model_id", None),
                       "mode": "read-only-proposal", "tools_executed": False}
         try:
+            run_id, digest = self._identity(task)
+            provenance["task_sha256"] = digest
             validate_task(task)
             if task["status"] not in ("ready", "queued"):
                 raise ContractError("task must be ready or queued")
@@ -67,7 +78,7 @@ class LocalModelProposalRunner:
             response = self.client.propose(messages, max_tokens=self.max_tokens)
             if response["truncated"]:
                 raise LocalModelError("truncated proposal")
-            proposal = json.loads(response["content"])
+            proposal = json.loads(response["content"], object_pairs_hook=self._unique_object)
             if (not isinstance(proposal, dict) or set(proposal) != {"summary", "steps", "risks"}
                     or not isinstance(proposal["summary"], str)
                     or not 1 <= len(proposal["summary"]) <= 4096
@@ -83,7 +94,7 @@ class LocalModelProposalRunner:
             provenance["proposal"] = proposal
             return RunnerResult("PASS", prepared.run_id, self.name, 0, provenance,
                                 "Validated untrusted read-only proposal; no tools executed.")
-        except (LocalModelError, ValueError, TypeError, KeyError, OSError) as exc:
+        except (LocalModelError, ValueError, TypeError, KeyError, OSError, RecursionError) as exc:
             return RunnerResult("BLOCKED", prepared.run_id, self.name, None, provenance,
                                 "local inference proposal rejected: " + type(exc).__name__)
 

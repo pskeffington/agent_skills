@@ -52,6 +52,16 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(result.status, "BLOCKED")
         self.assertEqual(client.calls, 0)
 
+    def test_nonserializable_task_is_blocked_without_exception(self):
+        client = FakeClient()
+        item = task()
+        item["cycle"] = item
+        result = LocalModelProposalRunner(client).prepare(item, {})
+        self.assertEqual(result.status, "BLOCKED")
+        self.assertEqual(result.run_id, "local:invalid")
+        self.assertFalse(result.provenance["tools_executed"])
+        self.assertEqual(client.calls, 0)
+
     def test_deny_write_and_tool_requests(self):
         client = FakeClient()
         for key in ("allow_tools", "allow_writes"):
@@ -60,9 +70,16 @@ class RunnerTests(unittest.TestCase):
 
     def test_reject_malformed_output(self):
         for content in ('not json', '{"summary":"x","steps":[],"risks":[]}',
-                        '{"summary":"ok","steps":["x"],"risks":[],"tool":"run"}'):
+                        '{"summary":"ok","steps":["x"],"risks":[],"tool":"run"}',
+                        '{"summary":"safe","summary":"replacement","steps":["Review source"],"risks":[]}'):
             result = LocalModelProposalRunner(FakeClient(content)).execute(task(), {})
             self.assertEqual(result.status, "BLOCKED")
+
+    def test_reject_deeply_nested_model_output(self):
+        content = "[" * 1200 + "0" + "]" * 1200
+        result = LocalModelProposalRunner(FakeClient(content)).execute(task(), {})
+        self.assertEqual(result.status, "BLOCKED")
+        self.assertFalse(result.provenance["tools_executed"])
 
     def test_reject_truncation_and_high_risk(self):
         self.assertEqual(LocalModelProposalRunner(FakeClient(truncated=True)).execute(task(), {}).status, "BLOCKED")

@@ -2,58 +2,145 @@
 from __future__ import annotations
 import ipaddress
 import json
-import urllib.error
+import math
+import http.client
+import io
+import socket
+import time
 import urllib.parse
-import urllib.request
 from typing import Any
 
 class LocalModelError(ValueError):
     """Local transport or protocol validation failure."""
 
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        raise LocalModelError("redirect forbidden")
-
 class LocalInferenceClient:
     """No tools, cloud fallback, DNS, credential inheritance or model downloads."""
     def __init__(self, base_url: str, model_id: str, *, timeout: float = 10.0, max_response_bytes: int = 1048576):
-        p = urllib.parse.urlsplit(base_url)
-        if p.scheme != "http" or not p.hostname or p.username or p.password or p.query or p.fragment or p.path.rstrip("/") != "/v1":
+        if not isinstance(base_url, str):
             raise LocalModelError("expected plain loopback HTTP /v1 endpoint")
         try:
-            address = ipaddress.ip_address(p.hostname)
+            p = urllib.parse.urlsplit(base_url)
+            hostname = p.hostname
+            port = p.port
+        except ValueError as exc:
+            raise LocalModelError("invalid endpoint URL") from exc
+        if p.scheme != "http" or not hostname or p.username or p.password or p.query or p.fragment or p.path not in ("/v1", "/v1/"):
+            raise LocalModelError("expected plain loopback HTTP /v1 endpoint")
+        if "%" in hostname:
+            raise LocalModelError("scoped or escaped address forbidden")
+        try:
+            address = ipaddress.ip_address(hostname)
         except ValueError as exc:
             raise LocalModelError("numeric loopback IP required; DNS forbidden") from exc
-        if not address.is_loopback or p.port is None:
+        if not address.is_loopback or port is None or not 1 <= port <= 65535:
             raise LocalModelError("explicit loopback address and port required")
-        if not isinstance(model_id, str) or not model_id.strip() or len(model_id) > 256:
+        if not isinstance(model_id, str) or not model_id.strip() or model_id != model_id.strip() or len(model_id) > 256:
             raise LocalModelError("exact model ID required")
-        if not 0 < timeout <= 120 or not 0 < max_response_bytes <= 8388608:
+        if (not isinstance(timeout, (int, float)) or isinstance(timeout, bool)
+                or not 0 < timeout <= 120 or not math.isfinite(timeout)
+                or not isinstance(max_response_bytes, int) or isinstance(max_response_bytes, bool)
+                or not 0 < max_response_bytes <= 8388608):
             raise LocalModelError("invalid resource limit")
         self.base_url = base_url.rstrip("/")
+        self._host = hostname
+        self._port = port
         self.model_id = model_id
         self.timeout = timeout
         self.max_response_bytes = max_response_bytes
-        self._opener = urllib.request.build_opener(_NoRedirect(), urllib.request.ProxyHandler({}))
 
     def _request(self, method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         data = None if payload is None else json.dumps(payload, separators=(",", ":")).encode("utf-8")
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json", "Connection": "close"}
         if data is not None:
             headers["Content-Type"] = "application/json"
-        req = urllib.request.Request(self.base_url + path, data=data, headers=headers, method=method)
+        deadline = time.monotonic() + self.timeout
+        conn = http.client.HTTPConnection(self._host, self._port, timeout=self.timeout)
         try:
-            with self._opener.open(req, timeout=self.timeout) as resp:
-                if resp.status != 200 or "application/json" not in resp.headers.get("Content-Type", ""):
-                    raise LocalModelError("invalid HTTP response")
-                raw = resp.read(self.max_response_bytes + 1)
-                if len(raw) > self.max_response_bytes:
-                    raise LocalModelError("response size limit exceeded")
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            conn.connect()
+            if conn.sock is None:
+                raise LocalModelError("local endpoint unavailable")
+            conn.sock.settimeout(max(0.001, deadline - time.monotonic()))
+            conn.putrequest(method, "/v1" + path)
+            for name, value in headers.items():
+                conn.putheader(name, value)
+            if data is not None:
+                conn.putheader("Content-Length", str(len(data)))
+            conn.endheaders(data)
+
+            # Parse bounded header lines directly so a trickling header cannot
+            # extend the caller's total deadline via http.client's buffered read.
+            header_data = bytearray()
+            while not header_data.endswith(b"\r\n\r\n") and not header_data.endswith(b"\n\n"):
+                budget = deadline - time.monotonic()
+                if budget <= 0:
+                    raise LocalModelError("total response deadline exceeded")
+                conn.sock.settimeout(budget)
+                part = conn.sock.recv(1)
+                if time.monotonic() >= deadline:
+                    raise LocalModelError("total response deadline exceeded")
+                if not part or len(header_data) >= 32768:
+                    raise LocalModelError("invalid or oversized HTTP headers")
+                header_data.extend(part)
+            header_lines = header_data.replace(b"\r\n", b"\n").split(b"\n")[:-2]
+            try:
+                status_line = header_lines.pop(0).decode("ascii").rstrip("\r").split(" ", 2)
+                if (len(status_line) < 2 or status_line[0] not in ("HTTP/1.0", "HTTP/1.1")
+                        or len(status_line[1]) != 3 or not status_line[1].isdigit()):
+                    raise LocalModelError("invalid HTTP status line")
+                status = int(status_line[1])
+                response_headers = http.client.parse_headers(io.BytesIO(b"\n".join(header_lines) + b"\n\n"))
+            except (ValueError, IndexError, UnicodeDecodeError, http.client.HTTPException) as exc:
+                raise LocalModelError("invalid HTTP response headers") from exc
+            if 300 <= status < 400:
+                raise LocalModelError("redirect forbidden")
+            if status != 200 or "application/json" not in response_headers.get("Content-Type", "").lower():
+                raise LocalModelError("invalid HTTP response")
+            length_values = response_headers.get_all("Content-Length", [])
+            if len(length_values) != 1:
+                raise LocalModelError("exactly one content length required")
+            content_length = length_values[0]
+            if response_headers.get_all("Transfer-Encoding", []):
+                raise LocalModelError("unsupported transfer encoding")
+            if response_headers.get("Transfer-Encoding", "").lower() not in ("", "identity"):
+                raise LocalModelError("unsupported transfer encoding")
+            if content_length is None:
+                raise LocalModelError("content length required")
+            if not content_length.isascii() or not content_length.isdigit():
+                raise LocalModelError("invalid response length")
+            normalized_length = content_length.lstrip("0") or "0"
+            if len(normalized_length) > len(str(self.max_response_bytes)):
+                raise LocalModelError("response size limit exceeded")
+            declared_size = int(normalized_length)
+            if declared_size > self.max_response_bytes:
+                raise LocalModelError("response size limit exceeded")
+            remaining = declared_size
+            chunks = []
+            while remaining:
+                budget = deadline - time.monotonic()
+                if budget <= 0:
+                    raise LocalModelError("total response deadline exceeded")
+                conn.sock.settimeout(budget)
+                chunk = conn.sock.recv(min(65536, remaining))
+                if time.monotonic() >= deadline:
+                    raise LocalModelError("total response deadline exceeded")
+                if not chunk:
+                    raise LocalModelError("truncated HTTP response body")
+                chunks.append(chunk)
+                remaining -= len(chunk)
+            raw = b"".join(chunks)
+            if len(raw) > self.max_response_bytes:
+                raise LocalModelError("response size limit exceeded")
+        except LocalModelError:
+            raise
+        except (TimeoutError, socket.timeout, OSError, http.client.HTTPException) as exc:
+            if time.monotonic() >= deadline:
+                raise LocalModelError("total response deadline exceeded") from exc
             raise LocalModelError("local endpoint unavailable: " + type(exc).__name__) from exc
+        finally:
+            conn.close()
         try:
             result = json.loads(raw)
-        except (ValueError, UnicodeDecodeError) as exc:
+        except (ValueError, UnicodeDecodeError, RecursionError) as exc:
             raise LocalModelError("invalid JSON") from exc
         if not isinstance(result, dict):
             raise LocalModelError("expected JSON object")
