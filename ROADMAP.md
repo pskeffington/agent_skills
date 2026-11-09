@@ -15,6 +15,8 @@ Build a portable, auditable, resource-bounded software-development agent control
 
 ## Current state / evidence
 
+The following table records the source-baseline snapshot from 2026-10-31. The 2026-11-09 integration update below supersedes its Git integration row.
+
 | Phase | Status | Basis |
 | --- | --- | --- |
 | A0–A1 research and architecture | DONE | catalogs, hierarchy, resource chain |
@@ -26,6 +28,13 @@ Build a portable, auditable, resource-bounded software-development agent control
 | RAG | FUNCTIONAL / OPTIMIZING | lexical retrieval with source provenance and multiple paired benchmarks; independent consolidated cold-vs-warm gate still needed |
 | Git integration | BLOCKED | PR #1–#6 draft/open; `main` has initial commit only |
 
+## Current integration update (2026-11-09)
+
+- PRs #1–#6 have been merged into `main`, most recently PR #6 at `5ba6970421be792967c137f367b88d230630a1a0`. PRs #7–#13 and #16 remain open at this inventory; #14 and #15 are issues.
+- The `main` branch has no branch-protection rule (GitHub read-back via `gh api repos/pskeffington/agent_skills/branches/main/protection` returned HTTP 404, “Branch not protected”). Required-check enforcement remains unresolved.
+- The latest O0 profiler run used source commit `e8ea33f77e182314afd79968699f0fdd90f5c613` on a dirty worktree, corpus fingerprint `ee61841eb7b445553199d507bb7749458f9995f1a915bf4561ffcf9af4414102`, and 15 repetitions. Strict warm-cache median was 1.287× cold-build median; this is instrumentation evidence on that worktree, not a speedup claim or a clean-main baseline.
+- PR #7's original branch also changed the README, `.gitignore`, scheduler safeguards, and scheduler tests. Those changes are not part of this update; retain the current-main README and scheduler protections while applying the roadmap and dated kickoff document.
+
 **Important measurement distinction:** the initial corpus reported 81.9008 ms median cold rebuild versus 192.9025 ms warm JSON-cache load (cache 2.36× slower). A later *different paired comparison* reported warm-load 268.6799 → 236.4983 ms (11.98% lower). These are not evidence that the candidate cache is now faster than cold rebuilding on the same corpus.
 
 ## Execution priority and objectives
@@ -33,7 +42,7 @@ Build a portable, auditable, resource-bounded software-development agent control
 | Priority | ID | Owner | Goal and deliverable | Exit criterion |
 | --- | --- | --- | --- | --- |
 | P0 | C31-01 containment | Host runtime integrator + security verifier | Replace pre-launch-only F5 attestation with trusted executor that launches the actual Codex process within a host-enforced boundary; bind PID/container/job handle to task/run/worktree/base; enforce cancellation, deadline and full-tree cleanup | Real platform isolation test, hostile scope/escape and cancellation tests, independent security review, evidence bound to candidate SHA; otherwise BLOCKED |
-| P0 | C31-02 PR integration | Integration lead | Audit stacked PR chain (#1–#6), eliminate duplicate/conflicting work, resolve review comments, define merge order and common baseline | Dependency graph, conflict report, combined candidate passes validator, all unit tests, CI, and provenance checks; no merge until branch-protection decision and owner authorization |
+| P0 | C31-02 PR integration | Integration lead | Audit the remaining open PRs (#7–#13 and #16), preserve current-main behavior, resolve stack dependencies and regressions, and integrate each authorized change separately | Dependency graph and conflict report; each merge has exact-head review, validation and CI evidence; post-merge main is revalidated. Record branch-protection status under C31-03; never merge indiscriminately |
 | P0 | C31-03 default-branch protection | Repository administrator | Require `structural` check on `main` or document an approved ruleset equivalent | Read-back proof of required checks and enforcement; CI success alone is insufficient |
 | P1 | C31-04 RAG benchmark | Retrieval/performance engineer + independent verifier | Consolidate all optimization passes under one replayable cold-build/warm-load/warm-query comparison | Fixed commit/corpus, >=15 repetitions per mode, median/p95, peak Python memory, invalidation and citation correctness; no regression or unsupported speedup claim |
 | P1 | C31-05 end-to-end pilot | Orchestrator + host integrator | On authorized sandbox, run bounded task from DAG → Codex → evidence → independent review → release-check | Exact task and source SHAs, scoped diff, negative tests, cancellation/replay/recovery, runner logs, approval boundaries; depends on C31-01 |
@@ -59,4 +68,4 @@ Build a portable, auditable, resource-bounded software-development agent control
 
 ## Next Codex invocation
 
-Read `AGENTS.md`, `docs/IMPLEMENTATION_QUEUE.md`, `docs/RELEASE_GATES.md`, `docs/BRANCH_PROTECTION.md`, and `docs/CODEX_PRIORITY_KICKOFF_2026-10-31.md`. First produce a baseline/PR dependency audit and test report; then implement the first unblocked scoped engineering task. Preserve the blocking F5 and G6 decisions until real admissible evidence exists.
+Read `AGENTS.md`, `docs/IMPLEMENTATION_QUEUE.md`, `docs/RELEASE_GATES.md`, and `docs/BRANCH_PROTECTION.md`. Treat the 2026-10-31 kickoff as historical after its initial sequence; inventory the remaining open PRs (#7–#13 and #16) against the current `main`, and review the merged PRs only for provenance when needed. First produce a fresh baseline/dependency audit and test report; then implement the first unblocked scoped engineering task. Preserve the blocking F5 and G6 decisions until real admissible evidence exists.

@@ -1,0 +1,21 @@
+name: Firmware RE skill validation
+on:
+  push:
+    paths:
+      - 'skills/firmware-reverse-engineering/**'
+      - '.github/workflows/firmware-re-validation.yml'
+  pull_request:
+    paths:
+      - 'skills/firmware-reverse-engineering/**'
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s skills/firmware-reverse-engineering/tests -v
+      - run: python skills/firmware-reverse-engineering/scripts/re_suite.py validate-tools skills/firmware-reverse-engineering/references/tool-suite.json

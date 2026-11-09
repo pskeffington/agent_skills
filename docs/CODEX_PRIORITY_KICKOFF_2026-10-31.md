@@ -1,10 +1,12 @@
 # Codex kickoff — priority-driven engineering pass (2026-10-31)
 
+> **Historical kickoff, superseded 2026-11-09:** The initial PR #1–#6 integration sequence has completed. For current repository and branch status, use the [current integration update](../ROADMAP.md#current-integration-update-2026-11-09). The instructions below apply only after refreshing their baseline.
+
 ## Execution directive
 Repository: `pskeffington/agent_skills`. Take `ROADMAP.md` as the priority source and `docs/RELEASE_GATES.md` as the non-waivable acceptance contract. Start from a clean, exact source SHA. Never infer the state of local files or GitHub checks; inspect them.
 
 ### Initial sequence
-1. Inventory branch, uncommitted state, open PRs #1–#6, HEAD SHAs, base branches, changed paths, overlapping ownership, checks, and blockers. Do not overwrite or discard unrelated changes.
+1. Inventory the current branch and uncommitted state, remaining open PRs #7–#13 and #16, head/base SHAs, changed paths, overlapping ownership, checks, and blockers. Consult merged PRs #1–#6 only for integration provenance. Do not overwrite or discard unrelated changes.
 2. Run `python3 scripts/validate.py`, `python3 -m unittest discover -s tests -v`, and the documented preflight/RAG evaluation commands if available. Capture command, environment, exit, SHA, and summary; distinguish real execution from mocks.
 3. Produce `docs/reviews/c31-integration-audit.md` with a safe stacked merge order, files that conflict, stale evidence, and branch protection status. If live GitHub access is unavailable, label live checks BLOCKED and limit conclusions to locally available refs.
 4. Examine F5 independent review and design the trusted **launch-time containment executor** interface. Any real runner work must prove that the launched process is within an OS-enforced boundary; pre-launch approval alone is inadequate. Keep real Codex execution disabled until verified.
