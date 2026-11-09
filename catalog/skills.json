@@ -26,6 +26,19 @@
       ]
     },
     {
+      "name": "audio-ui-engineering",
+      "description": "Build, debug, skin and validate modular Winamp-inspired desktop audio interfaces. Use for player/playlist/equalizer/library/visualizer windows, user-created themes, classic WSZ import, sprite atlases, docking, scalable hit testing, cross-platform Rust UIs and skin-security reviews.",
+      "path": ".agents/skills/audio-ui-engineering",
+      "entrypoint": ".agents/skills/audio-ui-engineering/SKILL.md",
+      "resources": [
+        "agents/openai.yaml",
+        "references/acceptance.md",
+        "references/agents.md",
+        "references/skin-contract.md",
+        "references/winamp-literature.md"
+      ]
+    },
+    {
       "name": "build-integration",
       "description": "Integrate scoped software changes, resolve interface failures and verify reproducible builds and dependency compatibility. Use when assigned this specialist responsibility in a repository software development workflow.",
       "path": ".agents/skills/build-integration",

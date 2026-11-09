@@ -149,6 +149,21 @@
       ]
     },
     {
+      "id": "audio-ui-engineer",
+      "level": 3,
+      "reports_to": "orchestrator",
+      "purpose": "Design and validate modular audio UI, skin formats, accessibility, and safe imports",
+      "skill": "audio-ui-engineering",
+      "permissions": [
+        "repo-read",
+        "draft-write",
+        "tests-run"
+      ],
+      "outputs": [
+        "change-set"
+      ]
+    },
+    {
       "id": "security-reviewer",
       "level": 4,
       "reports_to": "orchestrator",

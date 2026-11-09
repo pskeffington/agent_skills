@@ -9,6 +9,7 @@ Portable, role based software development skills and a standard library Python t
 - [Role catalog](catalog/roles.json) and [directed resource chain](catalog/resource-chain.json) for choosing focused procedures.
 - [Portable skills](.agents/skills/) for research, planning, architecture, implementation, testing, review, security, and release readiness.
 - [Audio systems engineering](.agents/skills/audio-systems-engineering/SKILL.md) for codec/DSP diagnostics, real-time playback, device lifecycle, and evidence-based audio quality gates. Hardware playback remains unverified unless physical testing is recorded.
+- [Audio UI engineering](.agents/skills/audio-ui-engineering/SKILL.md) for modular player panels, declarative skin packages, accessibility, visual regression, and safety requirements for untrusted skin imports.
 - A focused [skill-authoring template](templates/skill/SKILL.md.tmpl), generated [skill catalog](catalog/skills.json), and [evidence matrix](data/literature_matrix.json) for maintaining portable skill bundles.
 - [Task and evidence schemas](schemas/) for bounded work, handoffs, and verification records.
 - `agent_toolset/`, a dependency-free local Python control plane for contract validation, task journaling, scheduling, repository inventory, test execution, assurance, and an operator CLI.
