@@ -11,7 +11,7 @@ FIELD_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):\s*(.*)$")
 LINK_RE = re.compile(r"\]\(([^)]+)\)")
 
 
-def parse_skill(path):
+def parse_skill(path, repository_root=None):
     content = path.read_text(encoding="utf-8")
     if not content.startswith("---\n"):
         raise ValueError(f"{path}: missing opening YAML delimiter")
@@ -48,6 +48,7 @@ def parse_skill(path):
     if not body:
         raise ValueError(f"{path}: missing instructions")
     root = path.parent.resolve()
+    allowed_root = Path(repository_root).resolve() if repository_root is not None else root
     for link in LINK_RE.findall(body):
         if "://" in link or link.startswith(("#", "mailto:")):
             continue
@@ -55,7 +56,7 @@ def parse_skill(path):
         if not target:
             continue
         resolved = (root / target).resolve()
-        if not resolved.is_relative_to(root) or not resolved.is_file():
+        if not resolved.is_relative_to(allowed_root) or not resolved.is_file():
             raise ValueError(f"{path}: invalid or missing local reference: {link}")
     return {"name": name, "description": description}
 
@@ -81,7 +82,7 @@ def build_catalog(root=ROOT):
             manifest = path / "SKILL.md"
             if not manifest.is_file():
                 raise ValueError(f"{path}: missing SKILL.md")
-            meta = parse_skill(manifest)
+            meta = parse_skill(manifest, repository_root=root)
             if any(p.is_symlink() for p in path.rglob("*")):
                 raise ValueError(f"{path}: symbolic links are not allowed in skill bundles")
             members = sorted(p.relative_to(path).as_posix() for p in path.rglob("*") if p.is_file())

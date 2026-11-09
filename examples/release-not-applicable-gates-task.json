@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RELEASE-NOT-APPLICABLE-GATES",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "41cf2c5e645122e16eae1d62adf8efa766594351",
+  "objective": "Make the release evaluator honor the documented NOT_APPLICABLE disposition when its rationale and evidence pointer are covered by trusted, dossier-bound operator approval.",
+  "scope": {
+    "include": [
+      "agent_toolset/assurance/release.py",
+      "tests/test_release_approval.py",
+      "docs/RELEASE_GATES.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/release-not-applicable-gates-task.json",
+      "docs/reviews/release-not-applicable-gates-review-2026-10-30.md"
+    ],
+    "exclude": [
+      "deployment execution",
+      "production publication",
+      "trust-store administration"
+    ]
+  },
+  "acceptance": [
+    "PASS and trusted NOT_APPLICABLE gate dispositions can admit a candidate only when all other release checks pass",
+    "NOT_APPLICABLE without a rationale/evidence pointer remains blocked",
+    "FAIL/BLOCKED/unknown statuses remain rejecting",
+    "Signature binding ensures any N/A change requires new approval",
+    "Full repository acceptance passes and synthetic release remains BLOCKED"
+  ],
+  "risk": "high",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [
+    "RELEASE-DOSSIER-SIGNATURE-BINDING"
+  ],
+  "evidence_refs": [
+    "finding: docs/RELEASE_GATES.md permits justified, approved NOT_APPLICABLE, while evaluator accepts only PASS",
+    "independent review: PASS; PASS; docs/reviews/release-not-applicable-gates-review-2026-10-30.md",
+    "command: python3 -m unittest tests.test_release_approval -q (exit 0, 7 tests)",
+    "command: python3 -m unittest tests.test_codex.CodexTests.test_malformed_unhashable_gate_status_fails_closed -q (exit 0, 1 test)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 -m unittest discover -s tests -q (exit 0, 90 tests)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0; worktree dirty during candidate check)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "independent security review: PASS; N/A signed dossier admitted; blank rationale blocked; malformed list status rejected",
+    "artifact: three reproducible builds SHA256 c69fbb2b4d8e03f89356ee4c6f5214db9a79a49b08db11ee4b9debe23a8d5218; doctor/matching digest PASS; synthetic dossier BLOCKED exit 2",
+    "CI: GitHub Actions run 41157657279 succeeded for implementation commit 2e03e056fdb4c35fcb95aad52fc376eaf836ceec"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

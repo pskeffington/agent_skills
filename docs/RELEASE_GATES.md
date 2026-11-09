@@ -1,14 +1,47 @@
-# Release acceptance gates
+# Acceptance gates (G0–G6)
 
-Each gate needs artifact evidence, not just a written claim. A later gate cannot compensate for an earlier failed gate.
+All gate outcomes must be **PASS**, **FAIL**, **BLOCKED**, or **NOT_APPLICABLE** with a reason and evidence pointer. Only PASS or a justified NOT_APPLICABLE disposition included in the trusted, dossier-bound approval admits a candidate. Missing N/A rationale/pointer or unavailable approval verification remains BLOCKED; FAIL remains rejecting. No invented success or bypass based on missing tooling.
 
-| Gate | Criteria | Evidence | State at bootstrap |
-| --- | --- | --- | --- |
-| G0 — Source/index foundation | Repo layout, source links, dated evidence matrix, policy, threat model | README; docs; data | Implemented; review required |
-| G1 — Structural integrity | Every skill passes name/frontmatter/link/size checks; catalog generation is deterministic; unit tests pass | `validate_skills.py`; `index_skills.py --check`; tests; CI run | Local validation targeted |
-| G2 — Safety | Provenance checked; code-reviewed scripts; prompt-injection and least-privilege cases pass; secrets review | documented review and attack fixtures | Blocked: fixtures/review missing |
-| G3 — Behavioral quality | Realistic positive/negative trigger evals and failure-handling evals pass; baseline recorded | eval results per skill | Blocked: harness missing |
-| G4 — Client compatibility | Package opens and runs in each **claimed** target client; assumptions documented | per-client smoke-test logs | Blocked: not tested |
-| G5 — Distribution | Pinned version, license review, archive integrity, approvals, rollback instructions | release manifest, reviewer approval | Blocked: not released |
+Release dossiers use schema version `3.0.0`; the evaluator blocks older or unknown versions. Version 3 adds structured check provenance bound to the subject commit and artifact digest.
 
-**Failure rules:** Index drift, invalid metadata, broken local references, test failure, unauthorized outbound side effect, unexplained tool calls, or missing evidence block promotion. No automatic merges or production publication. CI green covers only what CI actually checks; it is not a substitute for G2–G5.
+| Gate | Owner | Minimum evidence |
+| --- | --- | --- |
+| G0 intake | Orchestrator | repository, baseline SHA, objective, allowed scope, risk |
+| G1 plan/design | Planner + architect | task DAG, interfaces, acceptance tests, rollback and changes |
+| G2 implementation | Implementer | bounded diff, code ownership, no unexpected dependencies |
+| G3 integration | Integrator | reproducible build, lockfile and compatibility outcomes |
+| G4 independent quality | Verifier + code reviewer | unit/integration/regression commands, defects and review decision |
+| G5 security/documentation | Security + documenter | threat/dependency/license checks and updated operator docs |
+| G6 release readiness | Release controller + human | full evidence packet, artifact digests, rollback, explicit approval signed by an allowlisted approver key |
+
+## Fail closed
+- `BLOCKED`: required tool/fixture/permission unavailable; log precise blocker and next action.
+- `FAIL`: check ran and found an unacceptable defect; return to owning stage.
+- `NOT_APPLICABLE`: require a documented rationale; cannot disguise unrun mandatory checks.
+- On new commit, re-evaluate affected downstream evidence.
+- Approval signatures are checked against an operator-managed public-key trust store and bind the approver, authority reference, invocation, decision, exact source commit, artifact digest, and SHA-256 of the complete canonical dossier. The dossier binding excludes only the detached signature and its own digest field. Any change to gates, target, rollback, attestations, or provenance requires a new signature. Accepted keys are RSA >=2048 bits or ECDSA P-256/P-384/P-521. A signature does not authenticate external CI, review, security, or staging references.
+- Deployment, migration, external publication and irreversible changes require a separate, explicit human authorization. A green documentation check does not constitute authorization.
+
+## Example checkpoint
+```text
+Task: DEV-001 | Base: <sha> | Head: <sha>
+G0 PASS | G1 PASS | G2 PASS | G3 PASS
+G4 BLOCKED (platform fixture unavailable)
+G5 PASS | G6 BLOCKED (depends on G4)
+Next: provision fixture, rerun G4, then reassess G6
+```
+
+## Skill-library admission gates (G0–G5)
+
+These gates evaluate an individual portable skill bundle. They supplement the toolset release gates above and do not certify a runtime or deployment.
+
+| Gate | Criteria | Evidence |
+| --- | --- | --- |
+| G0 — Source/index foundation | Canonical layout, dated evidence matrix, repository policy, threat model | README, docs, data |
+| G1 — Structural integrity | Skill metadata and links validate; generated catalog is deterministic; unit tests pass | `validate_skills.py`, `index_skills.py --check`, tests, CI trace |
+| G2 — Safety | Provenance, reviewed scripts, injection and least-privilege cases covered | security review and adversarial fixtures |
+| G3 — Behavioral quality | Positive/negative triggers and error handling evaluated against a baseline | per-skill evaluation evidence |
+| G4 — Client compatibility | Each claimed target client is smoke-tested | per-client test record |
+| G5 — Distribution | Version, license, archive integrity, approvals, and rollback are recorded | release manifest and review evidence |
+
+Missing or failed evidence blocks skill admission. A green structural check covers only the checks it actually runs; it does not satisfy G2–G5.

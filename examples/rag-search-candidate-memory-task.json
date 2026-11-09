@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0",
+  "task_id":"RAG-SEARCH-CANDIDATE-MEMORY",
+  "repository":"pskeffington/agent_skills",
+  "base_commit":"a7d4e37084cb4aefb456876e9d9e48c20958214b",
+  "objective":"Reduce temporary memory used during ranked RAG search without changing exact result semantics or materially regressing latency.",
+  "scope":{"include":["agent_toolset/rag.py","tests/test_rag.py","docs/benchmarks/rag-search-candidate-memory-optimization-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md","examples/rag-search-candidate-memory-task.json","scripts/validate.py","docs/reviews/rag-search-candidate-memory-review-2026-10-30.md"],"exclude":["ranking formula changes","third-party dependencies","deployment"]},
+  "acceptance":["Exact ordered hits, scores, and provenance match the baseline across representative queries.","Paired large and repository corpus timings and peak allocations are recorded.","Independent review finds no parity issue.","Full repository acceptance passes and synthetic release remains blocked without release evidence."],
+  "risk":"low",
+  "owner_role":"implementer",
+  "status":"done",
+  "depends_on":["RAG-SEARCH-IDF-PRECOMPUTE"],
+  "evidence_refs":["docs/benchmarks/rag-search-candidate-memory-optimization-2026-10-30.json","docs/IMPLEMENTATION_QUEUE.md R21"],
+  "blocker":null,
+  "approval_ref":null
+}

@@ -3,6 +3,87 @@
   "generated_by": "scripts/index_skills.py",
   "skills": [
     {
+      "name": "architecture-design",
+      "description": "Design software components, interfaces, security boundaries, design alternatives, and architecture decision records. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/architecture-design",
+      "entrypoint": ".agents/skills/architecture-design/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "build-integration",
+      "description": "Integrate scoped software changes, resolve interface failures and verify reproducible builds and dependency compatibility. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/build-integration",
+      "entrypoint": ".agents/skills/build-integration/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "code-implementation",
+      "description": "Implement bounded code changes with reproducible local tests and provenance on an isolated feature branch. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/code-implementation",
+      "entrypoint": ".agents/skills/code-implementation/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "documentation-maintenance",
+      "description": "Maintain documentation, API contracts, changelogs, operator instructions and task indexes after implementation. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/documentation-maintenance",
+      "entrypoint": ".agents/skills/documentation-maintenance/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "engineering-planning",
+      "description": "Break repository engineering requests into small scoped tasks, acceptance criteria, risk assessments, dependency DAGs, and rollback requirements. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/engineering-planning",
+      "entrypoint": ".agents/skills/engineering-planning/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "engineering-research",
+      "description": "Investigate repository baselines, code paths, upstream specifications, and verified engineering resources before development. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/engineering-research",
+      "entrypoint": ".agents/skills/engineering-research/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "independent-code-review",
+      "description": "Perform independent correctness, maintainability and regression review before release admission. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/independent-code-review",
+      "entrypoint": ".agents/skills/independent-code-review/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "release-readiness",
+      "description": "Evaluate release candidate gates, evidence validity, artifacts, rollback and explicit owner approval. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/release-readiness",
+      "entrypoint": ".agents/skills/release-readiness/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "security-assurance",
+      "description": "Perform security, supply-chain, permission-boundary and threat review of software changes. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/security-assurance",
+      "entrypoint": ".agents/skills/security-assurance/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
       "name": "skill-authoring",
       "description": "Create or review a focused, portable Agent Skill in this repository. Use when asked to scaffold a new SKILL.md workflow, refine skill triggers, audit a skill, or prepare skill admission checks.",
       "path": ".agents/skills/skill-authoring",
@@ -10,6 +91,24 @@
       "resources": [
         "agents/openai.yaml",
         "references/review-checklist.md"
+      ]
+    },
+    {
+      "name": "software-delivery-orchestrator",
+      "description": "Route software engineering tasks and coordinate specialist handoffs, dependency ordering, blockers, independent verification, and release readiness. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/software-delivery-orchestrator",
+      "entrypoint": ".agents/skills/software-delivery-orchestrator/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "test-verification",
+      "description": "Independently test engineering changes, build regression fixtures, check edge cases and generate evidence. Use when assigned this specialist responsibility in a repository software development workflow.",
+      "path": ".agents/skills/test-verification",
+      "entrypoint": ".agents/skills/test-verification/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
       ]
     }
   ]

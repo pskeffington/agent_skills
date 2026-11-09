@@ -54,6 +54,20 @@ class SkillTests(unittest.TestCase):
             out.write("\n[missing](references/missing.md)\n")
         self.assertTrue(validate(self.root))
 
+    def test_accept_repository_local_reference(self):
+        skill = self.add_good()
+        catalog_entry = self.root / "catalog" / "roles.json"
+        catalog_entry.write_text("{}", encoding="utf-8")
+        with skill.open("a", encoding="utf-8") as out:
+            out.write("\n[role catalog](../../../catalog/roles.json)\n")
+        self.assertEqual([], validate(self.root))
+
+    def test_reject_reference_escaping_repository(self):
+        skill = self.add_good()
+        with skill.open("a", encoding="utf-8") as out:
+            out.write("\n[outside file](../../../../../../etc/passwd)\n")
+        self.assertTrue(validate(self.root))
+
     def test_reject_catalog_drift(self):
         self.add_good()
         (self.root / "catalog" / "skills.json").write_text("{}", encoding="utf-8")
