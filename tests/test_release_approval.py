@@ -1,4 +1,6 @@
 import base64
+import copy
+import hashlib
 import json
 import os
 import pathlib
@@ -10,6 +12,7 @@ import unittest
 
 from agent_toolset.assurance.approval import (
     canonical_approval_payload,
+    dossier_binding_sha256,
     load_trust_store,
     make_openssl_approval_verifier,
 )
@@ -48,6 +51,7 @@ class ReleaseApprovalTests(unittest.TestCase):
             "evidence_ref": "approval:request-42",
             "subject_commit": "a" * 40,
             "artifact_sha256": "b" * 64,
+            "dossier_sha256": "c" * 64,
             "invocation_id": "approval-run-42",
             "decision": "APPROVE",
             "approver_id": "operator-42",
@@ -80,47 +84,91 @@ class ReleaseApprovalTests(unittest.TestCase):
         self.assertIs(verifier(altered, "a" * 40, "b" * 64), False)
 
     def test_signed_approval_allows_ready_classification_only_with_trusted_key(self):
-        commit, artifact = "a" * 40, "b" * 64
+        commit = "a" * 40
+        artifact_path = (self.root / "signed-candidate.pyz").resolve()
+        artifact_path.write_bytes(b"release-approved artifact bytes")
+        artifact = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
         attestation = lambda ref, run: {
             "evidence_ref": ref, "subject_commit": commit,
             "artifact_sha256": artifact, "invocation_id": run,
         }
-        approval = self.sign({**attestation("approval:request-42", "approver-run"),
-            "decision": "APPROVE", "approver_id": "operator-42",
-            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"})
+        approval = {**attestation("approval:request-42", "approver-run"),
+            "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
+            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
-            "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "schema_version": "3.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
             "implementation": attestation("implementation:42", "implementer-run"),
             "independent_review": attestation("review:42", "review-run"),
             "security_review": attestation("security:42", "security-run"),
             "staging": attestation("staging:42", "staging-run"),
-            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
+            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": [{"name":"unit tests","command":["python3","-m","unittest","discover","-s","tests"],"result":"PASS","subject_commit":commit,"artifact_sha256":artifact,"evidence_ref":"ci:run-42","invocation_id":"ci-run-42","output_sha256":"d"*64}],
         }
+        approval["dossier_sha256"] = dossier_binding_sha256(dossier)
+        dossier["approval"] = self.sign(approval)
         verifier = make_openssl_approval_verifier(self.approvers, openssl=OPENSSL)
         self.assertEqual("BLOCKED", evaluate(dossier)["status"])
-        self.assertEqual("PASS", evaluate(dossier, approval_verifier=verifier)["status"])
+        self.assertEqual("PASS", evaluate(dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        not_applicable = copy.deepcopy(dossier)
+        not_applicable["gates"]["G5"] = {
+            "status": "NOT_APPLICABLE",
+            "evidence_ref": "decision:g5-na-42",
+            "reason": "this candidate has no G5-specific change",
+        }
+        na_approval = dict(not_applicable["approval"])
+        na_approval.pop("signature", None)
+        na_approval["invocation_id"] = "approver-na-run"
+        not_applicable["approval"] = na_approval
+        na_approval["dossier_sha256"] = dossier_binding_sha256(not_applicable)
+        not_applicable["approval"] = self.sign(na_approval)
+        self.assertEqual("PASS", evaluate(not_applicable, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        incomplete_na = copy.deepcopy(not_applicable)
+        incomplete_na["gates"]["G5"]["reason"] = ""
+        incomplete_approval = dict(incomplete_na["approval"])
+        incomplete_approval.pop("signature", None)
+        incomplete_approval["invocation_id"] = "approver-na-incomplete-run"
+        incomplete_na["approval"] = incomplete_approval
+        incomplete_approval["dossier_sha256"] = dossier_binding_sha256(incomplete_na)
+        incomplete_na["approval"] = self.sign(incomplete_approval)
+        self.assertEqual("BLOCKED", evaluate(incomplete_na, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["target_environment"] = "production"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["gates"]["G0"]["evidence_ref"] = "check:substituted"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["check_provenance"][0]["result"] = "BLOCKED"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
+        altered_dossier = copy.deepcopy(dossier)
+        altered_dossier["rollback_ref"] = "rollback:other"
+        self.assertEqual("FAIL", evaluate(altered_dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
         dossier["artifact_sha256"] = "c" * 64
-        self.assertEqual("FAIL", evaluate(dossier, approval_verifier=verifier)["status"])
+        self.assertEqual("FAIL", evaluate(dossier, approval_verifier=verifier, artifact_path=artifact_path)["status"])
 
     def test_release_cli_verifies_trust_store_and_detached_signature(self):
-        commit, artifact = "a" * 40, "b" * 64
+        commit = "a" * 40
+        artifact_path = (self.root / "candidate.pyz").resolve()
+        artifact_path.write_bytes(b"exact candidate artifact bytes")
+        artifact = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
         attestation = lambda ref, run: {
             "evidence_ref": ref, "subject_commit": commit,
             "artifact_sha256": artifact, "invocation_id": run,
         }
-        approval = self.sign({**attestation("approval:request-42", "approver-run"),
-            "decision": "APPROVE", "approver_id": "operator-42",
-            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"})
+        approval = {**attestation("approval:request-42", "approver-run"),
+            "dossier_sha256": "0" * 64, "decision": "APPROVE", "approver_id": "operator-42",
+            "authority_ref": "change-control:42", "signature_algorithm": "openssl-dgst-sha256"}
         dossier = {
-            "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
+            "schema_version": "3.0.0", "commit": commit, "artifact_sha256": artifact, "target_environment": "staging",
             "gates": {gate: {"status": "PASS", "evidence_ref": f"check:{gate}", "reason": "actual recorded pass"} for gate in REQUIRED},
             "implementation": attestation("implementation:42", "implementer-run"),
             "independent_review": attestation("review:42", "review-run"),
             "security_review": attestation("security:42", "security-run"),
             "staging": attestation("staging:42", "staging-run"),
-            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": ["ci:run-42"],
+            "approval": approval, "rollback_ref": "rollback:42", "check_provenance": [{"name":"unit tests","command":["python3","-m","unittest","discover","-s","tests"],"result":"PASS","subject_commit":commit,"artifact_sha256":artifact,"evidence_ref":"ci:run-42","invocation_id":"ci-run-42","output_sha256":"d"*64}],
         }
+        approval["dossier_sha256"] = dossier_binding_sha256(dossier)
+        dossier["approval"] = self.sign(approval)
         dossier_path = self.root / "release.json"
         dossier_path.write_text(json.dumps(dossier), encoding="utf-8")
         trust_path = self.root / "trust.json"
@@ -128,11 +176,23 @@ class ReleaseApprovalTests(unittest.TestCase):
         trust_path.chmod(0o600)
         env = {"PATH": str(pathlib.Path(OPENSSL).parent) + os.pathsep + "/usr/bin:/bin", "PYTHONDONTWRITEBYTECODE": "1"}
         result = subprocess.run(
-            [sys.executable, "-m", "agent_toolset", "release-check", str(dossier_path), "--approval-trust-store", str(trust_path)],
+            [sys.executable, "-m", "agent_toolset", "release-check", str(dossier_path), "--artifact", str(artifact_path), "--approval-trust-store", str(trust_path)],
             cwd=ROOT, env=env, capture_output=True, text=True,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual("PASS", json.loads(result.stdout)["status"])
+        compatibility = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "release_gate.py"), "--evidence", str(dossier_path), "--approval-trust-store", str(trust_path)],
+            cwd=ROOT, env=env, capture_output=True, text=True,
+        )
+        self.assertEqual(2, compatibility.returncode, compatibility.stdout)
+        self.assertEqual("BLOCKED", json.loads(compatibility.stdout)["status"])
+        compatibility = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "release_gate.py"), "--evidence", str(dossier_path), "--artifact", str(artifact_path), "--approval-trust-store", str(trust_path)],
+            cwd=ROOT, env=env, capture_output=True, text=True,
+        )
+        self.assertEqual(0, compatibility.returncode, compatibility.stdout + compatibility.stderr)
+        self.assertEqual("PASS", json.loads(compatibility.stdout)["status"])
 
     def test_trust_store_loading_rejects_writable_and_symlinked_store(self):
         store = self.root / "trust.json"

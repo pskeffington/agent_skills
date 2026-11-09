@@ -15,6 +15,7 @@ def main(argv=None):
     group=parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--example",action="store_true")
     group.add_argument("--evidence")
+    parser.add_argument("--artifact",help="exact candidate artifact to hash against the dossier")
     parser.add_argument("--approval-trust-store",help="operator-managed JSON allowlist of authorized approver public keys")
     args=parser.parse_args(argv)
     try:
@@ -29,7 +30,7 @@ def main(argv=None):
         if args.approval_trust_store:
             from agent_toolset.assurance.approval import load_trust_store, make_openssl_approval_verifier
             verifier=make_openssl_approval_verifier(load_trust_store(args.approval_trust_store))
-        result=evaluate(data,approval_verifier=verifier)
+        result=evaluate(data,approval_verifier=verifier,artifact_path=args.artifact)
     except (ValueError,OSError,TypeError) as exc:
         result={"status":"BLOCKED","release_ready":False,"issues":[str(exc)],"notice":"Read-only evaluation. No deployment performed."}
     print(json.dumps(result,indent=2))

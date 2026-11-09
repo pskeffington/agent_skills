@@ -9,13 +9,43 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SKILLS = ROOT / ".agents" / "skills"
 EXAMPLE_SCHEMAS = {
     "feature-task.json": "task-contract.schema.json",
+    "candidate-artifact-release-evaluation-task.json": "task-contract.schema.json",
+    "release-provenance-artifact-refresh-task.json": "task-contract.schema.json",
+    "a4-ci-runtime-readiness-task.json": "task-contract.schema.json",
     "security-hardening-task.json": "task-contract.schema.json",
     "release-approval-verifier-task.json": "task-contract.schema.json",
     "artifact-digest-task.json": "task-contract.schema.json",
     "codex-runner-task.json": "task-contract.schema.json",
+    "f5-containment-verifier-task.json": "task-contract.schema.json",
+    "f5-probe-containment-readiness-task.json": "task-contract.schema.json",
+    "release-artifact-path-hardening-task.json": "task-contract.schema.json",
+    "rag-cache-framing-followup-task.json": "task-contract.schema.json",
+    "rag-search-length-cache-investigation-task.json": "task-contract.schema.json",
+    "rag-search-deferred-length-investigation-task.json": "task-contract.schema.json",
+    "f5-process-bound-launch-task.json": "task-contract.schema.json",
+    "rag-search-streaming-topk-task.json": "task-contract.schema.json",
+    "rag-search-idf-precompute-task.json": "task-contract.schema.json",
+    "rag-search-candidate-memory-task.json": "task-contract.schema.json",
+    "release-artifact-binding-task.json": "task-contract.schema.json",
+    "release-dossier-binding-task.json": "task-contract.schema.json",
+    "release-dossier-schema-version-task.json": "task-contract.schema.json",
+    "release-check-provenance-task.json": "task-contract.schema.json",
+    "release-not-applicable-gates-task.json": "task-contract.schema.json",
+    "rag-cache-optimization-task.json": "task-contract.schema.json",
+    "rag-source-scan-optimization-task.json": "task-contract.schema.json",
+    "rag-cache-digest-validation-optimization-task.json": "task-contract.schema.json",
+    "rag-search-candidate-optimization-task.json": "task-contract.schema.json",
+    "rag-cache-validator-optimization-task.json": "task-contract.schema.json",
+    "rag-cache-entry-framing-optimization-task.json": "task-contract.schema.json",
+    "rag-citation-verification-optimization-task.json": "task-contract.schema.json",
+    "rag-cache-memory-optimization-task.json": "task-contract.schema.json",
+    "rag-source-scan-optimization-task.json": "task-contract.schema.json",
     "feature-handoff.json": "handoff.schema.json",
     "feature-evidence.json": "evidence.schema.json",
+    "candidate-artifact-release-evaluation-evidence.json": "evidence.schema.json",
+    "a4-ci-runtime-readiness-evidence.json": "evidence.schema.json",
     "rag-evaluation.json": "rag-evaluation.schema.json",
+    "candidate-artifact-release-dossier.json": "release-dossier.schema.json",
     "release-dossier.json": "release-dossier.schema.json",
 }
 
@@ -114,11 +144,13 @@ def validate():
     for path in sorted((ROOT/"examples").glob("*.json")):
         try:
             example=json.loads(path.read_text(encoding="utf-8"))
-            if example.get("schema_version")!="1.0.0": errors.append("invalid example version: "+path.name)
             schema_name=EXAMPLE_SCHEMAS.get(path.name)
             if schema_name is None: errors.append("example has no registered schema: "+path.name)
             elif schema_name not in schema_docs: errors.append("missing schema "+schema_name+" for "+path.name)
             else:
+                version_schema=schema_docs[schema_name].get("properties",{}).get("schema_version",{})
+                expected_version=version_schema.get("const","1.0.0")
+                if example.get("schema_version")!=expected_version: errors.append("invalid example version: "+path.name)
                 errors.extend(f"{path.name}{error[1:]}" for error in validate_document(example,schema_docs[schema_name]))
         except (OSError,json.JSONDecodeError,AttributeError) as exc: errors.append("invalid example JSON: "+path.name+": "+str(exc))
     return errors

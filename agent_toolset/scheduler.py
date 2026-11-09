@@ -117,16 +117,17 @@ class Scheduler:
 
     def _assert_scope_available(self,tasks,leases,task_id):
         requested=tasks[task_id]["scope"]["include"]
-        for other_id in leases:
+        for other_id,other in tasks.items():
             if other_id==task_id: continue
-            if _scope_conflicts(requested,tasks[other_id]["scope"]["include"]):
-                raise ScheduleError(f"writer scope overlaps active lease for task {other_id}")
+            if other_id in leases or other["status"]=="running":
+                if _scope_conflicts(requested,other["scope"]["include"]):
+                    raise ScheduleError(f"writer scope overlaps active lease for task {other_id}")
 
     def _acquire_locked(self,tx,tasks,leases,task_id,owner,worktree,now):
         if not isinstance(owner,str) or not owner.strip(): raise ScheduleError("lease owner must be non-empty")
         if task_id not in tasks or any(tasks[d]["status"]!="done" for d in tasks[task_id].get("depends_on",[])):
             raise ScheduleError("task is unknown or dependencies are not complete")
-        if tasks[task_id]["status"] not in {"queued","ready","running"}:
+        if tasks[task_id]["status"] not in {"queued","ready"}:
             raise ScheduleError("task is not in a schedulable state")
         current=leases.get(task_id)
         if current:
@@ -167,8 +168,9 @@ class Scheduler:
 
     def release(self,task_id:str,owner:str,token:str)->None:
         with self.journal.transaction() as tx:
-            _,leases=self._state(); lease=leases.get(task_id)
+            tasks,leases=self._state(); lease=leases.get(task_id)
             if not lease or lease["owner"]!=owner or lease["token"]!=token: raise ScheduleError("lease owner or token mismatch")
+            if tasks[task_id]["status"]=="running": raise ScheduleError("cannot release a running task lease before the task stops running")
             tx.append(task_id,"LEASE_RELEASED",{"owner":owner,"token":token})
 
     def cancel(self,task_id:str,reason:str,*,process_check:Callable[[dict[str,Any]],bool|None]|None=None)->None:
@@ -176,6 +178,8 @@ class Scheduler:
         with self.journal.transaction() as tx:
             tasks,leases=self._state(); self._check_transition(tasks,task_id,"cancelled",None)
             lease=leases.get(task_id)
+            if tasks[task_id]["status"]=="running" and not lease:
+                raise ScheduleError("cannot cancel a running task without a lease to verify worker inactivity")
             if lease:
                 if not callable(process_check) or process_check(dict(lease)) is not True:
                     raise ScheduleError("cancelling a leased task requires verified worker inactivity")

@@ -32,7 +32,7 @@ For building the complete executable agent toolset, follow `CODEX_FULL_BUILD.md`
 Read `docs/CODEX_IMPLEMENTATION.md` and `docs/CODEX_RESOURCE_POLICY.md` for Codex-specific task routing, bounded repair attempts, and release approvals. Use `CODEX_KICKOFF.md` for a ready-to-run pilot. The skills are role instructions, not spawned or permissioned processes.
 
 ## Acceptance
-Run `python3 scripts/validate.py` and `python3 -m unittest discover -s tests -v`; also run `python3 scripts/codex_preflight.py --repo .` and `python3 scripts/release_gate.py --example` (the latter intentionally exits nonzero to demonstrate blocked release). Include results and unverified gaps in handoff. See `docs/RELEASE_GATES.md`.
+Run `python3 scripts/validate.py` and `python3 -m unittest discover -s tests -v`; also run `python3 scripts/codex_preflight.py --repo .` and `python3 scripts/release_gate.py --example` (the latter intentionally exits nonzero to demonstrate blocked release). For skill-library changes, additionally run `python3 scripts/validate_skills.py` and `python3 scripts/index_skills.py --check`. Include results and unverified gaps in handoff. See `docs/RELEASE_GATES.md`.
 
 ## Files
 - `catalog/`: roles and directed resource chain (machine-readable source of truth).
@@ -42,3 +42,7 @@ Run `python3 scripts/validate.py` and `python3 -m unittest discover -s tests -v`
 - `examples/`: contract examples; `scripts/` and `tests/`: local validators.
 
 Skills define *how to work*. The actual execution runtime enforces permissions, launches agents and performs integrations. Do not misrepresent these files as a deployed multi-agent service.
+
+## Skill library admission
+
+Keep portable skill bundles under `.agents/skills/<name>/SKILL.md`; maintain `catalog/skills.json` only through `scripts/index_skills.py`. Keep each skill's inputs, outputs, trigger boundaries, error handling, and required local references explicit. Use the [skill library plan](docs/SKILL_LIBRARY_PLAN.md) and [build matrix](data/skill_build_matrix.json) for campaign scope and evidence requirements. Skills remain instructions and do not gain execution permissions from this policy.

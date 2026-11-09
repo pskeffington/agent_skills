@@ -19,6 +19,13 @@ EXIT = {"PASS": 0, "FAIL": 1, "BLOCKED": 2}
 def _json(value: Any) -> None:
     print(json.dumps(value, sort_keys=True, indent=2))
 
+def _unique_object(pairs):
+    result={}
+    for key,value in pairs:
+        if key in result: raise ValueError(f"duplicate release dossier key: {key}")
+        result[key]=value
+    return result
+
 def parser() -> argparse.ArgumentParser:
     p=argparse.ArgumentParser(prog="agent-toolset",description="Local-first engineering task control plane")
     sub=p.add_subparsers(dest="command",required=True)
@@ -33,21 +40,31 @@ def parser() -> argparse.ArgumentParser:
     replay=sub.add_parser("replay",help="verify and display the event journal"); replay.add_argument("--state",default=".agent-toolset/events.jsonl")
     ci=sub.add_parser("ci-ingest",help="classify a saved GitHub Actions run export"); ci.add_argument("path"); ci.add_argument("--commit",required=True); ci.add_argument("--required-check",action="append",default=[])
     sec=sub.add_parser("security-summary",help="summarize a saved security findings export"); sec.add_argument("path"); sec.add_argument("--fail-on",default="high")
-    release=sub.add_parser("release-check",help="evaluate a release dossier without deploying"); release.add_argument("evidence"); release.add_argument("--approval-trust-store",help="operator-managed JSON allowlist of authorized approver public keys")
+    release=sub.add_parser("release-check",help="evaluate a release dossier and artifact without deploying"); release.add_argument("evidence"); release.add_argument("--artifact",required=True,help="exact regular-file artifact whose digest must match the dossier"); release.add_argument("--approval-trust-store",help="operator-managed JSON allowlist of authorized approver public keys")
     approval=sub.add_parser("approval-payload",help="emit canonical approval bytes for offline detached signing"); approval.add_argument("dossier")
     artifact=sub.add_parser("artifact-check",help="verify candidate artifact bytes against a SHA256 digest"); artifact.add_argument("path"); artifact.add_argument("--sha256",required=True)
     export=sub.add_parser("export",help="export journal-derived state as JSON"); export.add_argument("--state",default=".agent-toolset/events.jsonl")
+    rag=sub.add_parser("rag-search",help="search local repository text with verifiable citations"); rag.add_argument("--repo",default="."); rag.add_argument("--query",required=True); rag.add_argument("--limit",type=int,default=8)
     return p
 
 def main(argv: list[str] | None = None) -> int:
     args=parser().parse_args(argv)
     try:
+        if args.command == "rag-search":
+            from .rag import build_index, search as rag_search, verify_hit
+            if not 1 <= args.limit <= 100: raise ValueError("limit must be between 1 and 100")
+            index=build_index(args.repo)
+            hits=rag_search(index,args.query,limit=args.limit)
+            verified=[hit for hit in hits if verify_hit(args.repo,hit)]
+            if len(verified) != len(hits):
+                _json({"status":"BLOCKED","error":"retrieval source changed during verification"}); return 2
+            _json({"status":"PASS","mode":"offline-lexical","indexed_lines":len(index["documents"]),"hits":verified}); return 0
         if args.command == "doctor":
             _json({"status":"PASS","python":sys.version.split()[0],"journal":"available","runner":"dry-run","codex_execution":"disabled"}); return 0
         if args.command == "inventory":
             value=inventory(args.repo); _json({"status":"PASS",**value}); return 0
         if args.command == "search":
-            from .rag import build_index, load_or_build_cache, search as rag_search, verify_hit
+            from .rag import build_index, load_or_build_cache, search as rag_search, verify_hits
             root=pathlib.Path(args.repo).resolve(strict=True)
             if not root.is_dir(): raise ValueError("repository root must be a directory")
             if args.cache:
@@ -55,7 +72,8 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 index=build_index(root); fingerprint=None; cache_hit=False
             hits=rag_search(index,args.query,limit=args.limit)
-            verified=[hit for hit in hits if verify_hit(root,hit)]
+            hit_validity=verify_hits(root,hits)
+            verified=[hit for hit,valid in zip(hits,hit_validity) if valid]
             _json({"status":"PASS","root":str(root),"query":args.query,"hits":verified,"unverified_hits":len(hits)-len(verified),"cache_fingerprint":fingerprint,"cache_hit":cache_hit})
             return 0
         if args.command == "run":
@@ -74,22 +92,17 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "release-check":
             from .assurance.release import evaluate
             from .assurance.approval import load_trust_store, make_openssl_approval_verifier
-            def unique_pairs(pairs):
-                result={}
-                for key,value in pairs:
-                    if key in result: raise ValueError(f"duplicate release dossier key: {key}")
-                    result[key]=value
-                return result
-            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8"),object_pairs_hook=unique_pairs)
+            doc=json.loads(pathlib.Path(args.evidence).read_text(encoding="utf-8"),object_pairs_hook=_unique_object)
             verifier=None
             if args.approval_trust_store:
                 verifier=make_openssl_approval_verifier(load_trust_store(args.approval_trust_store))
-            result=evaluate(doc,approval_verifier=verifier); _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
+            result=evaluate(doc,approval_verifier=verifier,artifact_path=args.artifact)
+            _json(result); return {"PASS":0,"FAIL":1,"BLOCKED":2}[result["status"]]
         if args.command == "approval-payload":
-            from .assurance.approval import canonical_approval_payload
-            doc=json.loads(pathlib.Path(args.dossier).read_text(encoding="utf-8"))
+            from .assurance.approval import approval_payload_for_dossier
+            doc=json.loads(pathlib.Path(args.dossier).read_text(encoding="utf-8"),object_pairs_hook=_unique_object)
             try:
-                payload=canonical_approval_payload(doc.get("approval"))
+                payload=approval_payload_for_dossier(doc)
             except ValueError as exc:
                 print(json.dumps({"status":"BLOCKED","error":str(exc)}),file=sys.stderr); return 2
             sys.stdout.buffer.write(payload); return 0

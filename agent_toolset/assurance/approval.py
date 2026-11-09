@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import json
 import os
 import pathlib
@@ -14,7 +15,7 @@ import tempfile
 from typing import Any
 
 APPROVAL_FIELDS = (
-    "evidence_ref", "subject_commit", "artifact_sha256", "invocation_id",
+    "evidence_ref", "subject_commit", "artifact_sha256", "dossier_sha256", "invocation_id",
     "decision", "approver_id", "authority_ref", "signature_algorithm",
 )
 MAX_TRUST_STORE_BYTES = 1_000_000
@@ -37,6 +38,32 @@ def canonical_approval_payload(approval: dict[str, Any]) -> bytes:
     if payload["decision"] != "APPROVE" or payload["signature_algorithm"] != "openssl-dgst-sha256":
         raise ValueError("unsupported approval decision or signature algorithm")
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+
+def dossier_binding_sha256(dossier: dict[str, Any]) -> str:
+    """Hash the dossier content while excluding only signature and its own binding field."""
+    if not isinstance(dossier, dict):
+        raise ValueError("release dossier must be an object")
+    approval = dossier.get("approval")
+    if not isinstance(approval, dict):
+        raise ValueError("release dossier approval must be an object")
+    bound = dict(dossier)
+    unsigned_approval = dict(approval)
+    unsigned_approval.pop("signature", None)
+    unsigned_approval.pop("dossier_sha256", None)
+    bound["approval"] = unsigned_approval
+    canonical = json.dumps(bound, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def approval_payload_for_dossier(dossier: dict[str, Any]) -> bytes:
+    """Create signing bytes whose approval includes a digest of the full dossier."""
+    approval = dossier.get("approval") if isinstance(dossier, dict) else None
+    if not isinstance(approval, dict):
+        raise ValueError("release dossier approval must be an object")
+    bound_approval = dict(approval)
+    bound_approval["dossier_sha256"] = dossier_binding_sha256(dossier)
+    return canonical_approval_payload(bound_approval)
 
 
 def load_trust_store(path: str | pathlib.Path) -> dict[str, dict[str, str]]:

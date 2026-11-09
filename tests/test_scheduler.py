@@ -49,6 +49,7 @@ class SchedulerTests(unittest.TestCase):
             with self.assertRaises(ScheduleError): s.reclaim_expired("F3-A","two","worker stopped",process_check=lambda _:False,now=111)
             reclaimed=s.reclaim_expired("F3-A","two","confirmed worker process ended",process_check=lambda _:True,now=111)
             with self.assertRaises(ScheduleError): s.release("F3-A", "one", lease["token"])
+            s.transition("F3-A","review",owner="two",lease_token=reclaimed["token"],now=112)
             s.release("F3-A", "two", reclaimed["token"])
 
     def test_overlapping_writer_scopes_are_rejected(self):
@@ -63,6 +64,39 @@ class SchedulerTests(unittest.TestCase):
             self.assertEqual("queued",s.status()["tasks"]["F3-B"]["status"])
             self.assertEqual("running",s.status()["tasks"]["F3-A"]["status"])
             s.acquire("F3-C","writer-three",now=100)
+
+    def test_running_lease_cannot_be_released_or_reacquired(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            s=self.scheduler(tmp)
+            first=self.task("F3-A"); second=self.task("F3-B")
+            first["scope"]["include"]=["src/shared.py"]
+            second["scope"]["include"]=["src/shared.py"]
+            s.add_tasks([first,second])
+            lease=s.acquire("F3-A","worker-a",now=100)
+            with self.assertRaisesRegex(ScheduleError,"running task lease"):
+                s.release("F3-A","worker-a",lease["token"])
+            with self.assertRaises(ScheduleError):
+                s.acquire("F3-A","worker-b",now=101)
+            with self.assertRaises(ScheduleError):
+                s.acquire("F3-B","worker-b",now=101)
+            self.assertEqual("running",s.status()["tasks"]["F3-A"]["status"])
+
+    def test_unleased_running_task_keeps_its_scope_reserved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            s=self.scheduler(tmp)
+            first=self.task("F3-A"); second=self.task("F3-B")
+            first["scope"]["include"]=["src/shared.py"]
+            second["scope"]["include"]=["src/shared.py"]
+            s.add_tasks([first,second])
+            lease=s.acquire("F3-A","worker-a",now=100)
+            with s.journal.transaction() as tx:
+                tx.append("F3-A","LEASE_RELEASED",{"owner":"worker-a","token":lease["token"]})
+            with self.assertRaises(ScheduleError):
+                s.acquire("F3-A","worker-b",now=101)
+            with self.assertRaisesRegex(ScheduleError,"without a lease"):
+                s.cancel("F3-A","operator requested stop",process_check=lambda _:True)
+            with self.assertRaisesRegex(ScheduleError,"active lease for task F3-A"):
+                s.acquire("F3-B","worker-b",now=101)
 
     def test_cancelling_leased_task_requires_verified_worker_stop(self):
         with tempfile.TemporaryDirectory() as tmp:
