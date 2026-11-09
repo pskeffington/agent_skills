@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-SEARCH-DEFERRED-LENGTH-INVESTIGATION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "d3fce3724c2940ff9c3ab7ce74947204090bd332",
+  "objective": "Test whether deferring corpus token-length aggregation until a query has matching documents improves sparse and no-answer search without changing rankings.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py (transient prototype only)",
+      "scripts/compare_rag_search.py",
+      "docs/benchmarks/rag-search-deferred-length-investigation-repo-2026-10-30.json",
+      "docs/benchmarks/rag-search-deferred-length-investigation-scale-2026-10-30.json",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/rag-search-deferred-length-investigation-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "retaining runtime change without consistent measured benefit",
+      "ranking formula changes",
+      "third-party dependencies",
+      "deployment"
+    ]
+  },
+  "acceptance": [
+    "Run 31 alternating baseline/candidate measurements on the current repository corpus and deterministic 500-file, 20,000-line corpus.",
+    "Require exact ordered result equality for all fixed queries.",
+    "Record individual samples, source hashes, corpus fingerprints and corpus sizes.",
+    "Retain the prototype only if it improves the target workload without a material regression on the repository corpus."
+  ],
+  "risk": "low",
+  "owner_role": "engineering-research",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "docs/benchmarks/rag-search-deferred-length-investigation-repo-2026-10-30.json",
+    "docs/benchmarks/rag-search-deferred-length-investigation-scale-2026-10-30.json",
+    "docs/IMPLEMENTATION_QUEUE.md"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

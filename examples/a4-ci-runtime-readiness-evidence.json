@@ -1,0 +1,36 @@
+{
+  "schema_version":"1.0.0",
+  "task_id":"A4-CI-RUNTIME-READINESS-AUDIT",
+  "stage":"integration-readiness",
+  "source_commit":"f8d1ae1d8465d0d363dac19d7c2b74521903ba7e",
+  "result":"BLOCKED",
+  "checks":[
+    {
+      "name":"GitHub Actions structural check",
+      "result":"PASS",
+      "provenance":"GitHub Actions run 41160740474 for f8d1ae1d8465d0d363dac19d7c2b74521903ba7e; check structural; validated contracts, 103 unit tests, and preflight",
+      "details":"The CI check passes when run, but this does not enforce it as a required branch-protection check."
+    },
+    {
+      "name":"required branch protection",
+      "result":"BLOCKED",
+      "provenance":"GET https://api.github.com/repos/pskeffington/agent_skills/rulesets returned []; gh api repos/pskeffington/agent_skills/branches/main/protection returned Branch not protected (HTTP 404)",
+      "details":"Next action: a repository administrator must require the existing structural check on the default branch and provide read-back evidence. No settings were changed."
+    },
+    {
+      "name":"Codex CLI capability",
+      "result":"PASS",
+      "provenance":"command: codex --version returned codex-cli 0.147.0; codex exec --help showed --strict-config, --json, --ephemeral, --ignore-user-config, --sandbox, --cd, and --output-last-message",
+      "details":"CLI presence and flags do not establish host process containment or runtime admission."
+    },
+    {
+      "name":"host process containment",
+      "result":"BLOCKED",
+      "provenance":"command: sandbox-exec -p '(version 1)(deny default)(allow process-exec (literal \"/usr/bin/true\"))' /usr/bin/true returned exit 71, sandbox_apply: Operation not permitted; docker info could not connect to unix:///Users/null/.docker/run/docker.sock",
+      "details":"Next action: provision an approved host containment runtime and a trusted verifier that emits task-bound attestations; then repeat the isolated runtime pilot."
+    }
+  ],
+  "artifacts":[],
+  "blocker":"Required branch protection and verified process containment require administrator/host-runtime changes unavailable in the current session.",
+  "approval_ref":null
+}

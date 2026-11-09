@@ -11,11 +11,21 @@ class AssuranceIngestionTests(unittest.TestCase):
         commit="a"*40
         report=classify_github_run({"id":42,"head_sha":commit,"conclusion":"success","jobs":[{"name":"structural","conclusion":"success"}]},expected_commit=commit,required_checks={"structural"})
         self.assertEqual("PASS",report["status"])
+    def test_missing_or_unconfigured_job_evidence_cannot_pass(self):
+        commit="a"*40
+        missing=classify_github_run({"head_sha":commit,"conclusion":"success"},expected_commit=commit,required_checks={"structural"})
+        self.assertEqual("BLOCKED",missing["status"])
+        self.assertIn("workflow run has no complete job evidence",missing["issues"])
+        absent_requirements=classify_github_run({"head_sha":commit,"conclusion":"success","jobs":[{"name":"structural","conclusion":"success"}]},expected_commit=commit)
+        self.assertEqual("BLOCKED",absent_requirements["status"])
+        self.assertIn("required check names must be configured",absent_requirements["issues"])
+        self.assertEqual("BLOCKED",classify_github_run({"head_sha":commit,"conclusion":"success","jobs":[]},expected_commit=commit)["status"])
     def test_stale_failed_missing_and_in_progress_ci_fail_closed(self):
         commit="a"*40
         self.assertEqual("FAIL",classify_github_run({"head_sha":"b"*40,"conclusion":"success","jobs":[]},expected_commit=commit)["status"])
         self.assertEqual("FAIL",classify_github_run({"head_sha":commit,"conclusion":"failure","jobs":[]},expected_commit=commit)["status"])
         self.assertEqual("BLOCKED",classify_github_run({"head_sha":commit,"conclusion":"in_progress","jobs":[]},expected_commit=commit)["status"])
+        self.assertEqual("BLOCKED",classify_github_run({"head_sha":commit,"conclusion":"weird-new-state","jobs":[]},expected_commit=commit)["status"])
         self.assertTrue(classify_github_run({"head_sha":commit,"conclusion":"success","jobs":[]},expected_commit=commit,required_checks={"test"})["issues"])
     def test_security_severity_threshold_and_missing_export(self):
         self.assertEqual("PASS",summarize_findings({"findings":[{"severity":"low"}]})["status"])

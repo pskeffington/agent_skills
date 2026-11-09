@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0",
+  "task_id":"A4-CI-RUNTIME-READINESS-AUDIT",
+  "repository":"pskeffington/agent_skills",
+  "base_commit":"f8d1ae1d8465d0d363dac19d7c2b74521903ba7e",
+  "objective":"Reconcile roadmap status against current CI, branch protection, Codex CLI capabilities, and host process-containment availability.",
+  "scope":{"include":["ROADMAP.md","docs/IMPLEMENTATION_QUEUE.md","docs/BRANCH_PROTECTION.md","examples/a4-ci-runtime-readiness-task.json","examples/a4-ci-runtime-readiness-evidence.json","scripts/validate.py"],"exclude":["changing GitHub repository settings","model invocation","staging","production deployment"]},
+  "acceptance":["Record current CI evidence and check identity.","Read-only branch protection checks distinguish configured protection from successful CI.","Record Codex CLI version/flag capability separately from verified process containment.","Mark unavailable protection and containment BLOCKED with the exact next action.","Validate the task and evidence examples against their schemas."],
+  "risk":"low",
+  "owner_role":"engineering-research",
+  "status":"done",
+  "depends_on":[],
+  "evidence_refs":["docs/BRANCH_PROTECTION.md","examples/a4-ci-runtime-readiness-evidence.json"],
+  "blocker":null,
+  "approval_ref":null
+}

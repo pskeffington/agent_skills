@@ -30,6 +30,24 @@ class ToolboxTests(unittest.TestCase):
         self.assertEqual("PASS",result.outcome)
         self.assertEqual(0,result.exit_code)
 
+    def test_executor_bounds_stdout_and_stderr_during_capture(self):
+        executor=TestExecutor(ROOT,timeout=10,output_limit=128)
+        executor.commands["chatty"]=["python3","-c","import sys; sys.stdout.write('o'*1000000); sys.stderr.write('e'*1000000)"]
+        result=executor.run("chatty")
+        self.assertEqual("PASS",result.outcome)
+        self.assertEqual(128,len(result.stdout.encode()))
+        self.assertEqual(128,len(result.stderr.encode()))
+        self.assertTrue(result.stdout_truncated)
+        self.assertTrue(result.stderr_truncated)
+
+    def test_executor_timeout_kills_process_and_returns_blocked(self):
+        executor=TestExecutor(ROOT,timeout=0.1,output_limit=128)
+        executor.commands["slow"]=["python3","-c","import time; print('started', flush=True); time.sleep(5)"]
+        result=executor.run("slow")
+        self.assertEqual("BLOCKED",result.outcome)
+        self.assertIsNone(result.exit_code)
+        self.assertIn("command timed out",result.stderr)
+
     def test_invalid_cwd_rejected(self):
         with self.assertRaises(ContractError): TestExecutor(ROOT).run("validate",cwd="../")
 

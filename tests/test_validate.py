@@ -4,11 +4,22 @@ import sys
 import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from validate import validate
+from validate import validate, validate_document
 
 class ControlPlaneTests(unittest.TestCase):
     def test_catalog(self):
         self.assertEqual([], validate())
+
+    def test_schema_validation_rejects_nested_and_unknown_fields(self):
+        schema={"type":"object","additionalProperties":False,"required":["count"],"properties":{"count":{"type":"integer","minimum":1}}}
+        self.assertEqual([],validate_document({"count":2},schema))
+        self.assertTrue(validate_document({"count":0,"extra":True},schema))
+        self.assertTrue(validate_document({"count":True},schema))
+
+    def test_release_example_is_schema_valid_but_semantically_blocked(self):
+        from release_gate import evaluate
+        doc=json.loads((ROOT/"examples/release-dossier.json").read_text())
+        self.assertFalse(evaluate(doc)["release_ready"])
 
     def test_all_roles_have_skill(self):
         roles = json.loads((ROOT / "catalog/roles.json").read_text())["roles"]

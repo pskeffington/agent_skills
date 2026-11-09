@@ -38,3 +38,53 @@ class CatalogValidationTests(unittest.TestCase):
     def test_missing_catalog_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(validate(tmp)["status"], "FAIL")
+
+    def test_malformed_catalog_values_fail_without_raising(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "catalog").mkdir()
+            (root / "catalog/roles.json").write_text(json.dumps({"roles": [None, {"id": []}]}))
+            (root / "catalog/resource-chain.json").write_text(json.dumps({
+                "resources": [{}], "stages": [None, {"id": "stage", "depends_on": None, "consumes": [[]]}]
+            }))
+            result = validate(root)
+            self.assertEqual(result["status"], "FAIL")
+            self.assertTrue(result["errors"])
+
+    def test_symlinked_skill_roots_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
+            root = Path(tmp)
+            self.fixture(root)
+            skills = root / ".agents/skills"
+            saved = root / "saved-skills"
+            skills.rename(saved)
+            skills.symlink_to(outside, target_is_directory=True)
+            result = validate(root)
+            self.assertEqual(result["status"], "FAIL")
+            self.assertTrue(any("unsafe SKILL.md" in message for message in result["errors"]))
+
+    def test_symlinked_catalog_file_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
+            root = Path(tmp)
+            self.fixture(root)
+            roles = root / "catalog/roles.json"
+            external = Path(outside) / "roles.json"
+            external.write_text(roles.read_text())
+            roles.unlink()
+            roles.symlink_to(external)
+            result = validate(root)
+            self.assertEqual(result["status"], "FAIL")
+            self.assertEqual(result["errors"], ["catalog files are missing or unsafe"])
+
+    def test_long_acyclic_graph_does_not_recurse(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            chain = self.fixture(root)
+            chain["stages"] = [
+                {"id": f"stage-{index}", "role": "worker",
+                 "depends_on": [f"stage-{index - 1}"] if index else [],
+                 "consumes": ["input"], "produces": ["output"]}
+                for index in reversed(range(2000))
+            ]
+            (root / "catalog/resource-chain.json").write_text(json.dumps(chain))
+            self.assertEqual(validate(root)["status"], "PASS")
