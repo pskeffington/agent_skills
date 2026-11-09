@@ -11,6 +11,7 @@ Portable, role based software development skills and a standard library Python t
 - A focused [skill-authoring template](templates/skill/SKILL.md.tmpl), generated [skill catalog](catalog/skills.json), and [evidence matrix](data/literature_matrix.json) for maintaining portable skill bundles.
 - [Task and evidence schemas](schemas/) for bounded work, handoffs, and verification records.
 - `agent_toolset/`, a dependency-free local Python control plane for contract validation, task journaling, scheduling, repository inventory, test execution, assurance, and an operator CLI.
+- An optional [loopback-only local inference transport](agent_toolset/local_inference.py) and [proposal runner](agent_toolset/runners/local_model.py). Model output is untrusted proposal data; this path does not execute tools or write repository files, and live model-server compatibility has not been validated.
 - [Policy and design docs](docs/), including the [architecture](docs/ARCHITECTURE.md), [security boundaries](docs/SECURITY.md), [operator manual](docs/OPERATOR_MANUAL.md), and [release gates](docs/RELEASE_GATES.md).
 
 ## Get started
