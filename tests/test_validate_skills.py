@@ -118,6 +118,16 @@ class SkillTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "symbolic links are not allowed"):
             build_catalog(self.root)
 
+    def test_refuse_symlinked_skill_entrypoint_before_read(self):
+        skills_root = self.root / ".agents" / "skills"
+        skill = skills_root / "test-thing"
+        skill.mkdir(parents=True)
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, outside)
+        (skill / "SKILL.md").symlink_to(outside / "missing-entrypoint.md")
+        with self.assertRaisesRegex(ValueError, "symbolic links are not allowed"):
+            build_catalog(self.root)
+
     def test_refuse_symlinked_skills_root(self):
         agents_root = self.root / ".agents"
         agents_root.mkdir()
