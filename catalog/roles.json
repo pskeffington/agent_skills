@@ -103,6 +103,22 @@
       ]
     },
     {
+      "id": "skill-author",
+      "level": 3,
+      "reports_to": "orchestrator",
+      "purpose": "Design, author, evaluate, and maintain portable Agent Skills",
+      "skill": "skill-authoring",
+      "permissions": [
+        "repo-read",
+        "draft-write",
+        "tests-run"
+      ],
+      "outputs": [
+        "change-set",
+        "documentation-evidence"
+      ]
+    },
+    {
       "id": "verifier",
       "level": 4,
       "reports_to": "orchestrator",
