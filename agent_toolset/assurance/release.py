@@ -5,8 +5,11 @@ import json
 import pathlib
 import re
 import sys
+from .artifact import verify_artifact
+from .approval import dossier_binding_sha256
 
 REQUIRED = ("G0", "G1", "G2", "G3", "G4", "G5", "G6")
+DOSSIER_SCHEMA_VERSION = "3.0.0"
 SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^[0-9a-f]{64}$")
 ATTESTATIONS = ("implementation", "independent_review", "security_review", "staging", "approval")
@@ -14,11 +17,13 @@ ATTESTATIONS = ("implementation", "independent_review", "security_review", "stag
 def _pointer(value):
     return isinstance(value, str) and len(value.strip()) >= 3
 
-def evaluate(doc, approval_verifier=None):
+def _evaluate_dossier(doc, approval_verifier=None):
     if not isinstance(doc, dict):
         return {"release_ready":False,"status":"BLOCKED","issues":["dossier must be an object"],"notice":"Read-only evaluation. No deployment performed."}
     issues=[]
     contradictions=False
+    if doc.get("schema_version") != DOSSIER_SCHEMA_VERSION:
+        issues.append(f"unsupported release dossier schema version (expected {DOSSIER_SCHEMA_VERSION})")
     commit=doc.get("commit")
     digest=doc.get("artifact_sha256")
     if not isinstance(commit,str) or not SHA.fullmatch(commit): issues.append("missing valid immutable commit")
@@ -31,8 +36,8 @@ def evaluate(doc, approval_verifier=None):
             record=gates.get(gate)
             if not isinstance(record,dict):
                 issues.append(gate + " evidence missing")
-            elif record.get("status") != "PASS":
-                issues.append(gate + " is not PASS")
+            elif record.get("status") not in ("PASS", "NOT_APPLICABLE"):
+                issues.append(gate + " is not PASS or approved NOT_APPLICABLE")
                 contradictions = contradictions or record.get("status") == "FAIL"
             if isinstance(record,dict) and (not _pointer(record.get("evidence_ref")) or not _pointer(record.get("reason"))):
                 issues.append(gate + " evidence pointer or reason missing")
@@ -60,6 +65,17 @@ def evaluate(doc, approval_verifier=None):
         issues.append("security reviewer must be independent from implementer")
         contradictions=True
     if isinstance(approval,dict):
+        try:
+            expected_dossier_digest=dossier_binding_sha256(doc)
+        except (TypeError,ValueError) as exc:
+            expected_dossier_digest=None
+            issues.append("release dossier approval binding could not be computed: " + str(exc))
+        approval_dossier_digest=approval.get("dossier_sha256")
+        if not isinstance(approval_dossier_digest,str) or not DIGEST.fullmatch(approval_dossier_digest):
+            issues.append("approval dossier content digest missing or invalid")
+        elif expected_dossier_digest is not None and approval_dossier_digest != expected_dossier_digest:
+            issues.append("approval does not bind the current release dossier contents")
+            contradictions=True
         if approval.get("decision") != "APPROVE":
             issues.append("approval decision must explicitly be APPROVE")
             contradictions = contradictions or approval.get("decision") in ("REJECT", "DENY")
@@ -92,14 +108,65 @@ def evaluate(doc, approval_verifier=None):
     if not _pointer(doc.get("rollback_ref")): issues.append("rollback plan missing")
     if not _pointer(doc.get("target_environment")): issues.append("target environment missing")
     provenance=doc.get("check_provenance")
-    if not isinstance(provenance,list) or not provenance or not all(_pointer(item) for item in provenance):
+    if not isinstance(provenance,list) or not provenance:
         issues.append("checks lack provenance")
+    else:
+        required_check_fields={"name","command","result","subject_commit","artifact_sha256","evidence_ref","invocation_id","output_sha256"}
+        for number,check in enumerate(provenance,1):
+            label=f"check provenance entry {number}"
+            if type(check) is not dict or set(check)!=required_check_fields:
+                issues.append(label + " is malformed")
+                continue
+            if not _pointer(check.get("name")):
+                issues.append(label + " name missing")
+            command=check.get("command")
+            if not isinstance(command,list) or not command or not all(isinstance(part,str) and part for part in command):
+                issues.append(label + " command must be a nonempty argument array")
+            result=check.get("result")
+            if result not in ("PASS","FAIL","BLOCKED"):
+                issues.append(label + " has invalid result")
+            elif result != "PASS":
+                issues.append(label + " is not PASS")
+                contradictions = contradictions or result == "FAIL"
+            if not isinstance(commit,str) or check.get("subject_commit") != commit:
+                issues.append(label + " is for a different commit")
+                contradictions=True
+            if not isinstance(digest,str) or check.get("artifact_sha256") != digest:
+                issues.append(label + " is for a different artifact")
+                contradictions=True
+            if not _pointer(check.get("evidence_ref")):
+                issues.append(label + " evidence reference missing")
+            if not _pointer(check.get("invocation_id")):
+                issues.append(label + " invocation ID missing")
+            if not isinstance(check.get("output_sha256"),str) or not DIGEST.fullmatch(check["output_sha256"]):
+                issues.append(label + " output SHA256 missing or invalid")
     release_ready=not issues
     status="PASS" if release_ready else ("FAIL" if contradictions else "BLOCKED")
     return {"release_ready":release_ready,"status":status,"issues":issues,"notice":"Read-only evaluation. No deployment performed."}
 
+def evaluate(doc, approval_verifier=None, *, artifact_path=None):
+    """Return release readiness only after verifying the candidate artifact bytes."""
+    result=_evaluate_dossier(doc,approval_verifier=approval_verifier)
+    if not artifact_path:
+        result["release_ready"]=False
+        result["status"]="FAIL" if result["status"]=="FAIL" else "BLOCKED"
+        result["issues"].append("candidate artifact path is required")
+        result["artifact_integrity"]={"status":"BLOCKED","issues":["candidate artifact path is required"]}
+        return result
+    expected_digest=doc.get("artifact_sha256") if isinstance(doc,dict) else None
+    integrity=verify_artifact(artifact_path,expected_digest)
+    result["artifact_integrity"]={key:value for key,value in integrity.items() if key != "notice"}
+    if integrity["status"] != "PASS":
+        result["release_ready"]=False
+        result["issues"].append("candidate artifact integrity verification " + integrity["status"].lower())
+        if integrity["status"] == "FAIL":
+            result["status"]="FAIL"
+        elif result["status"] != "FAIL":
+            result["status"]="BLOCKED"
+    return result
+
 def example():
-    return {"commit":"0"*40,"artifact_sha256":"0"*64,"target_environment":"example",
+    return {"schema_version":DOSSIER_SCHEMA_VERSION,"commit":"0"*40,"artifact_sha256":"0"*64,"target_environment":"example",
             "gates":{g:{"status":"BLOCKED","evidence_ref":None,"reason":"synthetic example"} for g in REQUIRED},
             "independent_review":None,"security_review":None,"staging":None,"approval":None,"rollback_ref":None,"check_provenance":[]}
 

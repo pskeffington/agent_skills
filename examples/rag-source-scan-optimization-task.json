@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-SOURCE-SCAN-OPTIMIZATION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "0ed7ab18cd76c04a6ce9623acf34b7cdd692cf58",
+  "objective": "Reduce source fingerprint scan overhead while preserving deterministic content hashes and no-follow filesystem traversal.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "tests/test_rag.py",
+      "tests/test_rag_cache.py",
+      "scripts/compare_rag_cache.py",
+      "docs/benchmarks/rag-source-scan-optimization-2026-10-30.json",
+      "docs/reviews/rag-source-scan-optimization-review-2026-10-30.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/rag-source-scan-optimization-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "deployment",
+      "production environment",
+      "retrieval ranking changes",
+      "third-party dependencies"
+    ]
+  },
+  "acceptance": [
+    "Baseline and candidate source manifests match for the same on-disk corpus",
+    "Symlink, traversal, ignored-directory, size-limit, content-hash and stale-cache protections remain covered",
+    "A paired benchmark records source revision, implementation hashes, corpus fingerprint and raw timings",
+    "Full local required checks pass and the synthetic release gate remains BLOCKED"
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": ["RAG-CACHE-OPTIMIZATION"],
+  "evidence_refs": [
+    "base: 0ed7ab18cd76c04a6ce9623acf34b7cdd692cf58",
+    "focused tests: python3 -m unittest tests.test_rag tests.test_rag_cache tests.test_cli -v (exit 0, 22 tests)",
+    "benchmark: docs/benchmarks/rag-source-scan-optimization-2026-10-30.json; seven paired repetitions; equal 112-file source manifests; baseline median 241.8969 ms, candidate median 151.5706 ms (37.34% lower)",
+    "command: python3 -m unittest tests.test_rag tests.test_rag_cache -v (exit 0, 13 tests)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 82 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "review: docs/reviews/rag-source-scan-optimization-review-2026-10-30.md (PASS; no remaining correctness or traversal-safety findings; no CI claim)"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

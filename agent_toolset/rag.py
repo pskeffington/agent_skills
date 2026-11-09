@@ -1,6 +1,7 @@
 """Offline, repo-confined lexical retrieval with source provenance."""
 from __future__ import annotations
 import hashlib
+import heapq
 import json
 import math
 import os
@@ -23,6 +24,7 @@ IGNORED_DIRS = {
 IGNORED_FILES = {".env", ".npmrc", ".pypirc", "id_rsa", "id_ed25519", "id_ecdsa", "known_hosts"}
 IGNORED_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".jks", ".keystore"}
 CACHE_FORMAT = 1
+CACHE_ENTRY_MAGIC = b"AGENT-TOOLSET-CACHE/2\n"
 _ORIGINAL_OS_OPEN = os.open
 
 def terms(value: str) -> list[str]:
@@ -111,24 +113,85 @@ def _is_sensitive(relative: str) -> bool:
 
 def _source_records(root: Path, suffixes: Iterable[str], exclude_paths: Iterable[Path] = ()) -> list[tuple[str, bytes, str]]:
     root = root.resolve(strict=True)
-    excluded=[Path(item).absolute() for item in exclude_paths]
-    records=[]
-    for path in sorted(root.rglob("*")):
-        absolute=path.absolute()
-        if any(absolute == item or item in absolute.parents for item in excluded):
-            continue
-        relative=path.relative_to(root)
-        relative_name=relative.as_posix()
-        if _is_sensitive(relative_name):
-            continue
-        if path.is_symlink() or path.suffix.lower() not in suffixes:
-            continue
+    excluded=[]
+    exclude_root=False
+    for item in exclude_paths:
+        absolute=Path(item).expanduser().resolve(strict=False)
         try:
-            raw=_read_confined_file(root,relative_name)
-            raw.decode("utf-8")
-        except (UnicodeError,OSError,ValueError):
+            relative=absolute.relative_to(root).as_posix()
+            excluded.append(relative)
+        except ValueError:
+            if absolute==root or absolute in root.parents:
+                exclude_root=True
             continue
-        records.append((relative_name,raw,hashlib.sha256(raw).hexdigest()))
+    if exclude_root:
+        return []
+    records=[]
+    flags=os.O_RDONLY | getattr(os,"O_CLOEXEC",0)
+    directory_flags=flags | getattr(os,"O_DIRECTORY",0) | os.O_NOFOLLOW
+
+    def is_excluded(relative: str) -> bool:
+        return any(relative==item or item=="." or relative.startswith(item+"/") for item in excluded)
+
+    def visit(directory_fd: int, prefix: str) -> None:
+        # scandir consumes its descriptor, so scan a duplicate and retain the
+        # original directory handle for safe dir_fd-relative child opens.
+        try:
+            with os.scandir(os.dup(directory_fd)) as iterator:
+                entries=sorted(iterator,key=lambda entry:entry.name)
+        except OSError:
+            return
+        for entry in entries:
+            relative=f"{prefix}/{entry.name}" if prefix else entry.name
+            if is_excluded(relative) or _is_sensitive(relative):
+                continue
+            try:
+                metadata=os.stat(entry.name,dir_fd=directory_fd,follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISDIR(metadata.st_mode):
+                try:
+                    child_fd=_ORIGINAL_OS_OPEN(entry.name,directory_flags,dir_fd=directory_fd)
+                except OSError:
+                    continue
+                try:
+                    if stat.S_ISDIR(os.fstat(child_fd).st_mode):
+                        visit(child_fd,relative)
+                finally:
+                    os.close(child_fd)
+                continue
+            if not stat.S_ISREG(metadata.st_mode) or Path(entry.name).suffix.lower() not in suffixes:
+                continue
+            try:
+                file_fd=_ORIGINAL_OS_OPEN(entry.name,flags|os.O_NOFOLLOW,dir_fd=directory_fd)
+                try:
+                    metadata=os.fstat(file_fd)
+                    if not stat.S_ISREG(metadata.st_mode) or metadata.st_size>MAX_BYTES:
+                        continue
+                    chunks=[]
+                    remaining=MAX_BYTES+1
+                    while remaining:
+                        chunk=os.read(file_fd,min(65536,remaining))
+                        if not chunk:
+                            break
+                        chunks.append(chunk)
+                        remaining-=len(chunk)
+                    raw=b"".join(chunks)
+                    if len(raw)>MAX_BYTES:
+                        continue
+                finally:
+                    os.close(file_fd)
+                raw.decode("utf-8")
+            except (UnicodeError,OSError,ValueError):
+                continue
+            records.append((relative,raw,hashlib.sha256(raw).hexdigest()))
+
+    root_fd=_open_directory_nofollow(root)
+    try:
+        visit(root_fd,"")
+    finally:
+        os.close(root_fd)
+    records.sort(key=lambda record:record[0])
     return records
 
 def _make_index(root: Path, records: list[tuple[str,bytes,str]]) -> dict:
@@ -143,10 +206,10 @@ def _make_index(root: Path, records: list[tuple[str,bytes,str]]) -> dict:
                 docs.append({"path":relative,"line":number,"text":line[:2000],"sha256":digest,"tf":dict(Counter(tokens))})
     return {"format":1,"root":str(root),"documents":docs}
 
-def build_index(root: str | Path, *, suffixes=DEFAULT_SUFFIXES) -> dict:
+def build_index(root: str | Path, *, suffixes=DEFAULT_SUFFIXES, exclude_paths: Iterable[Path] = ()) -> dict:
     """Index approved local text only; never follow symlinks or invoke remote services."""
     base=Path(root).resolve(strict=True)
-    return _make_index(base,_source_records(base,suffixes))
+    return _make_index(base,_source_records(base,suffixes,exclude_paths))
 
 def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
     """Deterministic BM25-like lexical ranking; each hit includes a file/line/hash."""
@@ -158,20 +221,32 @@ def search(index: dict, query: str, *, limit: int = 8) -> list[dict]:
     docs=index["documents"]
     if not docs:
         return []
-    df=Counter(t for d in docs for t in q if t in d["tf"])
-    lengths=[sum(d["tf"].values()) for d in docs]
-    avg=sum(lengths)/len(docs)
-    results=[]
-    for d,length in zip(docs,lengths):
-        score=0.0
+    df={term:0 for term in q}
+    candidates=[]
+    total_length=0
+    for document in docs:
+        frequencies=document["tf"]
+        length=sum(frequencies.values())
+        total_length+=length
+        matches=[]
         for term in q:
-            frequency=d["tf"].get(term,0)
-            if frequency:
-                idf=math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5))
-                score+=idf*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
-        if score:
-            results.append({"path":d["path"],"line":d["line"],"sha256":d["sha256"],"text":d["text"],"score":round(score,8)})
-    return sorted(results,key=lambda hit:(-hit["score"],hit["path"],hit["line"]))[:limit]
+            if term in frequencies:
+                df[term]+=1
+                frequency=frequencies[term]
+                if frequency:
+                    matches.append((term,frequency))
+        if matches:
+            candidates.append((document,length,tuple(matches)))
+    avg=total_length/len(docs)
+    idf={term:math.log(1+(len(docs)-df[term]+0.5)/(df[term]+0.5)) for term in q}
+    def scored_hits():
+        for document,length,matches in candidates:
+            score=0.0
+            for term,frequency in matches:
+                score+=idf[term]*(frequency*2.2/(frequency+1.2*(0.25+0.75*length/avg)))
+            if score:
+                yield {"path":document["path"],"line":document["line"],"sha256":document["sha256"],"text":document["text"],"score":round(score,8)}
+    return heapq.nsmallest(limit,scored_hits(),key=lambda hit:(-hit["score"],hit["path"],hit["line"]))
 
 def verify_hit(root: str | Path, hit: dict) -> bool:
     """Reject stale citations or changed files before using them as evidence."""
@@ -187,6 +262,32 @@ def verify_hit(root: str | Path, hit: dict) -> bool:
                 and hashlib.sha256(raw).hexdigest()==hit.get("sha256"))
     except (OSError,UnicodeError,KeyError,TypeError,ValueError):
         return False
+
+def verify_hits(root: str | Path, hits: Iterable[dict]) -> list[bool]:
+    """Verify ranked citations while reading and hashing each distinct source once."""
+    try:
+        base=Path(root).resolve(strict=True)
+    except (OSError,ValueError):
+        return [False for _ in hits]
+    sources: dict[str,tuple[list[str],str] | None]={}
+    verified=[]
+    for hit in hits:
+        if not isinstance(hit,dict) or not isinstance(hit.get("path"),str):
+            verified.append(False)
+            continue
+        path=hit["path"]
+        if path not in sources:
+            try:
+                raw=_read_confined_file(base,path)
+                sources[path]=(raw.decode("utf-8").splitlines(),hashlib.sha256(raw).hexdigest())
+            except (OSError,UnicodeError,TypeError,ValueError):
+                sources[path]=None
+        source=sources[path]
+        line=hit.get("line")
+        verified.append(bool(source is not None and isinstance(line,int) and not isinstance(line,bool)
+                             and 1<=line<=len(source[0]) and source[0][line-1][:2000]==hit.get("text")
+                             and source[1]==hit.get("sha256")))
+    return verified
 
 def cache_fingerprint(root: str | Path, *, suffixes=DEFAULT_SUFFIXES, exclude_paths: Iterable[Path] = ()) -> tuple[str, Path, list[tuple[str,bytes,str]]]:
     base=Path(root).resolve(strict=True)
@@ -230,29 +331,80 @@ def _read_fd(fd: int, limit: int) -> bytes:
     return data
 
 def _valid_cached_index(index: object, expected_root: Path) -> bool:
-    if not isinstance(index,dict) or set(index)!={"format","root","documents"}:
+    if type(index) is not dict or set(index)!={"format","root","documents"}:
         return False
-    if index.get("format")!=1 or index.get("root")!=str(expected_root) or not isinstance(index.get("documents"),list):
+    if type(index.get("format")) is not int or index["format"]!=1 or index.get("root")!=str(expected_root) or type(index.get("documents")) is not list:
         return False
+    validated_digests=set()
+    validated_paths=set()
     for document in index["documents"]:
-        if not isinstance(document,dict) or set(document)!={"path","line","text","sha256","tf"}:
+        if type(document) is not dict or set(document)!={"path","line","text","sha256","tf"}:
             return False
         path=document["path"]
-        if not isinstance(path,str) or Path(path).is_absolute() or ".." in Path(path).parts or "\\" in path:
+        if type(path) is not str:
             return False
-        if not isinstance(document["line"],int) or isinstance(document["line"],bool) or document["line"]<1:
+        # Cache paths are POSIX repository-relative names. Avoid constructing a
+        # pathlib object for every indexed line: large indexes repeat each path
+        # many times and validation is on every cache hit.
+        if path not in validated_paths:
+            try:
+                _safe_relative_parts(path)
+            except ValueError:
+                return False
+            validated_paths.add(path)
+        if type(document["line"]) is not int or document["line"]<1:
             return False
-        if not isinstance(document["text"],str) or len(document["text"])>2000:
+        if type(document["text"]) is not str or len(document["text"])>2000:
             return False
         digest=document["sha256"]
-        if not isinstance(digest,str) or len(digest)!=64 or any(char not in "0123456789abcdef" for char in digest):
+        if type(digest) is not str or len(digest)!=64:
             return False
+        if digest not in validated_digests:
+            if any(char not in "0123456789abcdef" for char in digest):
+                return False
+            validated_digests.add(digest)
         tf=document["tf"]
-        if not isinstance(tf,dict) or not tf or any(not isinstance(term,str) or not isinstance(count,int) or isinstance(count,bool) or count<1 for term,count in tf.items()):
+        if type(tf) is not dict or not tf:
             return False
+        for term,count in tf.items():
+            if type(term) is not str or type(count) is not int or count<1:
+                return False
     return True
 
-def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEFAULT_SUFFIXES) -> tuple[dict,str,bool]:
+def _encode_cache_entry(fingerprint: str, index: dict) -> bytes:
+    """Frame canonical index JSON so its digest can be checked without re-encoding it."""
+    payload=json.dumps(index,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode("utf-8")
+    digest=hashlib.sha256(payload).hexdigest().encode("ascii")
+    return CACHE_ENTRY_MAGIC+fingerprint.encode("ascii")+b"\n"+digest+b"\n"+payload
+
+def _decode_cache_entry(data: bytes, expected_fingerprint: str) -> dict:
+    if not data.startswith(CACHE_ENTRY_MAGIC):
+        raise ValueError("corrupt cache entry: unsupported format")
+    fingerprint_start=len(CACHE_ENTRY_MAGIC)
+    fingerprint_end=data.find(b"\n",fingerprint_start)
+    digest_end=data.find(b"\n",fingerprint_end+1) if fingerprint_end>=0 else -1
+    try:
+        if fingerprint_end<0 or digest_end<0:
+            raise ValueError("corrupt cache entry: malformed header")
+        fingerprint=data[fingerprint_start:fingerprint_end]
+        digest=data[fingerprint_end+1:digest_end]
+        if fingerprint.decode("ascii")!=expected_fingerprint:
+            raise ValueError("corrupt cache entry: source fingerprint mismatch")
+        if len(digest)!=64 or any(byte not in b"0123456789abcdef" for byte in digest):
+            raise ValueError("corrupt cache entry: malformed digest")
+        payload_start=digest_end+1
+        if hashlib.sha256(memoryview(data)[payload_start:]).hexdigest().encode("ascii")!=digest:
+            raise ValueError("corrupt cache entry: digest mismatch")
+        index=json.loads(data[payload_start:])
+    except (UnicodeError,json.JSONDecodeError,ValueError) as exc:
+        if isinstance(exc,ValueError) and str(exc).startswith("corrupt cache entry:"):
+            raise
+        raise ValueError(f"corrupt cache entry: {exc}") from exc
+    if type(index) is not dict:
+        raise ValueError("corrupt cache entry: invalid index")
+    return index
+
+def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEFAULT_SUFFIXES, exclude_paths: Iterable[Path] = ()) -> tuple[dict,str,bool]:
     """Load/create an atomic content-addressed cache; corrupt or symlinked entries fail closed."""
     base=Path(root).resolve(strict=True)
     requested=Path(cache_dir).expanduser().absolute()
@@ -265,8 +417,9 @@ def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEF
     _reject_symlink(directory,"cache directory")
     directory_fd=_open_directory_nofollow(directory)
     try:
-        fingerprint,_,records=cache_fingerprint(base,suffixes=suffixes,exclude_paths=(directory.resolve(strict=True),))
-        entry_name=f"index-{fingerprint}.json"
+        excluded=tuple(exclude_paths)+(directory.resolve(strict=True),)
+        fingerprint,_,records=cache_fingerprint(base,suffixes=suffixes,exclude_paths=excluded)
+        entry_name=f"index-v2-{fingerprint}.json"
         try:
             entry_fd=_ORIGINAL_OS_OPEN(entry_name,os.O_RDONLY|os.O_NOFOLLOW|getattr(os,"O_CLOEXEC",0),dir_fd=directory_fd)
         except FileNotFoundError:
@@ -280,27 +433,15 @@ def load_or_build_cache(root: str | Path, cache_dir: str | Path, *, suffixes=DEF
                 metadata=os.fstat(entry_fd)
                 if not stat.S_ISREG(metadata.st_mode) or metadata.st_size>64_000_000:
                     raise ValueError("corrupt cache entry: invalid file or size limit exceeded")
-                try:
-                    envelope=json.loads(_read_fd(entry_fd,64_000_000).decode("utf-8"))
-                except (UnicodeError,json.JSONDecodeError) as exc:
-                    raise ValueError(f"corrupt cache entry: {exc}") from exc
+                data=_read_fd(entry_fd,64_000_000)
             finally:
                 os.close(entry_fd)
-            if not isinstance(envelope,dict) or set(envelope)!={"fingerprint","index","sha256"}:
-                raise ValueError("corrupt cache entry: invalid envelope")
-            content={"fingerprint":envelope["fingerprint"],"index":envelope["index"]}
-            digest=hashlib.sha256(json.dumps(content,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
-            index=envelope["index"]
-            if envelope["fingerprint"]!=fingerprint or envelope["sha256"]!=digest:
-                raise ValueError("corrupt cache entry: digest or source fingerprint mismatch")
+            index=_decode_cache_entry(data,fingerprint)
             if not _valid_cached_index(index,base):
                 raise ValueError("corrupt cache entry: invalid index")
             return index,fingerprint,True
         index=_make_index(base,records)
-        content={"fingerprint":fingerprint,"index":index}
-        digest=hashlib.sha256(json.dumps(content,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
-        envelope={**content,"sha256":digest}
-        data=(json.dumps(envelope,sort_keys=True,separators=(",",":"),ensure_ascii=False)+"\n").encode()
+        data=_encode_cache_entry(fingerprint,index)
         temporary=f".index-{secrets.token_hex(12)}.tmp"
         flags=os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW|getattr(os,"O_CLOEXEC",0)
         temp_fd=_ORIGINAL_OS_OPEN(temporary,flags,0o600,dir_fd=directory_fd)

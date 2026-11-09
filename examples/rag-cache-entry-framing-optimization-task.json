@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "RAG-CACHE-ENTRY-FRAMING-OPTIMIZATION",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "9d3d48774760655da30c02c73ad624a8228745f4",
+  "objective": "Reduce large-index warm-cache latency by validating a framed serialized payload digest without re-encoding the parsed index, preserving corruption, source-freshness and structural checks.",
+  "scope": {
+    "include": [
+      "agent_toolset/rag.py",
+      "tests/test_rag_cache.py",
+      "scripts/create_rag_benchmark_corpus.py",
+      "docs/benchmarks/rag-cache-entry-framing-optimization-2026-10-30.json",
+      "docs/reviews/rag-cache-entry-framing-optimization-review-2026-10-30.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/rag-cache-entry-framing-optimization-task.json",
+      "scripts/validate.py"
+    ],
+    "exclude": [
+      "source fingerprint semantics",
+      "retrieval ranking",
+      "third-party dependencies",
+      "deployment"
+    ]
+  },
+  "acceptance": [
+    "Cache payload tampering, malformed framing, digest mismatch, invalid index, symlinks and stale sources fail closed",
+    "Versioned entry names avoid interpreting previous JSON envelope entries as the new format",
+    "Paired benchmark compares exact source manifests and records uninstrumented latency with separate memory sampling",
+    "Repository acceptance commands pass and synthetic release remains BLOCKED"
+  ],
+  "risk": "medium",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [
+    "RAG-CACHE-VALIDATOR-OPTIMIZATION"
+  ],
+  "evidence_refs": [
+    "baseline: 9d3d48774760655da30c02c73ad624a8228745f4",
+    "benchmark: docs/benchmarks/rag-cache-entry-framing-optimization-2026-10-30.json; reproducible 500-file/20,000-line corpus from scripts/create_rag_benchmark_corpus.py; 11 alternating repetitions; identical source manifests; median 62.7533 ms baseline / 45.3897 ms candidate (-27.67%); traced peak allocation +13,968 bytes; local 127-file repository comparison: 28.8062 ms / 19.9530 ms (-30.73%), traced peak -3,539,661 bytes",
+    "command: python3 -m unittest tests.test_rag_cache -v (exit 0, 10 tests)",
+    "command: python3 -m unittest tests.test_rag_cache -v (exit 0, 11 tests)",
+    "command: python3 scripts/validate.py (exit 0)",
+    "command: python3 -m unittest discover -s tests -v (exit 0, 88 tests)",
+    "command: python3 scripts/codex_preflight.py --repo . (exit 0; expected dirty worktree while candidate changes are in progress)",
+    "command: python3 scripts/release_gate.py --example (exit 2, expected BLOCKED)",
+    "command: git diff --check (exit 0)",
+    "independent review: PASS; docs/reviews/rag-cache-entry-framing-optimization-review-2026-10-30.md"
+  ],
+  "blocker": null,
+  "approval_ref": null
+}

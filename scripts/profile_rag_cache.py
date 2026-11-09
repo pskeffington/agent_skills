@@ -5,9 +5,12 @@ import argparse
 import cProfile
 import io
 import json
+import math
 import pathlib
 import pstats
+import platform
 import statistics
+import subprocess
 import sys
 import tempfile
 import time
@@ -16,6 +19,20 @@ import tracemalloc
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from agent_toolset import rag
+
+def _source_state(root: pathlib.Path):
+    try:
+        head = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
+                              capture_output=True, text=True, check=False)
+        if head.returncode:
+            return {"source_commit": None, "working_tree_dirty": None}
+        status = subprocess.run(["git", "-C", str(root), "status", "--porcelain", "--untracked-files=all"],
+                                capture_output=True, text=True, check=False)
+        if status.returncode:
+            return {"source_commit": head.stdout.strip(), "working_tree_dirty": None}
+        return {"source_commit": head.stdout.strip(), "working_tree_dirty": bool(status.stdout)}
+    except OSError:
+        return {"source_commit": None, "working_tree_dirty": None}
 
 def _measure(fn):
     profiler = cProfile.Profile()
@@ -38,25 +55,26 @@ def _measure(fn):
     )[:30]
     return result, {"elapsed_ms": round(elapsed_ms, 4), "peak_bytes": peak, "top_functions": top}
 
-def profile(root: pathlib.Path, repetitions: int = 5):
+def profile(root: pathlib.Path, repetitions: int = 5, exclude_paths=()):
     if not 1 <= repetitions <= 25:
         raise ValueError("repetitions must be 1..25")
     root = root.resolve(strict=True)
+    excluded = tuple(pathlib.Path(item).expanduser().resolve(strict=False) for item in exclude_paths)
     samples = {"cold_build": [], "strict_warm_cache": [], "warm_search": []}
     with tempfile.TemporaryDirectory(prefix="agent-rag-o0-") as tmp:
         cache = pathlib.Path(tmp) / "cache"
         # Setup is intentionally outside measurements.
-        cached, _, created = rag.load_or_build_cache(root, cache)
+        cached, fingerprint, created = rag.load_or_build_cache(root, cache, exclude_paths=excluded)
         if created:
             raise ValueError("cache setup unexpectedly reported a warm hit")
         for _ in range(repetitions):
-            _, metric = _measure(lambda: rag.build_index(root))
+            _, metric = _measure(lambda: rag.build_index(root, exclude_paths=excluded))
             samples["cold_build"].append(metric)
-            index, _, hit = rag.load_or_build_cache(root, cache)
+            index, _, hit = rag.load_or_build_cache(root, cache, exclude_paths=excluded)
             if not hit:
                 raise ValueError("strict warm cache failed to hit an unchanged corpus")
             # Record a second actual read, not a synthetic bypass.
-            _, metric = _measure(lambda: rag.load_or_build_cache(root, cache))
+            _, metric = _measure(lambda: rag.load_or_build_cache(root, cache, exclude_paths=excluded))
             samples["strict_warm_cache"].append(metric)
             _, metric = _measure(lambda: rag.search(index, "release readiness task journal lease", limit=8))
             samples["warm_search"].append(metric)
@@ -68,13 +86,19 @@ def profile(root: pathlib.Path, repetitions: int = 5):
         times = sorted(sample["elapsed_ms"] for sample in series)
         summary[name] = {
             "median_ms": statistics.median(times),
-            "p95_ms": times[min(len(times)-1, max(0, int(.95*(len(times)-1))))],
+            "p95_ms": times[min(len(times)-1, max(0, math.ceil(.95*len(times))-1))],
             "median_peak_bytes": statistics.median(sample["peak_bytes"] for sample in series),
             "samples": series,
         }
     cold = summary["cold_build"]["median_ms"]
     summary["strict_warm_cache"]["relative_to_cold"] = round(summary["strict_warm_cache"]["median_ms"]/cold, 4) if cold else None
     return {"status": "PASS", "mode": "strict SHA-256", "corpus": str(root),
+            "corpus_fingerprint": fingerprint, **_source_state(root),
+            "environment": {"python": sys.version.split()[0],
+                            "implementation": platform.python_implementation(),
+                            "platform": platform.platform()},
+            "indexed_files": len({document["path"] for document in cached["documents"]}),
+            "indexed_lines": len(cached["documents"]),
             "repetitions": repetitions, "profile_note": "cProfile adds overhead; do not compare to unprofiled historical timings",
             "operations": summary}
 
@@ -85,11 +109,12 @@ def main():
     parser.add_argument("--output", type=pathlib.Path)
     args = parser.parse_args()
     try:
-        outcome = profile(args.repo, args.repetitions)
+        output = args.output.expanduser().resolve(strict=False) if args.output else None
+        outcome = profile(args.repo, args.repetitions, exclude_paths=(output,) if output else ())
         data = json.dumps(outcome, indent=2, sort_keys=True)
-        if args.output:
-            args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(data + "\n", encoding="utf-8")
+        if output:
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(data + "\n", encoding="utf-8")
         print(data)
     except (OSError, ValueError, KeyError) as error:
         print(json.dumps({"status": "BLOCKED", "error": str(error)}))
