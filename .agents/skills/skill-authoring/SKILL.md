@@ -13,6 +13,7 @@ Produce a single-purpose, auditable skill that follows the local architecture an
 4. Write imperative, bounded, sequential instructions. Prefer instructions to executable scripts. Put detailed references in `references/` only when needed; keep links relative and local.
 5. Specify failure handling, untrusted-input boundaries, tool limitations, and explicit confirmation before consequential operations. Never assume a skill grants tool permissions or authorizes secrets/network use.
 6. Add positive, negative, and adversarial evaluation fixtures when a harness exists. In this repository run `scripts/index_skills.py --write`, `scripts/validate_skills.py`, and unit tests; otherwise use available validators and tests. Review every generated change.
-7. Report exactly which gates passed, which are blocked, the changed paths, and target-client tests actually performed. Do not claim portable runtime support without a client smoke test.
+7. If a portable archive is requested on POSIX, package a validated canonical skill with `python3 scripts/package_skill.py <skill-name> --output /tmp/<skill-name>.zip`. This creates a local ZIP only; it does not publish or install it.
+8. Report exactly which gates passed, which are blocked, the changed paths, and target-client tests actually performed. Do not claim portable runtime support without a client smoke test.
 
 Read [review checklist](references/review-checklist.md) for admission review. Consult the repository standards matrix for source analysis; repo-wide docs are governance, not portable skill resources.
