@@ -12,6 +12,7 @@ description: Evaluate release candidate gates, evidence validity, artifacts, rol
 5. Produce a concise artifact with source commit, input references, changed files (if any), reproducible commands, actual results, remaining risks, and next owner.
 6. Record `PASS`, `FAIL` or `BLOCKED` accurately. A skill's prose is not an executed permission boundary or release approval.
 7. Stop before destructive actions, credentials, production modifications, or scope expansion; request human authorization.
+8. Require the release dossier's detached approval signature to verify against an operator-managed allowlist binding approver identity and authority reference. Missing OpenSSL, trust-store configuration, or valid signature means BLOCKED; signature verification does not authenticate external CI/review/staging references.
 
 ## References
 - [Role catalog](../../../catalog/roles.json)
