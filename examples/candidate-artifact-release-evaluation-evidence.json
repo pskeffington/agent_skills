@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F8-CANDIDATE-ARTIFACT-EVALUATION",
+  "stage": "release-readiness",
+  "source_commit": "33039d975675172693f164e5a25927ac17350dc5",
+  "result": "BLOCKED",
+  "checks": [
+    {
+      "name": "candidate artifact integrity",
+      "result": "PASS",
+      "provenance": "command: python3 dist/agent-toolset.pyz release-check examples/candidate-artifact-release-dossier.json --artifact dist/agent-toolset.pyz; exact digest 72acf0d8384f59245a1c3bc85388edb3d6a1aa39d125ae759105ce966b6c3775; 38979 bytes",
+      "details": "The evaluator opened the rebuilt candidate artifact and its SHA-256 matched the dossier-bound expectation."
+    },
+    {
+      "name": "overall release readiness",
+      "result": "BLOCKED",
+      "provenance": "same read-only release-check invocation; exit code 2",
+      "details": "The synthetic dossier remains BLOCKED on missing gate dispositions, attestations, rollback, and authenticated check provenance. No deployment occurred."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "dist/agent-toolset.pyz (local ignored artifact)",
+      "sha256": "72acf0d8384f59245a1c3bc85388edb3d6a1aa39d125ae759105ce966b6c3775"
+    }
+  ],
+  "blocker": "Required signed release, staging, rollback, and authenticated check evidence is absent.",
+  "approval_ref": null
+}
