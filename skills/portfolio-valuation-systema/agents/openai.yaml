@@ -1,0 +1,3 @@
+interface:
+  display_name: "Portfolio Valuation Systema"
+  short_description: "Read-only repository scans and private central portfolio valuation updates."
