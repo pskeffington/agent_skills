@@ -12,6 +12,20 @@
       ]
     },
     {
+      "name": "audio-systems-engineering",
+      "description": "Diagnose, implement and validate audio software and playback systems. Use for codecs, PCM/DSP, queues, real-time callbacks, audio devices or silent playback. Use for Rust/C/C++/Swift audio work, FLAC/WAV/AIFF issues, silent playback, queue and UI state defects, DSP, device routing, real-time audio underruns, CoreAudio, ALSA/PipeWire and WASAPI.",
+      "path": ".agents/skills/audio-systems-engineering",
+      "entrypoint": ".agents/skills/audio-systems-engineering/SKILL.md",
+      "resources": [
+        "agents/openai.yaml",
+        "references/agents.md",
+        "references/diagnostic-matrix.md",
+        "references/quality-gates.md",
+        "references/rust-music-acceptance.md",
+        "references/task-contract.md"
+      ]
+    },
+    {
       "name": "build-integration",
       "description": "Integrate scoped software changes, resolve interface failures and verify reproducible builds and dependency compatibility. Use when assigned this specialist responsibility in a repository software development workflow.",
       "path": ".agents/skills/build-integration",

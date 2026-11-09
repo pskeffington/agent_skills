@@ -134,6 +134,21 @@
       ]
     },
     {
+      "id": "audio-engineer",
+      "level": 3,
+      "reports_to": "orchestrator",
+      "purpose": "Diagnose and implement bounded audio software changes with measurable playback evidence",
+      "skill": "audio-systems-engineering",
+      "permissions": [
+        "repo-read",
+        "draft-write",
+        "tests-run"
+      ],
+      "outputs": [
+        "change-set"
+      ]
+    },
+    {
       "id": "security-reviewer",
       "level": 4,
       "reports_to": "orchestrator",
