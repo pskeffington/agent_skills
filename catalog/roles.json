@@ -1,0 +1,165 @@
+{
+  "version": "1.0.0",
+  "human_authority": "human",
+  "roles": [
+    {
+      "id": "orchestrator",
+      "level": 1,
+      "reports_to": "human",
+      "purpose": "Own task lifecycle, delegation, blockers and evidence aggregation",
+      "skill": "software-delivery-orchestrator",
+      "permissions": [
+        "repo-read",
+        "task-write"
+      ],
+      "outputs": [
+        "task-contract",
+        "status-record"
+      ]
+    },
+    {
+      "id": "planner",
+      "level": 2,
+      "reports_to": "orchestrator",
+      "purpose": "Decompose scope into bounded tasks and dependencies",
+      "skill": "engineering-planning",
+      "permissions": [
+        "repo-read",
+        "task-write"
+      ],
+      "outputs": [
+        "task-contract"
+      ]
+    },
+    {
+      "id": "researcher",
+      "level": 2,
+      "reports_to": "orchestrator",
+      "purpose": "Collect current repository facts and primary references",
+      "skill": "engineering-research",
+      "permissions": [
+        "repo-read"
+      ],
+      "outputs": [
+        "repo-inventory"
+      ]
+    },
+    {
+      "id": "architect",
+      "level": 2,
+      "reports_to": "orchestrator",
+      "purpose": "Define architecture, interfaces, alternatives and ADRs",
+      "skill": "architecture-design",
+      "permissions": [
+        "repo-read",
+        "draft-write"
+      ],
+      "outputs": [
+        "design-record"
+      ]
+    },
+    {
+      "id": "implementer",
+      "level": 3,
+      "reports_to": "orchestrator",
+      "purpose": "Implement a bounded task in an isolated working branch",
+      "skill": "code-implementation",
+      "permissions": [
+        "repo-read",
+        "draft-write",
+        "tests-run"
+      ],
+      "outputs": [
+        "change-set"
+      ]
+    },
+    {
+      "id": "integrator",
+      "level": 3,
+      "reports_to": "orchestrator",
+      "purpose": "Integrate changes and verify build compatibility",
+      "skill": "build-integration",
+      "permissions": [
+        "repo-read",
+        "draft-write",
+        "tests-run"
+      ],
+      "outputs": [
+        "build-evidence"
+      ]
+    },
+    {
+      "id": "documenter",
+      "level": 3,
+      "reports_to": "orchestrator",
+      "purpose": "Update public interfaces, migration notes and operator guidance",
+      "skill": "documentation-maintenance",
+      "permissions": [
+        "repo-read",
+        "draft-write"
+      ],
+      "outputs": [
+        "documentation-evidence"
+      ]
+    },
+    {
+      "id": "verifier",
+      "level": 4,
+      "reports_to": "orchestrator",
+      "purpose": "Independently validate behavior against acceptance tests",
+      "skill": "test-verification",
+      "permissions": [
+        "repo-read",
+        "tests-run",
+        "review-comment"
+      ],
+      "outputs": [
+        "test-evidence"
+      ]
+    },
+    {
+      "id": "security-reviewer",
+      "level": 4,
+      "reports_to": "orchestrator",
+      "purpose": "Review threat exposure, supply chain and credential boundaries",
+      "skill": "security-assurance",
+      "permissions": [
+        "repo-read",
+        "tests-run",
+        "review-comment"
+      ],
+      "outputs": [
+        "security-evidence"
+      ]
+    },
+    {
+      "id": "code-reviewer",
+      "level": 4,
+      "reports_to": "orchestrator",
+      "purpose": "Independently review correctness, maintenance, regression risk",
+      "skill": "independent-code-review",
+      "permissions": [
+        "repo-read",
+        "review-comment"
+      ],
+      "outputs": [
+        "review-evidence"
+      ]
+    },
+    {
+      "id": "release-controller",
+      "level": 5,
+      "reports_to": "human",
+      "purpose": "Check admission evidence and request explicit release authorization",
+      "skill": "release-readiness",
+      "permissions": [
+        "repo-read",
+        "review-comment",
+        "deploy-request"
+      ],
+      "outputs": [
+        "release-decision"
+      ]
+    }
+  ]
+}

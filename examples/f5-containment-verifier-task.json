@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "F5-CONTAINMENT-VERIFIER",
+  "repository": "pskeffington/agent_skills",
+  "base_commit": "e4e966ee76f308311a390e7888916db0b8ace55c",
+  "objective": "Require trusted task-bound external process-containment verification before Codex CLI execution.",
+  "scope": {
+    "include": [
+      "agent_toolset/runners/codex_cli.py",
+      "tests/test_runners_assurance.py",
+      "docs/OPERATOR_MANUAL.md",
+      "docs/IMPLEMENTATION_QUEUE.md",
+      "examples/f5-containment-verifier-task.json"
+    ],
+    "exclude": [
+      "production deployment",
+      "secrets and credential stores"
+    ]
+  },
+  "acceptance": [
+    "Missing verifier, rejected verifier, verifier exception, or misbound attestation returns BLOCKED before process launch.",
+    "Containment attestation binds task ID, explicit run ID, resolved worktree, and base commit.",
+    "Synthetic verifier tests are documented as routing tests and do not claim platform containment.",
+    "Independent security review and all repository acceptance checks are recorded."
+  ],
+  "risk": "high",
+  "owner_role": "implementer",
+  "status": "done",
+  "depends_on": [],
+  "evidence_refs": [
+    "tests/test_runners_assurance.py",
+    "docs/IMPLEMENTATION_QUEUE.md"
+  ],
+  "blocker": "Real platform containment runtime integration remains unavailable and F5 runtime admission stays BLOCKED.",
+  "approval_ref": null
+}

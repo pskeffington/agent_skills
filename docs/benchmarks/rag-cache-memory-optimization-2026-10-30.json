@@ -1,0 +1,82 @@
+{
+  "scope": "paired local warm-hit and cold-miss cache comparison with peak Python allocation; observational; no cross-machine claim",
+  "baseline_revision": "42156773f8164d745caab3b9778bbbf97dcd0c84",
+  "baseline_source_sha256": "8c3ce0c1a72d0a35b858360c60bf8d6e95b83ca0de967ca5451159dc07e31036",
+  "candidate_source_sha256": "748d70c2febfcee2caab1812b9609ace0e6bd332d81b1d10535c828f10b3f71f",
+  "corpus_root": "/Users/null/GitHub/agent_skills",
+  "environment": {
+    "python": "3.15.2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+  },
+  "excluded_paths": [
+    "/Users/null/GitHub/agent_skills/docs/benchmarks/rag-cache-memory-optimization-2026-10-30.json"
+  ],
+  "corpus_fingerprint": "a3557304cd80ee29b7e85b76c461d12886580c8285154ebe5903212dd74c957d",
+  "source_files": 143,
+  "source_manifest_equal": true,
+  "repetitions": 11,
+  "results": {
+    "baseline": {
+      "samples_ms": [
+        21.2588,
+        20.3075,
+        21.74,
+        20.3299,
+        20.9808,
+        20.5019,
+        21.072,
+        20.3126,
+        21.3038,
+        20.3982,
+        21.2196
+      ],
+      "median_latency_ms": 20.9808,
+      "cold_cache_samples_ms": [
+        32.3251,
+        37.3578,
+        33.3377,
+        33.179,
+        32.9977,
+        33.5956,
+        33.2278,
+        33.8119,
+        33.5022,
+        33.6085,
+        33.8924
+      ],
+      "cold_cache_median_latency_ms": 33.5022,
+      "traced_python_peak_bytes": 12560221
+    },
+    "candidate": {
+      "samples_ms": [
+        20.2801,
+        22.2121,
+        21.8151,
+        22.0981,
+        20.3136,
+        21.1773,
+        20.5688,
+        21.2301,
+        20.4026,
+        20.9185,
+        20.3245
+      ],
+      "median_latency_ms": 20.9185,
+      "cold_cache_samples_ms": [
+        33.7567,
+        33.628,
+        34.2751,
+        32.5999,
+        33.3565,
+        32.7305,
+        34.5505,
+        34.7963,
+        34.0299,
+        33.3246,
+        33.3415
+      ],
+      "cold_cache_median_latency_ms": 33.628,
+      "traced_python_peak_bytes": 12561470
+    }
+  }
+}
