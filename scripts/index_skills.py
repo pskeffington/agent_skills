@@ -79,12 +79,12 @@ def build_catalog(root=ROOT):
                 raise ValueError(f"{path}: symbolic links are not allowed in skill bundles")
             if not path.is_dir():
                 continue
+            if any(p.is_symlink() for p in path.rglob("*")):
+                raise ValueError(f"{path}: symbolic links are not allowed in skill bundles")
             manifest = path / "SKILL.md"
             if not manifest.is_file():
                 raise ValueError(f"{path}: missing SKILL.md")
             meta = parse_skill(manifest, repository_root=root)
-            if any(p.is_symlink() for p in path.rglob("*")):
-                raise ValueError(f"{path}: symbolic links are not allowed in skill bundles")
             members = sorted(p.relative_to(path).as_posix() for p in path.rglob("*") if p.is_file())
             if sum((path / member).stat().st_size for member in members) > 25 * 1024 * 1024:
                 raise ValueError(f"{path}: skill size exceeds 25 MB")
