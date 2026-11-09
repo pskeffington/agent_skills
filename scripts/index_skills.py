@@ -61,10 +61,21 @@ def parse_skill(path):
 
 
 def build_catalog(root=ROOT):
-    base = root / ".agents" / "skills"
+    repo_root = root.resolve()
+    agents = root / ".agents"
+    base = agents / "skills"
     entries = []
+    if agents.is_symlink():
+        raise ValueError(f"{agents}: symbolic links are not allowed in repository instructions")
+    if base.is_symlink():
+        raise ValueError(f"{base}: symbolic links are not allowed in skills root")
+    resolved_base = base.resolve()
+    if not resolved_base.is_relative_to(repo_root):
+        raise ValueError(f"{base}: skills root resolves outside the repository")
     if base.is_dir():
         for path in sorted(base.iterdir()):
+            if path.is_symlink():
+                raise ValueError(f"{path}: symbolic links are not allowed in skill bundles")
             if not path.is_dir():
                 continue
             manifest = path / "SKILL.md"
