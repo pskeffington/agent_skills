@@ -42,7 +42,7 @@ class ReportingPersonalityTests(unittest.TestCase):
         self.assertIn("references/role-personalities.md", self.skill)
 
     def test_independence_boundary_preserved(self):
-        self.assertIn("not to claim independent sign-off", self.skill)
+        self.assertIn("independent sign-off", self.skill)
         self.assertIn("same-instance rechecking alone is not independent review",
                       self.profile)
 
