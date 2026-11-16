@@ -102,6 +102,17 @@
       ]
     },
     {
+      "name": "scientific-reporting-qa",
+      "description": "Coordinate evidence-grounded scientific report editing, APA-aware impersonal grammar, R Markdown/Quarto and LaTeX presentation, table and figure QA, compilation, and final page-by-page acceptance. Use when creating, refining, checking, or releasing scientific and biomedical reports, including code-visible knitted statistical analyses and research manuscripts.",
+      "path": ".agents/skills/scientific-reporting-qa",
+      "entrypoint": ".agents/skills/scientific-reporting-qa/SKILL.md",
+      "resources": [
+        "agents/openai.yaml",
+        "references/acceptance-matrix.md",
+        "scripts/report_source_audit.py"
+      ]
+    },
+    {
       "name": "security-assurance",
       "description": "Perform security, supply-chain, permission-boundary and threat review of software changes. Use when assigned this specialist responsibility in a repository software development workflow.",
       "path": ".agents/skills/security-assurance",
