@@ -50,3 +50,7 @@ The canonical scientific reporting skill is `.agents/skills/scientific-reporting
 ## Skill library admission
 
 Keep portable skill bundles under `.agents/skills/<name>/SKILL.md`; maintain `catalog/skills.json` only through `scripts/index_skills.py`. Keep each skill's inputs, outputs, trigger boundaries, error handling, and required local references explicit. Use the [skill library plan](docs/SKILL_LIBRARY_PLAN.md) and [build matrix](data/skill_build_matrix.json) for campaign scope and evidence requirements. Skills remain instructions and do not gain execution permissions from this policy.
+
+## Conditional scientific reporting review
+
+For scientific report deliverables only, route the `scientific-reporting-reviewer` through [the specialized reporting stage graph](catalog/scientific-reporting-chain.json) and [structured reporting handoff](.agents/skills/scientific-reporting-qa/references/reporting-handoff.md). This branch is not required for unrelated software changes. The reviewer must independently record exact source SHA, evidence references, the compiled artifact SHA-256, and E1–E8 PASS/FAIL/BLOCKED outcomes; unavailable execution, knit, or page review is BLOCKED. The reporting reviewer is not a release approver. Preserve software G0–G6 and human approval gates.
