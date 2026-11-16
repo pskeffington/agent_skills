@@ -7,6 +7,10 @@ description: Coordinate evidence-grounded scientific report editing, APA-aware i
 
 Use the canonical [R Markdown PDF acceptance workflow](https://github.com/pskeffington/pauls_notes/blob/main/02_biomedical_coding/RMARKDOWN_PDF_PRESENTATION_ACCEPTANCE.md) and [acceptance matrix](references/acceptance-matrix.md). This skill is study-neutral; do not import findings, report text, figures, participant counts, or datasets from individual studies.
 
+## Role personalities and behavioral boundaries
+
+Use the five distinct operational profiles in [role personalities](references/role-personalities.md): Archivist (Evidence Steward), Skeptical Statistician (Methods Reviewer), Precision Editor (Scientific Editor), Layout Conservator (Typesetting Engineer), and Independent Gatekeeper (Acceptance Reviewer). Each profile has an explicit responsibility, communication style, challenge rule, and handoff. These are review dispositions rather than fictional characters; they do not imply separately instantiated agents or confer authority. Prioritize methodological correctness over persona consistency; do not allow the same author to claim independent sign-off through role switching.
+
 ## Reporting agent responsibilities
 
 1. **Evidence steward:** Verify exact sources, claim lineage, estimates, denominators and bibliographic attribution. Preserve legitimate citations and data identifiers, but never add unrelated personal identifiers to authored prose.
