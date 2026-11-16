@@ -206,6 +206,21 @@
       "outputs": [
         "release-decision"
       ]
+    },
+    {
+      "id": "scientific-reporting-reviewer",
+      "level": 4,
+      "reports_to": "orchestrator",
+      "purpose": "Review evidence-grounded scientific reporting, APA-aware prose, R Markdown and LaTeX presentation, and independent PDF release evidence",
+      "skill": "scientific-reporting-qa",
+      "permissions": [
+        "repo-read",
+        "tests-run",
+        "review-comment"
+      ],
+      "outputs": [
+        "review-evidence"
+      ]
     }
   ]
 }
