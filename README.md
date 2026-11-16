@@ -79,3 +79,7 @@ See [the roadmap](ROADMAP.md), [resource chain](docs/RESOURCE_CHAIN.md), and [re
 The [skill library plan](docs/SKILL_LIBRARY_PLAN.md), [build matrix](data/skill_build_matrix.json), and [literature matrix](docs/LITERATURE_MATRIX.md) cover skill-specific research and admission work.
 
 License: see [LICENSE](LICENSE).
+
+## Scientific reporting agent handoff
+
+The [Scientific Reporting QA skill](.agents/skills/scientific-reporting-qa/SKILL.md) uses a separate [conditional reporting workflow](catalog/scientific-reporting-chain.json) and [structured handoff contract](.agents/skills/scientific-reporting-qa/references/reporting-handoff.md). Source lint, actual analysis execution, final-document compilation, and rendered-page review remain separate gates. Run the synthetic dossier checks with `python3 -m unittest discover -s tests -p test_scientific_reporting_handoff.py -v`; these tests do not validate any particular research manuscript.
