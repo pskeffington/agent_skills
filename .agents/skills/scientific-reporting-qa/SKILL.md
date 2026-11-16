@@ -35,6 +35,14 @@ Compose with installed specialist skills where available: **scientific-narrative
 - If code is meant to appear in a report, do not hide it to shorten pagination. Wrap valid expressions and check actual pages.
 - Raw LaTeX page breaks and figure floats require a fresh knit and visual review; a source edit alone is not release acceptance.
 
+## Git-based verification
+
+For source-only R Markdown screening, run:
+`python3 .agents/skills/scientific-reporting-qa/scripts/report_source_audit.py path/to/report.Rmd`.
+For the reusable scanner's synthetic regression fixtures, run:
+`python3 -m unittest discover -s tests -p test_scientific_reporting_source_audit.py -v`.
+Also run `python3 scripts/validate_skills.py` and `python3 scripts/index_skills.py --check` from this repository. Report these as **not run** if the repository cannot be materialized in a runtime; GitHub file retrieval alone is not a passing test.
+
 ## Git ownership and output
 
 The canonical source for this skill is the dedicated `agent_skills` repository, under `.agents/skills/scientific-reporting-qa/`. Do not maintain competing copies in study repositories or methods notebooks. Version all changes through Git; regenerate the repository skill catalog and run its dedicated skill admission tests before labeling a new version accepted. Keep Paul's Notes as the external methods reference, not the skill's authoritative code home.
