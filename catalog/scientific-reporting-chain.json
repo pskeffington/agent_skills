@@ -12,7 +12,8 @@
       "outputs": [
         "claim-source-check"
       ],
-      "rule": "Source/claim and study data provenance reviewed independently of typography"
+      "rule": "Source/claim and study data provenance reviewed independently of typography",
+      "persona": "evidence-steward"
     },
     {
       "id": "methods",
@@ -24,7 +25,8 @@
       "outputs": [
         "methods-review"
       ],
-      "rule": "Hypotheses, estimands, uncertainty, numeric fidelity, and limitations checked"
+      "rule": "Hypotheses, estimands, uncertainty, numeric fidelity, and limitations checked",
+      "persona": "methods-reviewer"
     },
     {
       "id": "editorial",
@@ -36,7 +38,8 @@
       "outputs": [
         "editorial-review"
       ],
-      "rule": "Impersonal scientific prose, APA-aware notation, citation consistency and house style checked"
+      "rule": "Impersonal scientific prose, APA-aware notation, citation consistency and house style checked",
+      "persona": "scientific-editor"
     },
     {
       "id": "source",
@@ -48,7 +51,8 @@
       "outputs": [
         "source-lint"
       ],
-      "rule": "Structural source screen with explicit command and observed result"
+      "rule": "Structural source screen with explicit command and observed result",
+      "persona": "typesetting-engineer"
     },
     {
       "id": "execution",
@@ -60,7 +64,8 @@
       "outputs": [
         "execution-evidence"
       ],
-      "rule": "Actual statistical execution with authorized data or explicitly BLOCKED"
+      "rule": "Actual statistical execution with authorized data or explicitly BLOCKED",
+      "persona": "methods-reviewer"
     },
     {
       "id": "compile",
@@ -72,7 +77,8 @@
       "outputs": [
         "knit-evidence"
       ],
-      "rule": "Output knitted from exact current source revision or explicitly BLOCKED"
+      "rule": "Output knitted from exact current source revision or explicitly BLOCKED",
+      "persona": "typesetting-engineer"
     },
     {
       "id": "visual",
@@ -84,7 +90,8 @@
       "outputs": [
         "page-review"
       ],
-      "rule": "All final rendered pages inspected for presentation defects or explicitly BLOCKED"
+      "rule": "All final rendered pages inspected for presentation defects or explicitly BLOCKED",
+      "persona": "typesetting-engineer"
     },
     {
       "id": "reporting-handoff",
@@ -102,7 +109,8 @@
       "outputs": [
         "scientific-reporting-review-evidence"
       ],
-      "rule": "Evidence packet passed to orchestrator and independent release reviewer; no self-approval"
+      "rule": "Evidence packet passed to orchestrator and independent release reviewer; no self-approval",
+      "persona": "acceptance-reviewer"
     }
   ],
   "release_interlock": {
@@ -112,5 +120,7 @@
     "on_missing_or_stale": "BLOCKED",
     "human_approval": "Required separately for external publication or release",
     "software_release_graph": "unchanged; this is an opt-in specialized branch"
-  }
+  },
+  "persona_reference": ".agents/skills/scientific-reporting-qa/references/role-personalities.md",
+  "persona_contract": "Behavioral profiles for logical phases; each stage remains owned by the registered scientific-reporting-reviewer; independent release review cannot be self-attested."
 }
