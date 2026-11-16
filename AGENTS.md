@@ -43,6 +43,10 @@ Run `python3 scripts/validate.py` and `python3 -m unittest discover -s tests -v`
 
 Skills define *how to work*. The actual execution runtime enforces permissions, launches agents and performs integrations. Do not misrepresent these files as a deployed multi-agent service.
 
+## Scientific reporting agent admission
+
+The canonical scientific reporting skill is `.agents/skills/scientific-reporting-qa/`. Preserve its `SKILL.md`, `agents/openai.yaml`, reference matrix, and audit script together; update the generated catalog whenever a resource is added or removed. Treat Paul's Notes as the linked methods reference; do not fork or mirror this skill into research or methods repositories. Use the reporting agent only for bounded evidence review, scientific grammar, mathematical typesetting, source lint, and independently recorded PDF acceptance. Separate source checks, code execution, knit, and rendered-page review. Never introduce data or findings from a particular study into this reusable skill.
+
 ## Skill library admission
 
 Keep portable skill bundles under `.agents/skills/<name>/SKILL.md`; maintain `catalog/skills.json` only through `scripts/index_skills.py`. Keep each skill's inputs, outputs, trigger boundaries, error handling, and required local references explicit. Use the [skill library plan](docs/SKILL_LIBRARY_PLAN.md) and [build matrix](data/skill_build_matrix.json) for campaign scope and evidence requirements. Skills remain instructions and do not gain execution permissions from this policy.
