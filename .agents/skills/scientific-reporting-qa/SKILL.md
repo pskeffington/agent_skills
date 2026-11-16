@@ -35,13 +35,19 @@ Compose with installed specialist skills where available: **scientific-narrative
 - If code is meant to appear in a report, do not hide it to shorten pagination. Wrap valid expressions and check actual pages.
 - Raw LaTeX page breaks and figure floats require a fresh knit and visual review; a source edit alone is not release acceptance.
 
+## Opt-in orchestration and independent release review
+
+For scientific manuscripts, code-visible research reports, and PDF/HTML research deliverables, follow the [scientific-reporting chain](https://github.com/pskeffington/agent_skills/blob/main/catalog/scientific-reporting-chain.json) and [reporting evidence handoff](references/reporting-handoff.md). This reporting branch is conditional; it must not make PDF inspection mandatory for unrelated software engineering tasks.
+
+Treat E1–E8 as source-bound evidence gates. E6–E8 are also bound to the compiled artifact SHA-256. Any missing execution, knit, rendered-page inspection, independent review, or artifact provenance is BLOCKED; do not represent source lint as compiled-output acceptance. The reporting reviewer provides evidence to the orchestrator and independent release controller, not a self-approved publication decision. Actual publication or deployment remains subject to the existing human approval gates.
+
 ## Git-based verification
 
 For source-only R Markdown screening, run:
 `python3 .agents/skills/scientific-reporting-qa/scripts/report_source_audit.py path/to/report.Rmd`.
 For the reusable scanner's synthetic regression fixtures, run:
 `python3 -m unittest discover -s tests -p test_scientific_reporting_source_audit.py -v`.
-Also run `python3 scripts/validate_skills.py` and `python3 scripts/index_skills.py --check` from this repository. Report these as **not run** if the repository cannot be materialized in a runtime; GitHub file retrieval alone is not a passing test.
+Validate the reporting handoff with `python3 .agents/skills/scientific-reporting-qa/scripts/validate_reporting_handoff.py path/to/dossier.json`; run `python3 -m unittest discover -s tests -p test_scientific_reporting_handoff.py -v` for its synthetic fixtures. Also run `python3 scripts/validate_skills.py` and `python3 scripts/index_skills.py --check` from this repository. Report these as **not run** if the repository cannot be materialized in a runtime; GitHub file retrieval alone is not a passing test.
 
 ## Git ownership and output
 
