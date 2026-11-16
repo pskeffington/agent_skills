@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scientific Reporting QA"
+  short_description: "Scientific prose, methods, LaTeX, and PDF acceptance"
+  default_prompt: "Review this scientific report for methodological fidelity, impersonal grammar, LaTeX presentation, reproducible compilation, and final page-by-page PDF quality. Distinguish observed tests from checks not run."
