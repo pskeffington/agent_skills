@@ -45,3 +45,7 @@ These gates evaluate an individual portable skill bundle. They supplement the to
 | G5 — Distribution | Version, license, archive integrity, approvals, and rollback are recorded | release manifest and review evidence |
 
 Missing or failed evidence blocks skill admission. A green structural check covers only the checks it actually runs; it does not satisfy G2–G5.
+
+## Optional scientific reporting release interlock
+
+When the release candidate is a research report or scientific manuscript, also require the [reporting branch](../catalog/scientific-reporting-chain.json) and its [evidence contract](../.agents/skills/scientific-reporting-qa/references/reporting-handoff.md). E1–E8 PASS with verifiable references and exact source/artifact bindings is necessary for reporting readiness, but does not replace G0–G6, a trusted approval signature, or human publication authorization. Missing/blocked gate evidence must block the reporting recommendation; a validator exit 0 confirms only envelope structure, not factual provenance or rendered output.
