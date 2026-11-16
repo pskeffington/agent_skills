@@ -110,6 +110,7 @@
         "agents/openai.yaml",
         "references/acceptance-matrix.md",
         "references/reporting-handoff.md",
+        "references/role-personalities.md",
         "scripts/report_source_audit.py",
         "scripts/validate_reporting_handoff.py"
       ]
