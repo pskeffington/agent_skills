@@ -109,7 +109,9 @@
       "resources": [
         "agents/openai.yaml",
         "references/acceptance-matrix.md",
-        "scripts/report_source_audit.py"
+        "references/reporting-handoff.md",
+        "scripts/report_source_audit.py",
+        "scripts/validate_reporting_handoff.py"
       ]
     },
     {
