@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "trigger": "Only when the task deliverable is a scientific report, manuscript, code-visible statistical report, or formatted PDF/HTML research artifact.",
+  "owner_role": "scientific-reporting-reviewer",
+  "orchestrator_role": "orchestrator",
+  "stages": [
+    {
+      "id": "evidence",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [],
+      "evidence_key": "E1",
+      "outputs": [
+        "claim-source-check"
+      ],
+      "rule": "Source/claim and study data provenance reviewed independently of typography"
+    },
+    {
+      "id": "methods",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [
+        "evidence"
+      ],
+      "evidence_key": "E2",
+      "outputs": [
+        "methods-review"
+      ],
+      "rule": "Hypotheses, estimands, uncertainty, numeric fidelity, and limitations checked"
+    },
+    {
+      "id": "editorial",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [
+        "methods"
+      ],
+      "evidence_key": "E3",
+      "outputs": [
+        "editorial-review"
+      ],
+      "rule": "Impersonal scientific prose, APA-aware notation, citation consistency and house style checked"
+    },
+    {
+      "id": "source",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [
+        "editorial"
+      ],
+      "evidence_key": "E4",
+      "outputs": [
+        "source-lint"
+      ],
+      "rule": "Structural source screen with explicit command and observed result"
+    },
+    {
+      "id": "execution",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [
+        "source"
+      ],
+      "evidence_key": "E5",
+      "outputs": [
+        "execution-evidence"
+      ],
+      "rule": "Actual statistical execution with authorized data or explicitly BLOCKED"
+    },
+    {
+      "id": "compile",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [
+        "execution"
+      ],
+      "evidence_key": "E6",
+      "outputs": [
+        "knit-evidence"
+      ],
+      "rule": "Output knitted from exact current source revision or explicitly BLOCKED"
+    },
+    {
+      "id": "visual",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [
+        "compile"
+      ],
+      "evidence_key": "E7",
+      "outputs": [
+        "page-review"
+      ],
+      "rule": "All final rendered pages inspected for presentation defects or explicitly BLOCKED"
+    },
+    {
+      "id": "reporting-handoff",
+      "owner": "scientific-reporting-reviewer",
+      "depends_on": [
+        "evidence",
+        "methods",
+        "editorial",
+        "source",
+        "execution",
+        "compile",
+        "visual"
+      ],
+      "evidence_key": "E8",
+      "outputs": [
+        "scientific-reporting-review-evidence"
+      ],
+      "rule": "Evidence packet passed to orchestrator and independent release reviewer; no self-approval"
+    }
+  ],
+  "release_interlock": {
+    "input_resource": "scientific-reporting-review-evidence",
+    "route": "scientific-reporting-only",
+    "pass_condition": "E1-E8 PASS with linked verifiable evidence and exact source SHA; output artifact SHA-256 required for E6-E8",
+    "on_missing_or_stale": "BLOCKED",
+    "human_approval": "Required separately for external publication or release",
+    "software_release_graph": "unchanged; this is an opt-in specialized branch"
+  }
+}
