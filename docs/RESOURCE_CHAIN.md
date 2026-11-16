@@ -36,3 +36,7 @@ Use `schemas/handoff.schema.json`. Each transfer includes task ID, source/target
 - Artifacts and evidence are bound to commit SHA; binaries additionally use SHA-256.
 - A failing upstream gate blocks release. Waivers require named human authority and documented justification; critical/high risks cannot be auto-waived.
 - Cross-repository access needs an explicit scoped grant; this repository is a skill library, not an integration credential.
+
+## Conditional scientific reporting branch
+
+For scientific manuscripts, computational reports, and research PDF/HTML deliverables, use the [opt-in reporting stage graph](../catalog/scientific-reporting-chain.json) after the task is identified as a reporting deliverable. The scientific reporting reviewer produces E1–E8 evidence; the orchestrator routes its result to independent release review. The ordinary software resource chain remains unchanged for unrelated engineering tasks. Any required statistical execution, compilation, PDF page inspection, or source/artifact digest that is unavailable must be recorded as BLOCKED; reporting review does not grant publication approval.
