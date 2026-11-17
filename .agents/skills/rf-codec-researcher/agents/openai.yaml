@@ -1,0 +1,3 @@
+interface:
+  display_name: "Voice Codec Researcher"
+  short_description: "Codec 2 DSP, vocoder quality and efficient voice transport"
