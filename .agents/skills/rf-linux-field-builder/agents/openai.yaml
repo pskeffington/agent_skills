@@ -1,0 +1,3 @@
+interface:
+  display_name: "Field Linux Builder"
+  short_description: "operator-friendly Linux setup and deployment scripts"
