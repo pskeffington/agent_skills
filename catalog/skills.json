@@ -174,6 +174,15 @@
       ]
     },
     {
+      "name": "rf-software-master-operator",
+      "description": "Coordinate Arch/Garuda Linux RF communications software deployment planning by dispatching nine specialist agents, resolving package profiles, mapping hardware drivers, requiring independent review and maintaining evidence-based acceptance gates. Use for multi-component SDR, digital voice, packet, mesh or field workstation deployment orchestration.",
+      "path": ".agents/skills/rf-software-master-operator",
+      "entrypoint": ".agents/skills/rf-software-master-operator/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
       "name": "rf-systems-steward",
       "description": "Apply the Signal Systems Steward specialist role when planning, implementing, reviewing or testing cross-platform gnu radio integration and technical governance for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
       "path": ".agents/skills/rf-systems-steward",
