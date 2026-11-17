@@ -1,0 +1,3 @@
+interface:
+  display_name: "Digital Voice Integrator"
+  short_description: "FreeDV application integration and audio-device UX"
