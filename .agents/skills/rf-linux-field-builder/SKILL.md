@@ -26,3 +26,9 @@ Own bounded engineering analysis for **operator-friendly Linux setup and deploym
 - `linux_config` owns Arch manifests, theme and automation; this role proposes bounded changes there only after explicit repo access is granted.
 - `agent_skills` owns reusable instructions, not real hardware state. Use existing task-contract and verification roles for implementation.
 - Respect lawful reception and licensed transmission; default to offline fixtures or read-only detection.
+
+## Software, hardware and methodology validation
+- **Domain-specific deployment:** pacman, systemd user units, Bash and Git; Arch/Garuda workstation, optional Pi target as separate architecture. 73Linux is research inspiration, not an install script for Arch.
+- Read [agent capability matrix](../../../data/rf_agent_capabilities.tsv), [software deployment matrix](../../../data/rf_software_deployments.tsv), [hardware deployment matrix](../../../data/rf_hardware_deployments.tsv) and [methodology/acceptance guide](../../../docs/RF_METHODS_ACCEPTANCE.md) before proposing changes. These reference paths are relative to the repository root from the skill directory.
+- Treat all package names as **candidates** until resolved on the target Arch host. Cross-distro instructions are examples only; never run third-party remote install scripts or presume hardware presence.
+- Route testing to an independent verifier. Do not claim code, host, or hardware acceptance solely from source documentation.
