@@ -1,0 +1,3 @@
+interface:
+  display_name: "Packet Frame Engineer"
+  short_description: "AX.25, APRS, soundcard modems and offline packet decode"
