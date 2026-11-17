@@ -102,6 +102,87 @@
       ]
     },
     {
+      "name": "rf-codec-researcher",
+      "description": "Apply the Voice Codec Researcher specialist role when planning, implementing, reviewing or testing codec 2 dsp, vocoder quality and efficient voice transport for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-codec-researcher",
+      "entrypoint": ".agents/skills/rf-codec-researcher/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-digital-voice-integrator",
+      "description": "Apply the Digital Voice Integrator specialist role when planning, implementing, reviewing or testing freedv application integration and audio-device ux for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-digital-voice-integrator",
+      "entrypoint": ".agents/skills/rf-digital-voice-integrator/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-dsp-architect",
+      "description": "Apply the Spectrum Architect specialist role when planning, implementing, reviewing or testing gnu radio graphs, iq dsp and sample-rate architecture for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-dsp-architect",
+      "entrypoint": ".agents/skills/rf-dsp-architect/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-linux-field-builder",
+      "description": "Apply the Field Linux Builder specialist role when planning, implementing, reviewing or testing operator-friendly linux setup and deployment scripts for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-linux-field-builder",
+      "entrypoint": ".agents/skills/rf-linux-field-builder/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-mesh-integrator",
+      "description": "Apply the Mesh Link Integrator specialist role when planning, implementing, reviewing or testing lora mesh device inventory and receive-safe integration for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-mesh-integrator",
+      "entrypoint": ".agents/skills/rf-mesh-integrator/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-packet-engineer",
+      "description": "Apply the Packet Frame Engineer specialist role when planning, implementing, reviewing or testing ax.25, aprs, soundcard modems and offline packet decode for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-packet-engineer",
+      "entrypoint": ".agents/skills/rf-packet-engineer/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-portable-operator",
+      "description": "Apply the Portable Signal Operator specialist role when planning, implementing, reviewing or testing portable field data communications and station resilience for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-portable-operator",
+      "entrypoint": ".agents/skills/rf-portable-operator/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-sdr-validator",
+      "description": "Apply the Receiver Validation Engineer specialist role when planning, implementing, reviewing or testing linux sdr gui, receiver validation and bug reproduction for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-sdr-validator",
+      "entrypoint": ".agents/skills/rf-sdr-validator/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "rf-systems-steward",
+      "description": "Apply the Signal Systems Steward specialist role when planning, implementing, reviewing or testing cross-platform gnu radio integration and technical governance for Arch/Garuda Linux RF communications, SDR and amateur-radio systems. Produce source-linked, reproducible engineering evidence, not roleplay impersonation.",
+      "path": ".agents/skills/rf-systems-steward",
+      "entrypoint": ".agents/skills/rf-systems-steward/SKILL.md",
+      "resources": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
       "name": "scientific-reporting-qa",
       "description": "Coordinate evidence-grounded scientific report editing, APA-aware impersonal grammar, R Markdown/Quarto and LaTeX presentation, table and figure QA, compilation, and final page-by-page acceptance. Use when creating, refining, checking, or releasing scientific and biomedical reports, including code-visible knitted statistical analyses and research manuscripts.",
       "path": ".agents/skills/scientific-reporting-qa",
