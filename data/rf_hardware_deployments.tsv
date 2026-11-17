@@ -1,0 +1,13 @@
+hardware	class	connection	linux_driver_or_stack	primary_agent	acceptance_gate	transmit_capability	deployment_state	notes
+RTL-SDR compatible dongle	receive SDR	USB	rtl-sdr / libusb / udev	rf-sdr-validator	VID PID; no conflict; known center frequency; IQ hash	RX-only	candidate	Do not infer that all DVB dongles are RTL-compatible
+Airspy R2	receive SDR	USB	libairspy / SoapyAirspy (if available)	rf-sdr-validator	official enumeration; 5-second IQ capture; zero-drop evidence	RX-only	candidate	Validate USB throughput and sample-rate support
+HackRF One	transceiver SDR	USB	libhackrf / SoapyHackRF	rf-dsp-architect	RX mode only, official enumeration and calibrated chain	TX-capable; disabled	candidate	Explicit TX approval required
+USRP B200/B210	transceiver SDR	USB 3	UHD / GNU Radio	rf-systems-steward	uhd_find_devices; RX IQ fixture; bandwidth budget	TX-capable; disabled	candidate	USB3 and power requirements vary
+SDRplay device	receive SDR	USB	vendor API + compatible Soapy backend	rf-sdr-validator	match exact device model and proprietary API version	RX-only	candidate	Review licensing and packaging separately
+RAK WisBlock Meshtastic node	LoRa node	USB serial / BLE	meshtastic CLI / serial	rf-mesh-integrator	board ID, firmware, region, local read-only API	TX-capable; disabled	candidate	No region or radio configuration automatically written
+Meshtastic-compatible hosted node	LoRa node	network/API	vendor/meshtastic supported protocol	rf-mesh-integrator	authenticated API health and read-only local stats	TX-capable; disabled	candidate	Network credentials kept outside Git
+USB soundcard / SignaLink class	audio interface	USB audio	snd-usb-audio / PipeWire ALSA	rf-packet-engineer	duplex device enumeration; measured latency; WAV loopback	Audio may feed TX; disabled	candidate	Physical PTT wiring never assumed safe
+SSB HF receiver/transceiver	HF rig	audio and optional CAT serial	Hamlib plus audio	rf-digital-voice-integrator	RX audio routing and read-only CAT query	TX-capable; disabled	model-unspecified	Verify exact model interfaces and ground/isolation
+Raspberry Pi 5	ARM64 workstation/field node	USB/ethernet	separate Pi OS/Arch ARM build contract	rf-linux-field-builder	architecture-specific repo and package acceptance	depends on attached radio	candidate	Do not reuse x86 Arch manifest unchanged
+GNSS USB receiver	timing peripheral	USB serial	gpsd / tty driver	rf-portable-operator	UTC time quality and serial framing	No RF TX intended	candidate	Do not log precise location in Git
+Battery / DC supply / antenna	field electrical	DC/RF physical	hardware checklists only	rf-portable-operator	load budget, fuse, connector, SWR if TX authorized	depends on radio	candidate	Electrical and RF safety gate distinct
