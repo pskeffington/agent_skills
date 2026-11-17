@@ -1,0 +1,3 @@
+interface:
+  display_name: "Portable Signal Operator"
+  short_description: "portable field data communications and station resilience"
