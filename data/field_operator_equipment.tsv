@@ -1,0 +1,11 @@
+equipment_id	class	device_category	requirement_ids	acceptance_conditions	priority	selection_status	notes
+EQ-01	field-compute	ruggedizable x86_64 notebook	FO-001;FO-004;FO-006;FO-010	Linux device drivers; encrypted storage; repairable IO	priority-1	candidate	hardware-model-not-selected
+EQ-02	mobile-endpoint	managed Android or iOS phone/tablet	FO-002;FO-003;FO-007	OS update support; offline app; MDM capability	priority-1	candidate	no product endorsement
+EQ-03	communications-interface	authorized commercial/public safety/amateur radio as applicable	FO-001;FO-003;FO-009	appropriate licensing; documented audio/data interface	priority-1	candidate	no default TX activation
+EQ-04	receive-only-sdr	RTL-SDR or Airspy R2 receiver	FO-009;FO-010	USB VID PID; supported driver; IQ integrity	priority-2	candidate	radio RX only
+EQ-05	network-adapter	Ethernet Wi-Fi and approved optional mesh device	FO-001;FO-011	driver; local link; encrypted data path	priority-1	candidate	no tactical routing presets
+EQ-06	time-source	GNSS receiver or RTC	FO-008;FO-010	UTC accuracy and time provenance	priority-2	candidate	no precise location committed
+EQ-07	storage	encrypted removable SSD with verified recovery media	FO-002;FO-004;FO-006;FO-008	LUKS or platform encryption; restore evidence	priority-1	candidate	secure key custody required
+EQ-08	power	DC battery power bank charging meter	FO-005;FO-011	watt-hour budget and offline endurance test	priority-1	candidate	manufacturer electrical limits
+EQ-09	human-interface	headset readable screen external keyboard tactile controls	FO-007	accessible alert and alternate text mode	priority-1	candidate	no assumptions about actual clothing or PPE
+EQ-10	maintenance-kit	USB cables spare connectors approved recovery media	FO-006;FO-009	adapter compatibility and recovery rehearsal	priority-2	candidate	non-invasive bench tools
