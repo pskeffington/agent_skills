@@ -1,0 +1,474 @@
+{
+  "schema_version": "1.0.0",
+  "title": "RF software master operator catalog",
+  "source_of_truth": {
+    "agent_skills": "agent_skills",
+    "host_manifests": "linux_config",
+    "existing_matrix": "data/rf_software_deployments.tsv"
+  },
+  "execution_model": "planning and task routing only; no autonomous deployment privileges",
+  "operator": {
+    "id": "rf-software-master-operator",
+    "reports_to": "software-delivery-orchestrator",
+    "role": "dispatcher",
+    "permissions": [
+      "repo-read",
+      "task-propose",
+      "evidence-aggregate"
+    ],
+    "write_permission": "not granted automatically",
+    "human_approval": [
+      "package-apply",
+      "aur-build",
+      "driver-blacklist",
+      "firmware-flash",
+      "privileged-service",
+      "radio-ptt",
+      "radio-tx"
+    ]
+  },
+  "states": [
+    "DISCOVERED",
+    "SOURCE_REVIEWED",
+    "PACKAGE_RESOLVED",
+    "PLAN_APPROVED",
+    "DOWNLOADED",
+    "INSTALLED",
+    "SIMULATED_PASS",
+    "HOST_PASS",
+    "HARDWARE_PASS",
+    "BLOCKED",
+    "FAILED"
+  ],
+  "profiles": {
+    "core": {
+      "depends_on": [],
+      "default_enabled": true
+    },
+    "core-dsp": {
+      "depends_on": [
+        "core"
+      ],
+      "default_enabled": false
+    },
+    "desktop-dsp": {
+      "depends_on": [
+        "core-dsp"
+      ],
+      "default_enabled": false
+    },
+    "sdr-rx": {
+      "depends_on": [
+        "core"
+      ],
+      "default_enabled": false
+    },
+    "packet-rx": {
+      "depends_on": [
+        "core"
+      ],
+      "default_enabled": false
+    },
+    "digital-voice": {
+      "depends_on": [
+        "core"
+      ],
+      "default_enabled": false
+    },
+    "mesh": {
+      "depends_on": [
+        "core"
+      ],
+      "default_enabled": false
+    },
+    "field-digital": {
+      "depends_on": [
+        "core"
+      ],
+      "default_enabled": false
+    }
+  },
+  "agents": [
+    {
+      "id": "rf-linux-field-builder",
+      "skill_path": ".agents/skills/rf-linux-field-builder/SKILL.md",
+      "profiles": [
+        "core",
+        "desktop",
+        "sdr-rx",
+        "packet-rx",
+        "digital-voice",
+        "mesh",
+        "field-digital"
+      ],
+      "capabilities": [
+        "package-plan",
+        "package-download",
+        "package-install",
+        "theme-config",
+        "user-automation"
+      ]
+    },
+    {
+      "id": "rf-dsp-architect",
+      "skill_path": ".agents/skills/rf-dsp-architect/SKILL.md",
+      "profiles": [
+        "core-dsp",
+        "desktop-dsp"
+      ],
+      "capabilities": [
+        "dsp-design",
+        "signal-simulation"
+      ]
+    },
+    {
+      "id": "rf-systems-steward",
+      "skill_path": ".agents/skills/rf-systems-steward/SKILL.md",
+      "profiles": [
+        "core-dsp",
+        "desktop-dsp",
+        "digital-voice",
+        "field-digital"
+      ],
+      "capabilities": [
+        "compatibility-review",
+        "release-plan"
+      ]
+    },
+    {
+      "id": "rf-sdr-validator",
+      "skill_path": ".agents/skills/rf-sdr-validator/SKILL.md",
+      "profiles": [
+        "sdr-rx"
+      ],
+      "capabilities": [
+        "usb-read",
+        "iq-read",
+        "spectrum-analysis"
+      ]
+    },
+    {
+      "id": "rf-packet-engineer",
+      "skill_path": ".agents/skills/rf-packet-engineer/SKILL.md",
+      "profiles": [
+        "packet-rx"
+      ],
+      "capabilities": [
+        "audio-read",
+        "frame-decode"
+      ]
+    },
+    {
+      "id": "rf-codec-researcher",
+      "skill_path": ".agents/skills/rf-codec-researcher/SKILL.md",
+      "profiles": [
+        "digital-voice"
+      ],
+      "capabilities": [
+        "offline-codec-benchmark"
+      ]
+    },
+    {
+      "id": "rf-digital-voice-integrator",
+      "skill_path": ".agents/skills/rf-digital-voice-integrator/SKILL.md",
+      "profiles": [
+        "digital-voice",
+        "field-digital"
+      ],
+      "capabilities": [
+        "audio-read",
+        "rig-cat-read"
+      ]
+    },
+    {
+      "id": "rf-mesh-integrator",
+      "skill_path": ".agents/skills/rf-mesh-integrator/SKILL.md",
+      "profiles": [
+        "mesh"
+      ],
+      "capabilities": [
+        "mesh-inventory-read",
+        "packet-schema-validation"
+      ]
+    },
+    {
+      "id": "rf-portable-operator",
+      "skill_path": ".agents/skills/rf-portable-operator/SKILL.md",
+      "profiles": [
+        "field-digital"
+      ],
+      "capabilities": [
+        "station-plan",
+        "time-sync-inspect",
+        "power-budget"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "gnuradio",
+      "owner": "rf-dsp-architect",
+      "reviewer": "rf-systems-steward",
+      "capability": "dsp",
+      "profile": "core-dsp",
+      "dependencies": [
+        "synthetic-iq"
+      ],
+      "hardware_adapters": [
+        "rtl-sdr",
+        "usrp-b200"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "gnuradio-companion",
+      "owner": "rf-systems-steward",
+      "reviewer": "rf-dsp-architect",
+      "capability": "dsp-ui",
+      "profile": "desktop-dsp",
+      "dependencies": [
+        "gnuradio"
+      ],
+      "hardware_adapters": [],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "gnuradio-osmosdr",
+      "owner": "rf-sdr-validator",
+      "reviewer": "rf-dsp-architect",
+      "capability": "device-adapter",
+      "profile": "sdr-rx",
+      "dependencies": [
+        "gnuradio"
+      ],
+      "hardware_adapters": [
+        "rtl-sdr",
+        "hackrf-one"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "soapysdr",
+      "owner": "rf-sdr-validator",
+      "reviewer": "rf-systems-steward",
+      "capability": "device-abstraction",
+      "profile": "sdr-rx",
+      "dependencies": [],
+      "hardware_adapters": [
+        "rtl-sdr",
+        "airspy-r2",
+        "hackrf-one",
+        "sdrplay"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "rtl-sdr",
+      "owner": "rf-sdr-validator",
+      "reviewer": "rf-dsp-architect",
+      "capability": "device-driver",
+      "profile": "sdr-rx",
+      "dependencies": [],
+      "hardware_adapters": [
+        "rtl-sdr"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "gqrx",
+      "owner": "rf-sdr-validator",
+      "reviewer": "rf-dsp-architect",
+      "capability": "spectrum-ui",
+      "profile": "sdr-rx",
+      "dependencies": [
+        "gnuradio"
+      ],
+      "hardware_adapters": [
+        "rtl-sdr",
+        "airspy-r2"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "direwolf",
+      "owner": "rf-packet-engineer",
+      "reviewer": "rf-sdr-validator",
+      "capability": "packet-modem",
+      "profile": "packet-rx",
+      "dependencies": [],
+      "hardware_adapters": [
+        "usb-audio",
+        "rtl-sdr"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "codec2",
+      "owner": "rf-codec-researcher",
+      "reviewer": "rf-digital-voice-integrator",
+      "capability": "codec",
+      "profile": "digital-voice",
+      "dependencies": [],
+      "hardware_adapters": [
+        "usb-audio"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "freedv",
+      "owner": "rf-digital-voice-integrator",
+      "reviewer": "rf-codec-researcher",
+      "capability": "digital-voice-ui",
+      "profile": "digital-voice",
+      "dependencies": [
+        "codec2"
+      ],
+      "hardware_adapters": [
+        "usb-audio",
+        "ssb-rig"
+      ],
+      "installation_policy": "manual-review",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "meshtastic CLI",
+      "owner": "rf-mesh-integrator",
+      "reviewer": "rf-linux-field-builder",
+      "capability": "mesh-cli",
+      "profile": "mesh",
+      "dependencies": [],
+      "hardware_adapters": [
+        "rak-wisblock",
+        "mesh-node"
+      ],
+      "installation_policy": "venv-manual-review",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "fldigi",
+      "owner": "rf-portable-operator",
+      "reviewer": "rf-digital-voice-integrator",
+      "capability": "digital-mode",
+      "profile": "field-digital",
+      "dependencies": [],
+      "hardware_adapters": [
+        "usb-audio",
+        "ssb-rig"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "js8call",
+      "owner": "rf-portable-operator",
+      "reviewer": "rf-systems-steward",
+      "capability": "weak-signal",
+      "profile": "field-digital",
+      "dependencies": [],
+      "hardware_adapters": [
+        "usb-audio",
+        "ssb-rig"
+      ],
+      "installation_policy": "manual-review",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "wsjtx",
+      "owner": "rf-portable-operator",
+      "reviewer": "rf-systems-steward",
+      "capability": "weak-signal",
+      "profile": "field-digital",
+      "dependencies": [],
+      "hardware_adapters": [
+        "usb-audio",
+        "ssb-rig"
+      ],
+      "installation_policy": "manual-review",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "hamlib",
+      "owner": "rf-digital-voice-integrator",
+      "reviewer": "rf-portable-operator",
+      "capability": "rig-control",
+      "profile": "field-digital",
+      "dependencies": [],
+      "hardware_adapters": [
+        "ssb-rig"
+      ],
+      "installation_policy": "pacman-candidate",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    },
+    {
+      "id": "systemd user timer",
+      "owner": "rf-linux-field-builder",
+      "reviewer": "rf-systems-steward",
+      "capability": "automation",
+      "profile": "core",
+      "dependencies": [],
+      "hardware_adapters": [],
+      "installation_policy": "os-provided",
+      "status": "SOURCE_REVIEWED",
+      "acceptance_record": null
+    }
+  ],
+  "handoff": {
+    "task_contract_required": [
+      "target_repository",
+      "commit_sha",
+      "requested_profile",
+      "target_os",
+      "host_arch",
+      "device_model",
+      "approved_operations",
+      "acceptance_tests"
+    ],
+    "evidence_required": [
+      "source_url",
+      "package_metadata",
+      "command",
+      "timestamp_utc",
+      "exit_code",
+      "artifact_hash",
+      "status",
+      "independent_reviewer"
+    ],
+    "release_requires": [
+      "human_approval",
+      "test_evidence",
+      "security_review",
+      "rollback_plan"
+    ]
+  },
+  "policy": {
+    "default_mode": "plan",
+    "default_radio_mode": "rx_only",
+    "aur": "manual_review",
+    "installation": "explicit_opt_in",
+    "telemetry": "local_private",
+    "actual_hardware": "not_assumed",
+    "unverified_status": "BLOCKED"
+  }
+}
