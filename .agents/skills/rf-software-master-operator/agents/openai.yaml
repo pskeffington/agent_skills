@@ -1,0 +1,3 @@
+interface:
+  display_name: "RF Software Master Operator"
+  short_description: "Coordinate RF software, drivers, profiles, and verified deployment gates"

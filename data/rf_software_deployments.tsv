@@ -1,0 +1,16 @@
+component	category	deployment_target	preferred_install	maintainer_role	preflight	acceptance	auto_install	upstream
+gnuradio	DSP	Arch x86_64	pacman candidate gnuradio	rf-dsp-architect	pacman -Si gnuradio	synthetic QPSK / sample-rate flowgraph	opt-in	https://wiki.gnuradio.org/index.php/Tutorials
+gnuradio-companion	DSP GUI	Arch KDE	pacman candidate gnuradio-companion	rf-systems-steward	pacman -Si gnuradio-companion	launch and save/run self-contained graph	opt-in	https://wiki.archlinux.org/title/GNU_Radio
+gnuradio-osmosdr	SDR sources	Arch x86_64	pacman candidate gnuradio-osmosdr	rf-sdr-validator	pacman -Si gnuradio-osmosdr	enumerate recognized backend read-only	opt-in	https://wiki.archlinux.org/title/GNU_Radio
+soapysdr	SDR HAL	Arch x86_64	pacman candidate soapysdr	rf-sdr-validator	pacman -Si soapysdr	device enumeration without TX	opt-in	https://github.com/pothosware/SoapySDR
+rtl-sdr	SDR USB	Arch x86_64	pacman candidate rtl-sdr	rf-sdr-validator	pacman -Si rtl-sdr	rtl_test with known compatible connected dongle	opt-in	https://osmocom.org/projects/rtl-sdr/wiki
+gqrx	SDR GUI	Arch KDE	pacman candidate gqrx	rf-sdr-validator	pacman -Si gqrx	verified waterfall from known recording	opt-in	https://gqrx.dk/
+direwolf	packet	Arch x86_64	pacman candidate direwolf	rf-packet-engineer	pacman -Si direwolf	offline AFSK WAV -> expected APRS CRC	opt-in	https://github.com/wb2osz/direwolf
+codec2	speech codec	Arch x86_64	pacman candidate codec2; check package name	rf-codec-researcher	pacman -Si codec2	offline speech roundtrip with metrics	opt-in	https://github.com/drowe67/codec2
+freedv	digital voice GUI	Arch KDE	manual upstream/AUR review	rf-digital-voice-integrator	inspect upstream Arch support/PKGBUILD	two-audio-interface offline decode	manual	https://freedv.org/getting-started/
+meshtastic CLI	mesh	Arch x86_64	isolated Python venv or manually vetted package	rf-mesh-integrator	upstream Python minimum version	USB discovery and JSON schema roundtrip	manual	https://meshtastic.org/docs/
+fldigi	digital modes	Arch KDE	pacman candidate fldigi	rf-portable-operator	pacman -Si fldigi	offline approved audio demodulation	opt-in	http://www.w1hkj.com/
+js8call	weak signal field text	Arch KDE	manual package/source review	rf-portable-operator	check current source and API	offline receive-only decode with clock control	manual	https://js8call.com/
+wsjtx	weak signal	Arch KDE	manual package/source review	rf-portable-operator	verify upstream release and package	offline signal decoding with time sync	manual	https://wsjt.sourceforge.io/
+hamlib	rig control	Arch x86_64	pacman candidate hamlib	rf-digital-voice-integrator	pacman -Si hamlib	read-only rig interrogation; no PTT	opt-in	https://hamlib.github.io/
+systemd user timer	automation	Arch/Garuda	OS provided	rf-linux-field-builder	systemctl --user --version	unit starts and logs local safe inventory	opt-in	https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html

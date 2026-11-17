@@ -1,0 +1,13 @@
+requirement_id	priority	capability	operational_need	proposed_acceptance_test	source_ids	owner
+FO-001	P0	resilience	Maintain essential information flows during upstream network failure	Simulate Internet disconnect and verify local message and record access	SRC-03;SRC-07	rf-systems-steward
+FO-002	P0	security	Authenticate endpoints and protect data at rest and in transit	Review encryption and identity configuration; reject default credentials	SRC-04;SRC-05	rf-linux-field-builder
+FO-003	P0	interoperability	Read/write documented portable data formats across approved applications	Round-trip sample JSON/GeoJSON with schema and integrity checks	SRC-03;SRC-08	rf-systems-steward
+FO-004	P0	offline	Retain maps manuals and essential logs while disconnected	Reboot offline and verify cached data, timestamps and search	SRC-03;SRC-07	rf-portable-operator
+FO-005	P1	power	Measure energy draw and runtime for defined equipment profiles	Record watts, watt-hours, temperature and shutdown behavior in controlled test	SRC-03;SRC-07	rf-portable-operator
+FO-006	P1	maintenance	Restore an endpoint without cloud-only dependencies	Reinstall from verified media and restore known-good configuration	SRC-04;SRC-03	rf-linux-field-builder
+FO-007	P1	accessibility	Support visual/textual alerts and alternative input/output	Complete alert workflow without reliance on audio only; audit readable controls	SRC-06	rf-digital-voice-integrator
+FO-008	P1	auditability	Ensure local record provenance and tamper evidence	Verify SHA-256, time source, device ID pseudonym and log retention	SRC-04;SRC-05	rf-systems-steward
+FO-009	P1	device_safety	Identify peripheral and firmware versions before configuration changes	Read-only enumeration and model-specific compatibility matrix	SRC-04;SRC-06	rf-sdr-validator
+FO-010	P2	edge_processing	Run offline receive-safe signal and media analytics	Use synthetic fixtures and document CPU, RAM, storage and latency	SRC-01;SRC-06	rf-dsp-architect
+FO-011	P1	continuity	Use alternate approved connection and local user fallback	Exercise noncombat failover without disclosing protected data	SRC-03;SRC-07	rf-mesh-integrator
+FO-012	P1	supply_chain	Track vendor, package integrity, support and replaceable interfaces	Record hashes, update cadence, support status and software bill of materials	SRC-03;SRC-04	rf-linux-field-builder

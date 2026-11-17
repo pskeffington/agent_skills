@@ -1,0 +1,3 @@
+interface:
+  display_name: "Spectrum Architect"
+  short_description: "GNU Radio graphs, IQ DSP and sample-rate architecture"

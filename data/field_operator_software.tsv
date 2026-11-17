@@ -1,0 +1,13 @@
+software_id	layer	software_candidates	requirement_ids	owner	deployment_policy	acceptance_test
+SW-01	os-bootstrap	Arch Garuda pacman secure bootstrapping	FO-002;FO-006;FO-012	rf-linux-field-builder	linux_config core; manual security review	reinstall and idempotent package plan
+SW-02	endpoint-crypto	LUKS cryptsetup and SSH key management	FO-002;FO-008	rf-linux-field-builder	native package availability check	encrypted storage and credential recovery
+SW-03	private-network	WireGuard for authorized private services	FO-001;FO-002;FO-011	rf-systems-steward	manual tunnel parameters	approved endpoint connectivity and leakage checks
+SW-04	offline-maps	offline-capable map viewer GeoJSON GPX support	FO-003;FO-004	rf-portable-operator	candidate selection pending	offline tile and sample geometry read
+SW-05	local-logs	journald sha256sum local inventory exporter	FO-006;FO-008	rf-systems-steward	system tools; privacy controls	offline trace and tamper-evidence review
+SW-06	sdr-dsp	GNU Radio SoapySDR rtl-sdr GQRX	FO-009;FO-010	rf-dsp-architect	linux_config sdr candidates	synthetic IQ and device enumeration
+SW-07	packet-decoder	Dire Wolf offline soundcard decoder	FO-003;FO-010	rf-packet-engineer	linux_config ham candidate	known WAV to expected frame CRC
+SW-08	digital-voice	Codec 2 and FreeDV receive/audio fixtures	FO-003;FO-007;FO-010	rf-digital-voice-integrator	manual Arch support check	offline decode and text/status interface
+SW-09	mesh-client	Meshtastic official CLI and API	FO-001;FO-009;FO-011	rf-mesh-integrator	isolated env; manual approval	local read-only node info and safe schema test
+SW-10	time-monitor	chrony or systemd-timesyncd plus RTC GNSS checks	FO-008	rf-portable-operator	target-specific source selection	detect drift and source failure offline
+SW-11	device-management	mobile endpoint lifecycle policy tools	FO-002;FO-009;FO-012	rf-linux-field-builder	MDM product decision deferred	policy compliance and revocation rehearsal
+SW-12	provenance	manifest SBOM package signatures checksums	FO-006;FO-008;FO-012	rf-systems-steward	reproducible tool selection	verify artifact provenance and rollback

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Mesh Link Integrator"
+  short_description: "LoRa mesh device inventory and receive-safe integration"
