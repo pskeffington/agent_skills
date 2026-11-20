@@ -11,6 +11,16 @@ Use the canonical [R Markdown PDF acceptance workflow](https://github.com/pskeff
 
 Use the five distinct operational profiles in [role personalities](references/role-personalities.md): Archivist (Evidence Steward), Skeptical Statistician (Methods Reviewer), Precision Editor (Scientific Editor), Layout Conservator (Typesetting Engineer), and Independent Gatekeeper (Acceptance Reviewer). Each profile has an explicit responsibility, communication style, challenge rule, and handoff. These are review dispositions rather than fictional characters; they do not imply separately instantiated agents or confer authority. Prioritize methodological correctness over persona consistency; do not allow the same author to claim independent sign-off through role switching.
 
+## Unified statistical notation and results-writing standard
+
+Read the latest [Paul's Notes statistical reporting standards](https://github.com/pskeffington/pauls_notes/blob/main/03_learning/bio_stats/SCIENTIFIC_STATISTICAL_REPORTING_STANDARDS.md), especially §1A (notation), before revising biomedical statistical results. This source owns the detailed method/report-type matrix; do not duplicate it in this portable skill.
+
+1. Require a declared endpoint, estimand, unit, denominator, reference, time scale and missingness before presenting an effect. Compute Results prose and tables from the same verified analysis object. For categorical outcomes show n/N (%); for continuous outcomes use mean (SD) or median [Q1,Q3] appropriate to the distribution and design. Keep exposure denominators and number of independent patients explicit.
+2. Specify estimate + confidence interval and then correctly typed test evidence: italic Latin *t*, *F*, *r*, *p* where the rendering style allows; Greek χ²; degrees of freedom (fractional for Welch where needed); meaningful precision. Distinguish SD/SE, estimated coefficients vs population symbols, risk/odds/rate/hazard ratios, adjusted p from adjusted CI, and confidence vs credible intervals. Never p = .000. Preserve A−B contrast and all reference categories.
+3. Apply study-design reporting checklists as appropriate (CONSORT 2025, STROBE, STARD, TRIPOD+AI 2024, REMARK, PRISMA 2020) rather than asserting all manuscripts share a single checklist. Use APA 7 as a default presentation style, subject to instructors and journals. For coursework plots and quartile summaries, follow Paul's Notes' R quantile type-2 requirement without changing other consumers.
+4. Keep scientific narrative finding-first: direction, magnitude and uncertainty; essential qualification once in the appropriate place, not repeated boilerplate. Do not introduce study-specific outcome values, source attribution not verified, or claimed validation.
+5. Preserve Rmd/LaTeX syntax, visible executable code, labeled figures and matched math symbols; distinguish source inspection, executed analysis, successful knit and page inspection as separate gates.
+
 ## Reporting agent responsibilities
 
 1. **Evidence steward:** Verify exact sources, claim lineage, estimates, denominators and bibliographic attribution. Preserve legitimate citations and data identifiers, but never add unrelated personal identifiers to authored prose.
