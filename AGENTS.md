@@ -43,6 +43,10 @@ Run `python3 scripts/validate.py` and `python3 -m unittest discover -s tests -v`
 
 Skills define *how to work*. The actual execution runtime enforces permissions, launches agents and performs integrations. Do not misrepresent these files as a deployed multi-agent service.
 
+## Biomedical statistical notation and reporting specialization
+
+The scientific reporting QA skill owns publication-style scientific prose, mathematical typography and final visual acceptance; the biomedical R wizard owns reproducible data analysis, assumptions, model fitting and computations. Both MUST use the current `pskeffington/pauls_notes/03_learning/bio_stats/SCIENTIFIC_STATISTICAL_REPORTING_STANDARDS.md` (especially §1A) as the canonical reporting/notation reference; do not duplicate the 25+ method reporting matrix in agent instructions. Define denominator, independent unit, effect direction, reference arm, estimand, interval method, model family, adjusted status, multiple-comparison family and source provenance before reporting. Prefer the same computed analysis objects for tables and prose. Apply journal/study-type guidance and separate source, R execution, knit, rendered pages and independent approval. This is statistical-symbol notation, not the arithmetic powers-of-ten meaning of scientific notation. ChatGPT skills installed outside GitHub are separately deployed and cannot be assumed updated by a repository commit.
+
 ## Scientific reporting agent admission
 
 The canonical scientific reporting skill is `.agents/skills/scientific-reporting-qa/`. Preserve its `SKILL.md`, `agents/openai.yaml`, reference matrix, and audit script together; update the generated catalog whenever a resource is added or removed. Treat Paul's Notes as the linked methods reference; do not fork or mirror this skill into research or methods repositories. Use the reporting agent only for bounded evidence review, scientific grammar, mathematical typesetting, source lint, and independently recorded PDF acceptance. Separate source checks, code execution, knit, and rendered-page review. Never introduce data or findings from a particular study into this reusable skill.
